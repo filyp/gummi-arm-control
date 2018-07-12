@@ -1,29 +1,13 @@
-import talk
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 
-from config import *
 from collections import deque
+
+import matplotlib.pyplot as plt
 from scipy import signal
-from time import time
 
-
-# some magic patch to allow updating text while blitting
-# don't try to understand
-# from https://stackoverflow.com/questions/17558096/animated-title-in-matplotlib/39262547
-def _blit_draw(self, artists, bg_cache):
-    updated_ax = []
-    for a in artists:
-        if a.axes not in bg_cache:
-            bg_cache[a.axes] = a.figure.canvas.copy_from_bbox(a.axes.figure.bbox)
-        a.axes.draw_artist(a)
-        updated_ax.append(a.axes)
-    for ax in set(updated_ax):
-        ax.figure.canvas.blit(ax.figure.bbox)
-
-
-matplotlib.animation.Animation._blit_draw = _blit_draw
+import talk
+from _plot_matplotlib_patch import *
+from config import FILTER_WINDOW_SIZE, FILTER_CUTOFF, \
+    PLOT_EVERY_TH, PLOT_X_SIZE, YMIN, YMAX
 
 
 # plot class
@@ -36,7 +20,7 @@ class SignalPlot:
 
     def __init__(self, max_len):
         # plot settings
-        self.maxLen = max_len
+        self.max_len = max_len
         self.ax = deque([0.0] * max_len)
         self.ay = deque([0.0] * max_len)
         self.info_text = ''
@@ -61,7 +45,7 @@ class SignalPlot:
         return x1, x2
 
     def add_to_buf(self, buf, val):
-        if len(buf) < self.maxLen:
+        if len(buf) < self.max_len:
             buf.append(val)
         else:
             buf.pop()
@@ -70,8 +54,8 @@ class SignalPlot:
     # update plot
     # it's called every frame by the animation function
     def update(self, frameNum, a0, a1, info_display):
-        a0.set_data(range(self.maxLen), self.ax)
-        a1.set_data(range(self.maxLen), self.ay)
+        a0.set_data(range(self.max_len), self.ax)
+        a1.set_data(range(self.max_len), self.ay)
         info_display.set_text(self.info_text)
         return a0, a1, info_display
 

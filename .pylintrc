@@ -1,0 +1,7 @@
+# [MESSAGES CONTROL]
+#
+# disable=invalid-name
+
+[FORMAT]
+
+good-names=ax,ay,b,x1,x2,a0,a1

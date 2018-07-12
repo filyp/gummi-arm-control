@@ -1,7 +1,9 @@
-import serial
+
 import threading
 
-from config import *
+import serial
+
+from config import PORT, BAUDRATE, PLOT_X_SIZE
 
 
 class Reader(threading.Thread):
@@ -38,6 +40,7 @@ class Reader(threading.Thread):
         self.ser.close()
 
     def kill(self):
+        """tell Reader thread to stop safely"""
         self.alive = False
 
 
@@ -54,16 +57,19 @@ class ServoController:
         self.plot = plot
 
     def set_stiffness(self, event):
+        """handle changing stiffness mouse commend"""
         self.stiffness += event.step
         self.send()
 
     def set_angle(self, event):
+        """handle changing angle mouse commend"""
         if event.inaxes:
             mouse_position = event.xdata / PLOT_X_SIZE
             self.angle = int(mouse_position * 180)
             self.send()
 
     def send(self):
+        """send position to the arm"""
         angle1 = self.angle + self.stiffness
         angle2 = 180 - self.angle + self.stiffness
         error_msg = ''
