@@ -1,3 +1,6 @@
+"""
+serial communication with arduino
+"""
 
 import threading
 
@@ -30,10 +33,10 @@ class Reader(threading.Thread):
 
             # parse
             line = self.ser.readline()
-            data = [float(val) for val in line.split()]
+            i1, i2 = [float(val) for val in line.split()]
 
             # send to plotter
-            self.plot.add(data)
+            self.plot.add(i1, i2)
 
         # clean up
         self.ser.flush()

@@ -4,4 +4,4 @@
 
 [FORMAT]
 
-good-names=ax,ay,b,x1,x2,a0,a1
+good-names=i1,i2,ax

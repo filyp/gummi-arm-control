@@ -1,9 +1,13 @@
+"""
+some monkey patch to allow updating text while blitting
+don't try to understand
+from https://stackoverflow.com/questions/17558096/animated-title-in-matplotlib/39262547
+"""
+
 import matplotlib
 import matplotlib.animation as animation
 
-# some monkey patch to allow updating text while blitting
-# don't try to understand
-# from https://stackoverflow.com/questions/17558096/animated-title-in-matplotlib/39262547
+
 def _blit_draw(self, artists, bg_cache):
     updated_ax = []
     for a in artists:
@@ -16,5 +20,3 @@ def _blit_draw(self, artists, bg_cache):
 
 
 matplotlib.animation.Animation._blit_draw = _blit_draw
-
-
