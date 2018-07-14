@@ -10,9 +10,9 @@ import cv2
 cv2.namedWindow("camera")
 vc = cv2.VideoCapture(0)
 
-rval = vc.isOpened()
-while rval:
-    rval, frame = vc.read()
+is_open = vc.isOpened()
+while is_open:
+    is_open, frame = vc.read()
 
     imgray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     imgray = cv2.GaussianBlur(imgray, (7, 7), 0)

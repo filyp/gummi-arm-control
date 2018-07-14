@@ -20,17 +20,9 @@ class Reader(threading.Thread):
         self.plot = plot
         self.ser = serial.Serial(PORT, BAUDRATE)
         self.alive = True
-        self.avg = 0
-        self.counter = 0
 
     def run(self):
-        # last_time = time()
         while self.alive:
-            # # measure latency
-            # t = time()
-            # print((t - last_time)*1000)
-            # last_time = t
-
             # parse
             line = self.ser.readline()
             i1, i2 = [float(val) for val in line.split()]
@@ -60,12 +52,12 @@ class ServoController:
         self.plot = plot
 
     def set_stiffness(self, event):
-        """handle changing stiffness mouse commend"""
+        """handle changing stiffness mouse command"""
         self.stiffness += event.step
         self.send()
 
     def set_angle(self, event):
-        """handle changing angle mouse commend"""
+        """handle changing angle mouse command"""
         if event.inaxes:
             mouse_position = event.xdata / PLOT_X_SIZE
             self.angle = int(mouse_position * 180)
