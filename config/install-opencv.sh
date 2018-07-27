@@ -2,7 +2,7 @@
 # added flags for Nikon D5100 compatibility:
 #       WITH_V4L=ON
 #       WITH_LIBV4L=ON
-# added flags for python3.6:
+# added flags for python3:
 #       BUILD_opencv_python3=ON \
 #       HAVE_opencv_python3=ON \
 #       PYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3.6 \
@@ -76,7 +76,10 @@ mkdir build
 cd build
 cmake \
 -D BUILD_NEW_PYTHON_SUPPORT=ON \
--D PYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3.6 \
+-D PYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3.5 \
+-D BUILD_opencv_python3=ON \
+-D HAVE_opencv_python3=ON \
+-D HAVE_opencv_python2=OFF \
 -D CMAKE_BUILD_TYPE=RELEASE \
 -D CMAKE_INSTALL_PREFIX=/usr/local \
 -D WITH_V4L=ON \
