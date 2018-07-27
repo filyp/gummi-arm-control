@@ -6,9 +6,12 @@ rdmilligan.wordpress.com/2015/07/19/glyph-recognition-using-opencv-and-python/
 """
 
 import cv2
+print(cv2.getBuildInformation())
+# gphoto2 --stdout --capture-movie | gst-launch-1.0 fdsrc fd=0 ! decodebin name=dec ! queue ! videoconvert ! tee ! v4l2sink device=/dev/video0
 
 cv2.namedWindow("camera")
 vc = cv2.VideoCapture(0)
+
 
 is_open = vc.isOpened()
 while is_open:

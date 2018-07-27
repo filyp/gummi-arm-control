@@ -6,7 +6,7 @@ import threading
 
 import serial
 
-from config import PORT, BAUDRATE, PLOT_X_SIZE
+from config.constants import PORT, BAUDRATE, PLOT_X_SIZE
 
 
 class Reader(threading.Thread):
