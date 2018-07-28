@@ -55,34 +55,54 @@ def get_topdown_quad(image, src):
     return warped
 
 
-def add_substitute_quad(image, substitute_quad, dst):
-    # dst (zero-set) and src points
-    dst = order_points(dst)
+def overlay(background, overlay_image, approx, rotation_num):
+    overlay_image = rotate_image(overlay_image, -rotation_num * 90)
 
-    (tl, tr, br, bl) = dst
-    min_x = min(int(tl[0]), int(bl[0]))
-    min_y = min(int(tl[1]), int(tr[1]))
+    overlay_height, overlay_width = overlay_image.shape[:2]
+    background_height, background_width = background.shape[:2]
 
-    for point in dst:
-        point[0] = point[0] - min_x
-        point[1] = point[1] - min_y
+    points = np.asarray(
+        [np.asarray(x[0], dtype=np.float32) for x in approx],
+        dtype=np.float32
+    )
+    points = order_points(points)
 
-    (max_width, max_height) = max_width_height(dst)
-    src = topdown_points(max_width, max_height)
+    input_coordinates = np.asarray(
+        [
+            np.asarray([0, 0], dtype=np.float32),
+            np.asarray([overlay_width, 0], dtype=np.float32),
+            np.asarray([overlay_width, overlay_height], dtype=np.float32),
+            np.asarray([0, overlay_height], dtype=np.float32)
+        ],
+        dtype=np.float32,
+    )
 
-    # warp perspective (with white border)
-    substitute_quad = cv2.resize(substitute_quad, (max_width, max_height))
+    transformation_matrix = cv2.getPerspectiveTransform(
+        np.asarray(input_coordinates),
+        np.asarray(points),
+    )
 
-    warped = np.zeros((max_height, max_width, 3), np.uint8)
-    warped[:, :, :] = 255
+    warped_image = cv2.warpPerspective(
+        overlay_image,
+        transformation_matrix,
+        (background_width, background_height),
+    )
 
-    matrix = cv2.getPerspectiveTransform(src, dst)
-    cv2.warpPerspective(substitute_quad, matrix, (max_width, max_height), warped, borderMode=cv2.BORDER_TRANSPARENT)
+    alpha_channel = np.ones(overlay_image.shape, dtype=np.float)
+    alpha_channel = cv2.warpPerspective(
+        alpha_channel,
+        transformation_matrix,
+        (background_width, background_height),
+    )
 
-    # add substitute quad
-    image[min_y:min_y + max_height, min_x:min_x + max_width] = warped
-
-    return image
+    def normalize(im):
+        min_val = np.min(im.ravel())
+        max_val = np.max(im.ravel())
+        out = (im.astype('float') - min_val) / (max_val - min_val)
+        return out
+    background = normalize(background)
+    warped_image = normalize(warped_image)
+    return (warped_image * alpha_channel) + (background * (1 - alpha_channel))
 
 
 def check_for_pattern(bitmap, glyph_pattern_centre):
