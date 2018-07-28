@@ -85,49 +85,28 @@ def add_substitute_quad(image, substitute_quad, dst):
     return image
 
 
-def get_glyph_pattern(image, black_threshold, white_threshold):
-    # collect pixel from each cell (left to right, top to bottom)
-    cells = []
+def check_for_pattern(bitmap, glyph_pattern_centre):
+    glyph_pattern = np.pad(glyph_pattern_centre, pad_width=1,
+                           mode='constant', constant_values=0)
 
-    cell_half_width = int(round(image.shape[1] / 10.0))
-    cell_half_height = int(round(image.shape[0] / 10.0))
+    # compute bit detection threshold
+    number_of_white = np.sum(glyph_pattern)
+    sorted_fields = np.sort(bitmap, axis=None)  # sort the flattened bitmap
+    darkest_white = sorted_fields[-number_of_white]
+    brightest_dark = sorted_fields[-number_of_white - 1]
+    threshold = np.average([darkest_white, brightest_dark])
 
-    row1 = cell_half_height * 3
-    row2 = cell_half_height * 5
-    row3 = cell_half_height * 7
-    col1 = cell_half_width * 3
-    col2 = cell_half_width * 5
-    col3 = cell_half_width * 7
-
-    cells.append(image[row1, col1])
-    cells.append(image[row1, col2])
-    cells.append(image[row1, col3])
-    cells.append(image[row2, col1])
-    cells.append(image[row2, col2])
-    cells.append(image[row2, col3])
-    cells.append(image[row3, col1])
-    cells.append(image[row3, col2])
-    cells.append(image[row3, col3])
-
-    # threshold pixels to either black or white
-    for idx, val in enumerate(cells):
-        if val < black_threshold:
-            cells[idx] = 0
-        elif val > white_threshold:
-            cells[idx] = 1
-        else:
-            return None
-
-    return cells
-
-
-def resize_image(image, new_size):
-    ratio = new_size / image.shape[1]
-    return cv2.resize(image, (int(new_size), int(image.shape[0] * ratio)))
+    detector = lambda val: val > threshold
+    detected_pattern = detector(bitmap)
+    if np.array_equal(detected_pattern, glyph_pattern):
+        # print(brightest_dark, darkest_white)
+        # print(threshold)
+        return True
+    return False
 
 
 def rotate_image(image, angle):
     (h, w) = image.shape[:2]
-    center = (w / 2, h / 2)
+    center = (w // 2, h // 2)
     rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
     return cv2.warpAffine(image, rotation_matrix, (w, h))
