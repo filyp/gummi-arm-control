@@ -17,21 +17,32 @@ EDGE_UPPER_THRESHOLD = 90
 substitute_image = cv2.imread('substitute.jpg')
 
 # constants
-GLYPH_PATTERN = [[0, 1, 0],
-                 [1, 0, 0],
-                 [0, 1, 1]]
+# GLYPH_PATTERN1 = [[0, 1, 0],
+#                   [1, 0, 0],
+#                   [0, 1, 1]]
+#
+# GLYPH_PATTERN2 = [[0, 0, 1],
+#                   [0, 1, 0],
+#                   [1, 0, 1]]
+
+GLYPH_PATTERNS = [[[0, 1, 0],
+                   [1, 0, 0],
+                   [0, 1, 1]],
+                  [[0, 0, 1],
+                   [0, 1, 0],
+                   [1, 0, 1]]]
+
 BUILTIN_CAMERA = 0
 LOOPBACK_CAMERA = 1
-
 
 # # bind camera to /dev/video1
 # os.spawnl(os.P_NOWAIT,
 #           'gphoto2 --stdout --capture-movie | \
 #                 gst-launch-1.0 fdsrc fd=0 ! decodebin name=dec ! queue ! \
 #                 videoconvert ! tee ! v4l2sink device=/dev/video1')
-cv2.namedWindow("camera")
-vc = cv2.VideoCapture(LOOPBACK_CAMERA)
 
+cv2.namedWindow("camera")
+vc = cv2.VideoCapture(BUILTIN_CAMERA)
 
 is_open = vc.isOpened()
 while is_open:
@@ -54,32 +65,26 @@ while is_open:
         topdown_quad = get_topdown_quad(imgray, approx.reshape(4, 2))
         bitmap = cv2.resize(topdown_quad, (5, 5))
 
-        glyph_found = False
-        for rotation_num in range(4):
-            if check_for_pattern(bitmap, GLYPH_PATTERN):
-                glyph_found = True
-                break
-            bitmap = rotate_image(bitmap, 90)
-
-        if glyph_found:
-            number_of_detected += 1
-            cv2.imshow("im", bitmap)
-            frame = overlay(frame, substitute_image, approx, rotation_num)
-            last_approx = approx
+        for glyph_pattern in GLYPH_PATTERNS:
+            for rotation_num in range(4):
+                if check_for_pattern(bitmap, glyph_pattern):
+                    cv2.imshow("im", bitmap)
+                    print(approx)
+                bitmap = rotate_image(bitmap, 90)
 
     # temporary solution for annoying flickering
-    # TODO fix image lingering too long
-    if number_of_detected == 0:
-        try:
-            frame = overlay(frame, substitute_image, last_approx, 0)
-        except:
-            pass
+    # # TODO fix image lingering too long
+    # if number_of_detected == 0:
+    #     try:
+    #         frame = overlay(frame, substitute_image, last_approx, 0)
+    #     except:
+    #         pass
 
     frame = cv2.flip(frame, 1)
     cv2.imshow("camera", frame)
 
     key = cv2.waitKey(10)
-    if key == 27:   # exit on ESC
+    if key == 27:  # exit on ESC
         break
 
 cv2.destroyWindow("camera")
