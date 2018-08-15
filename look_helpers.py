@@ -2,6 +2,7 @@
 
 import numpy as np
 import cv2
+from scipy.spatial import distance as dist
 
 
 def order_points(points):
@@ -100,12 +101,13 @@ def overlay(background, overlay_image, approx, rotation_num):
         max_val = np.max(im.ravel())
         out = (im.astype('float') - min_val) / (max_val - min_val)
         return out
+
     background = normalize(background)
     warped_image = normalize(warped_image)
     return (warped_image * alpha_channel) + (background * (1 - alpha_channel))
 
 
-def check_for_pattern(bitmap, glyph_pattern_centre):
+def bitmap_matches_glyph(bitmap, glyph_pattern_centre):
     glyph_pattern = np.pad(glyph_pattern_centre, pad_width=1,
                            mode='constant', constant_values=0)
 
@@ -126,7 +128,72 @@ def check_for_pattern(bitmap, glyph_pattern_centre):
 
 
 def rotate_image(image, angle):
+    # print(image)
     (h, w) = image.shape[:2]
     center = (w // 2, h // 2)
     rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
     return cv2.warpAffine(image, rotation_matrix, (w, h))
+
+
+def order_points(pts):
+    # sort the points based on their x-coordinates
+    xSorted = pts[np.argsort(pts[:, 0]), :]
+
+    # grab the left-most and right-most points from the sorted
+    # x-roodinate points
+    leftMost = xSorted[:2, :]
+    rightMost = xSorted[2:, :]
+
+    # now, sort the left-most coordinates according to their
+    # y-coordinates so we can grab the top-left and bottom-left
+    # points, respectively
+    leftMost = leftMost[np.argsort(leftMost[:, 1]), :]
+    (tl, bl) = leftMost
+
+    # now that we have the top-left coordinate, use it as an
+    # anchor to calculate the Euclidean distance between the
+    # top-left and right-most points; by the Pythagorean
+    # theorem, the point with the largest distance will be
+    # our bottom-right point
+    D = dist.cdist(tl[np.newaxis], rightMost, "euclidean")[0]
+    (br, tr) = rightMost[np.argsort(D)[::-1], :]
+
+    # return the coordinates in top-left, top-right,
+    # bottom-right, and bottom-left order
+    return np.array([tl, tr, br, bl], dtype="float32")
+
+
+def calculate_angle(upper_glyph_coordinates, lower_glyph_coordinates):
+    if upper_glyph_coordinates is None or lower_glyph_coordinates is None:
+        return None
+    else:
+        lower_top_coordinates = get_top_coordinates(lower_glyph_coordinates)
+        upper_side_coordinates = upper_glyph_coordinates[1], upper_glyph_coordinates[2]
+
+        upper_vector = vector(*upper_side_coordinates)
+        lower_vector = vector(*lower_top_coordinates)
+
+        # we need to use abs(upper_vector) to keep correct sign of arccos argument
+        upper_vector_u = np.abs(unit_vector(upper_vector))
+        lower_vector_u = unit_vector(lower_vector)
+        print(upper_vector_u)
+        print(lower_vector_u)
+        dot = np.dot(upper_vector_u, lower_vector_u)
+        clip = np.clip(dot, -1.0, 1.0)
+        print("Dot: {}\nClip: {}".format(dot, clip))
+        return np.arccos(clip)
+
+
+def get_top_coordinates(lower_glyph_coordinates):
+    sorted_coordinates = sorted(lower_glyph_coordinates, key=lambda x: x[1])
+    # print(sorted_coordinates)
+    return sorted_coordinates[0], sorted_coordinates[1]
+
+
+def unit_vector(vector):
+    """ Returns the unit vector of the vector.  """
+    return vector / np.linalg.norm(vector)
+
+
+def vector(point_a, point_b):
+    return point_b - point_a
