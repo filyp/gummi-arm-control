@@ -163,31 +163,30 @@ def order_points(pts):
     return np.array([tl, tr, br, bl], dtype="float32")
 
 
-def calculate_angle(upper_glyph_coordinates, lower_glyph_coordinates):
-    if upper_glyph_coordinates is None or lower_glyph_coordinates is None:
+def calculate_angle(upper_glyph_coordinates, lower_glyph_coordinates, rotation_num):
+    if upper_glyph_coordinates is None or lower_glyph_coordinates is None or rotation_num is None:
         return None
     else:
-        lower_top_coordinates = get_top_coordinates(lower_glyph_coordinates)
+        lower_top_coordinates = get_top_coordinates(lower_glyph_coordinates, rotation_num)
         upper_side_coordinates = upper_glyph_coordinates[1], upper_glyph_coordinates[2]
 
         upper_vector = vector(*upper_side_coordinates)
         lower_vector = vector(*lower_top_coordinates)
 
-        # we need to use abs(upper_vector) to keep correct sign of arccos argument
-        upper_vector_u = np.abs(unit_vector(upper_vector))
+        upper_vector_u = unit_vector(upper_vector)
         lower_vector_u = unit_vector(lower_vector)
-        print(upper_vector_u)
-        print(lower_vector_u)
+
         dot = np.dot(upper_vector_u, lower_vector_u)
         clip = np.clip(dot, -1.0, 1.0)
-        print("Dot: {}\nClip: {}".format(dot, clip))
         return np.arccos(clip)
 
 
-def get_top_coordinates(lower_glyph_coordinates):
+def get_top_coordinates(lower_glyph_coordinates, rotation_num):
     sorted_coordinates = sorted(lower_glyph_coordinates, key=lambda x: x[1])
-    # print(sorted_coordinates)
-    return sorted_coordinates[0], sorted_coordinates[1]
+    if rotation_num == 2:
+        return sorted_coordinates[0], sorted_coordinates[1]
+    else:
+        return sorted_coordinates[1], sorted_coordinates[0]
 
 
 def unit_vector(vector):
@@ -197,3 +196,7 @@ def unit_vector(vector):
 
 def vector(point_a, point_b):
     return point_b - point_a
+
+
+def flatten(nested_array):
+    return np.array(list(points for points_pair in nested_array for points in points_pair))
