@@ -36,14 +36,9 @@ TOP_GLYPH_COORDINATES = None
 LOWER_GLYPH_COORDINATES = None
 LOWER_GLYPH_ROTATION_NUM = None
 
-# # bind camera to /dev/video1
-# os.spawnl(os.P_NOWAIT,
-#           'gphoto2 --stdout --capture-movie | \
-#                 gst-launch-1.0 fdsrc fd=0 ! decodebin name=dec ! queue ! \
-#                 videoconvert ! tee ! v4l2sink device=/dev/video1')
 
 cv2.namedWindow("camera")
-vc = cv2.VideoCapture(BUILTIN_CAMERA)
+vc = cv2.VideoCapture(LOOPBACK_CAMERA)
 
 is_open = vc.isOpened()
 
@@ -98,7 +93,7 @@ while is_open:
     cv2.imshow("camera", frame)
 
     key = cv2.waitKey(10)
-    if key == 27:  # exit on ESC
+    if key == ord('q'):
         break
 
 cv2.destroyWindow("camera")

@@ -13,6 +13,7 @@ class Reader(threading.Thread):
     """
     Reads current measurements from arduino
     and sends them to signal plotter
+    TODO not true anymore
     """
 
     def __init__(self, plot):
@@ -43,9 +44,10 @@ class ServoController:
     """
     Handles mouse events
     and sends corresponding servo commands
+    TODO not true anymore
     """
 
-    def __init__(self, plot):
+    def __init__(self, plot=None):
         self.ser = serial.Serial(PORT, BAUDRATE)
         self.angle = 0
         self.stiffness = 0
@@ -65,15 +67,24 @@ class ServoController:
 
     def send(self):
         """send position to the arm"""
-        angle1 = self.angle + self.stiffness
-        angle2 = 180 - self.angle + self.stiffness
         error_msg = ''
 
-        if 0 <= angle1 <= 180 and 0 <= angle2 <= 180:
-            self.ser.write(b'A' + angle1.to_bytes(1, 'little'))
-            self.ser.write(b'B' + angle2.to_bytes(1, 'little'))
+        if self._position_valid():
+            self.ser.write(b'A' + self.get_raw_angle1().to_bytes(1, 'little'))
+            self.ser.write(b'B' + self.get_raw_angle2().to_bytes(1, 'little'))
         else:
             error_msg = 'servo out of range'
 
-        self.plot.info_text = 'angle: {}  stiffness: {}  {}' \
-            .format(self.angle, self.stiffness, error_msg)
+        if self.plot:
+            self.plot.info_text = 'angle: {}  stiffness: {}  {}' \
+                .format(self.angle, self.stiffness, error_msg)
+
+    def get_raw_angle1(self):
+        return self.angle + self.stiffness
+
+    def get_raw_angle2(self):
+        return 180 - self.angle + self.stiffness
+
+    def _position_valid(self):
+        return 0 <= self.get_raw_angle1() <= 180 and \
+               0 <= self.get_raw_angle2() <= 180
