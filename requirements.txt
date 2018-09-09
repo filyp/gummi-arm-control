@@ -12,3 +12,5 @@ PyYAML==3.13
 scipy==1.1.0
 serial==0.0.67
 six==1.11.0
+
+# also install pyserial

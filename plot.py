@@ -7,9 +7,11 @@ handles mouse commands:
 """
 
 from collections import deque
+import time
 
 import matplotlib.pyplot as plt
 from scipy import signal
+import numpy as np
 
 import talk
 from config._matplotlib_animation_patch import *
@@ -43,6 +45,7 @@ class SignalPlot:
         :param i1:    raw data from the current sensor 1
         :param i2:    raw data from the current sensor 2
         """
+
         i1, i2 = self.filter(i1, i2)
         self.counter = (self.counter + 1) % PLOT_EVERY_TH  # modulate plotting speed
         if self.counter == 0:
@@ -99,7 +102,7 @@ def main():
     reader.start()
 
     # set up animation
-    ax = plt.axes(xlim=(0, PLOT_X_SIZE), ylim=(YMIN, YMAX))
+    ax = plt.axes(xlim=(0, PLOT_X_SIZE), ylim=(0, 1))
     plot1, = ax.plot([], [])
     plot2, = ax.plot([], [])
     info_display = ax.text(0.05, 1.05, '', fontsize=14, transform=ax.transAxes)
@@ -110,8 +113,8 @@ def main():
 
     # set callbacks
     fig.canvas.mpl_connect('key_press_event', key_command_handle)
-    fig.canvas.mpl_connect('motion_notify_event', controller.set_angle)
-    fig.canvas.mpl_connect('scroll_event', controller.set_stiffness)
+    fig.canvas.mpl_connect('motion_notify_event', controller.set_angle_by_mouse)
+    fig.canvas.mpl_connect('scroll_event', controller.set_stiffness_by_mouse)
 
     # show plot (blocking)
     plt.show()

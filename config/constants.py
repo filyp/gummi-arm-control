@@ -6,10 +6,10 @@ change them for different behaviour
 # serial
 PORT = '/dev/ttyUSB0'
 BAUDRATE = 74880
+MAX_ANGLE = 180
 
 # plotting
 PLOT_X_SIZE = 200       # horizontal resolution of the plot
-YMIN, YMAX = 500, 580
 PLOT_EVERY_TH = 15      # for bigger value, plot flows slower
 
 # filter data

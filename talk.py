@@ -6,14 +6,18 @@ import threading
 
 import serial
 
-from config.constants import PORT, BAUDRATE, PLOT_X_SIZE
+import time
+import numpy as np
+
+from config.constants import PORT, BAUDRATE, PLOT_X_SIZE, MAX_ANGLE
 
 
 class Reader(threading.Thread):
     """
-    Reads current measurements from arduino
+    Reads current measurements from arduino,
+    calibrate to find min and max values,
+    once calibrated rescales raw values
     and sends them to signal plotter
-    TODO not true anymore
     """
 
     def __init__(self, plot):
@@ -22,11 +26,33 @@ class Reader(threading.Thread):
         self.ser = serial.Serial(PORT, BAUDRATE)
         self.alive = True
 
+        self.i1_min = 0
+        self.i1_max = 1024
+        self.i2_min = 0
+        self.i2_max = 1024
+
+    def read_raw_values(self):
+        line = self.ser.readline()
+        return [float(val) for val in line.split()]
+
     def run(self):
+        print('calibrating...')
+        print('please, put some load on servos')
+        start_time = time.time()
+        while time.time() < start_time + 10:
+            i1, i2 = self.read_raw_values()
+            self.i1_min = min(self.i1_min, i1)
+            self.i1_max = max(self.i1_max, i1)
+            self.i2_min = min(self.i2_min, i2)
+            self.i2_max = max(self.i2_max, i2)
+        print('calibrating finished')
+
         while self.alive:
-            # parse
-            line = self.ser.readline()
-            i1, i2 = [float(val) for val in line.split()]
+            i1, i2 = self.read_raw_values()
+
+            # map raw data into 0..1 interval
+            i1 = np.interp(i1, [self.i1_min, self.i1_max], [0, 1])
+            i2 = np.interp(i2, [self.i2_min, self.i2_max], [0, 1])
 
             # send to plotter
             self.plot.add(i1, i2)
@@ -42,9 +68,8 @@ class Reader(threading.Thread):
 
 class ServoController:
     """
-    Handles mouse events
-    and sends corresponding servo commands
-    TODO not true anymore
+    Sends commands to servos,
+    also handles mouse events
     """
 
     def __init__(self, plot=None):
@@ -53,20 +78,31 @@ class ServoController:
         self.stiffness = 0
         self.plot = plot
 
-    def set_stiffness(self, event):
+    def set_stiffness_by_mouse(self, event):
         """handle changing stiffness mouse command"""
         self.stiffness += event.step
         self.send()
 
-    def set_angle(self, event):
+    def set_angle_by_mouse(self, event):
         """handle changing angle mouse command"""
         if event.inaxes:
             mouse_position = event.xdata / PLOT_X_SIZE
-            self.angle = int(mouse_position * 180)
+            self.angle = int(mouse_position * MAX_ANGLE)
             self.send()
 
+    def get_raw_angle1(self):
+        return self.angle + self.stiffness
+
+    def get_raw_angle2(self):
+        return  - self.angle + self.stiffness
+
+    def _position_valid(self):
+        """return if the saved position is inside the servos range"""
+        return 0 <= self.get_raw_angle1() <= MAX_ANGLE and \
+               0 <= self.get_raw_angle2() <= MAX_ANGLE
+
     def send(self):
-        """send position to the arm"""
+        """send saved position to the arm"""
         error_msg = ''
 
         if self._position_valid():
@@ -78,13 +114,3 @@ class ServoController:
         if self.plot:
             self.plot.info_text = 'angle: {}  stiffness: {}  {}' \
                 .format(self.angle, self.stiffness, error_msg)
-
-    def get_raw_angle1(self):
-        return self.angle + self.stiffness
-
-    def get_raw_angle2(self):
-        return 180 - self.angle + self.stiffness
-
-    def _position_valid(self):
-        return 0 <= self.get_raw_angle1() <= 180 and \
-               0 <= self.get_raw_angle2() <= 180

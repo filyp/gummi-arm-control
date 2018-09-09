@@ -25,8 +25,8 @@ def main():
 
     while True:
         try:
-            controller.angle = np.random.uniform(0, 180)
-            controller.stiffness = np.random.uniform(-40, 40)
+            controller.angle = np.random.random.uniform(0, 180)
+            controller.stiffness = np.random.random.uniform(-40, 40)
             if not controller._position_valid():
                 continue
 
@@ -38,7 +38,7 @@ def main():
                                  controller.stiffness,
                                  signal_plot.buff1[-1],     # or [0]
                                  signal_plot.buff2[-1],     # or [0]
-                                 """Ania tu daj ten kat z kamery"""])
+                                 "kąt"])
 
         except InterruptedError:
             # clean up
