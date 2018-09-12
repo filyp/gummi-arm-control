@@ -16,7 +16,7 @@ import numpy as np
 import talk
 from config._matplotlib_animation_patch import *
 from config.constants import FILTER_WINDOW_SIZE, FILTER_CUTOFF, \
-    PLOT_EVERY_TH, PLOT_X_SIZE, YMIN, YMAX
+    PLOT_EVERY_TH, PLOT_X_SIZE, MAX_ANGLE
 
 
 # plot class
@@ -84,12 +84,6 @@ class SignalPlot:
         return plot1, plot2, info_display
 
 
-def key_command_handle(event):
-    """close window when q is pressed"""
-    if event.key == 'q':        # TODO 27 -> esc   ??
-        plt.close()
-
-
 def main():
     # set plot parameters
     plt.style.use('dark_background')
@@ -112,9 +106,26 @@ def main():
                                    blit=True)
 
     # set callbacks
+    def key_command_handle(event):
+        """close window when q is pressed"""
+        if event.key == 'q':  # TODO 27 -> esc   ??
+            plt.close()
     fig.canvas.mpl_connect('key_press_event', key_command_handle)
-    fig.canvas.mpl_connect('motion_notify_event', controller.set_angle_by_mouse)
-    fig.canvas.mpl_connect('scroll_event', controller.set_stiffness_by_mouse)
+
+    def set_angle_by_mouse(event):
+        """handle changing angle mouse command"""
+        if event.inaxes:
+            mouse_position = event.xdata / PLOT_X_SIZE
+            controller.angle = int(mouse_position * MAX_ANGLE)
+            controller.send()
+    fig.canvas.mpl_connect('motion_notify_event', set_angle_by_mouse)
+
+    def set_stiffness_by_mouse(event):
+        """handle changing stiffness mouse command"""
+        controller.stiffness += event.step
+        controller.send()
+    fig.canvas.mpl_connect('scroll_event', set_stiffness_by_mouse)
+
 
     # show plot (blocking)
     plt.show()

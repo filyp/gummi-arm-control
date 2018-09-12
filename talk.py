@@ -9,7 +9,7 @@ import serial
 import time
 import numpy as np
 
-from config.constants import PORT, BAUDRATE, PLOT_X_SIZE, MAX_ANGLE
+from config.constants import PORT, BAUDRATE, MAX_ANGLE
 
 
 class Reader(threading.Thread):
@@ -38,6 +38,7 @@ class Reader(threading.Thread):
     def run(self):
         print('calibrating...')
         print('please, put some load on servos')
+        i1, i2 = self.read_raw_values()
         start_time = time.time()
         while time.time() < start_time + 10:
             i1, i2 = self.read_raw_values()
@@ -68,8 +69,9 @@ class Reader(threading.Thread):
 
 class ServoController:
     """
-    Sends commands to servos,
-    also handles mouse events
+    Connect by serial
+    Set position and stiffness
+    Send them to servos
     """
 
     def __init__(self, plot=None):
@@ -77,18 +79,6 @@ class ServoController:
         self.angle = 0
         self.stiffness = 0
         self.plot = plot
-
-    def set_stiffness_by_mouse(self, event):
-        """handle changing stiffness mouse command"""
-        self.stiffness += event.step
-        self.send()
-
-    def set_angle_by_mouse(self, event):
-        """handle changing angle mouse command"""
-        if event.inaxes:
-            mouse_position = event.xdata / PLOT_X_SIZE
-            self.angle = int(mouse_position * MAX_ANGLE)
-            self.send()
 
     def get_raw_angle1(self):
         return self.angle + self.stiffness
