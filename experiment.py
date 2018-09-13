@@ -15,7 +15,7 @@ def main():
     try:
         while True:
             controller.angle = int(np.random.uniform(0, 180))
-            controller.stiffness = int(np.random.uniform(-40, 40))
+            controller.stiffness = int(np.random.uniform(-60, 60))
             if not controller._position_valid():
                 continue
             controller.send()
