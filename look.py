@@ -33,6 +33,12 @@ GLYPH_PATTERNS = {
 
 
 class TimingOut(object):
+    """
+    When value is set
+    Save the time, reading will fail
+    If you read too late
+        ~Pope John Paul II
+    """
     def __init__(self, timeout):
         self.timeout = timeout
         self.last_assignment_timestamp = 0
@@ -40,7 +46,7 @@ class TimingOut(object):
 
     def __setattr__(self, name, value):
         self.__dict__[name] = value
-        self.last_assignment_timestamp = time.time()
+        self.__dict__['last_assignment_timestamp'] = time.time()
 
     def __getattr__(self, attr):
         if attr != 'v':
@@ -55,16 +61,17 @@ class PositionDetector(threading.Thread):
     Connect camera
     Detect marker positions
     Find out their angle
+        ~John Paul Jones
     """
-
-    def __init__(self):
+    def __init__(self, timeout):
         threading.Thread.__init__(self)
-        cv2.namedWindow("camera")
-        self.camera = self.connect_camera(external=True)
+        # self.camera = self.connect_camera(external=True)
+        self.camera = cv2.VideoCapture(0)
         # current glyphs coordinates
-        self.top_glyph_coordinates = TimingOut(0.2)
-        self.lower_glyph_coordinates = TimingOut(0.2)
-        self.lower_glyph_rotation_num = TimingOut(0.2)
+        self.top_glyph_coordinates = TimingOut(timeout)
+        self.lower_glyph_coordinates = TimingOut(timeout)
+        self.lower_glyph_rotation_num = TimingOut(timeout)
+        self._alive = True
 
     @staticmethod
     def connect_camera(external=False):
@@ -101,10 +108,10 @@ class PositionDetector(threading.Thread):
                                    self.lower_glyph_coordinates.v,
                                    self.lower_glyph_rotation_num.v)
         except TimeoutError:
-            raise
+            return None
 
     def run(self):
-        while True:
+        while self._alive:
             is_open, frame = self.camera.read()
             if not is_open:
                 break
@@ -135,10 +142,7 @@ class PositionDetector(threading.Thread):
                                 self.lower_glyph_rotation_num.v = rotation_num
                             break
                         bitmap = rotate_image(bitmap, 90)
-            #frame = cv2.flip(frame, 1)
-            #cv2.imshow("camera", frame)
-            key = cv2.waitKey(10)
-            if key == ord('q'):
-                break
 
-        cv2.destroyWindow("camera")
+    def kill(self):
+        """tell thread to stop gracefully"""
+        self._alive = False

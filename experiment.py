@@ -1,39 +1,43 @@
-import plot
-import talk
-import numpy as np
-import time
 import csv
-import matplotlib.pyplot as plt
+import time
 
+import numpy as np
 
+import look
 import talk
-from config._matplotlib_animation_patch import *
-from config.constants import FILTER_WINDOW_SIZE, FILTER_CUTOFF, \
-    PLOT_EVERY_TH, PLOT_X_SIZE
 
 
 def main():
     controller = talk.ServoController()
+    position_detector = look.PositionDetector(0.1)
+    position_detector.start()
 
-    while True:
-        try:
+    try:
+        while True:
             controller.angle = int(np.random.uniform(0, 180))
             controller.stiffness = int(np.random.uniform(-40, 40))
             if not controller._position_valid():
                 continue
             controller.send()
+            time.sleep(1.5)
 
-            time.sleep(5)
+            angle = None
+            while not angle:
+                angle = position_detector.get_angle()
 
             with open("collected_data.csv", "a") as data:
                 writer = csv.writer(data)
-                writer.writerow([controller.angle,
-                                 controller.stiffness,
-                                 "kąt"])
+                row = [controller.angle,
+                       controller.stiffness,
+                       angle]
+                writer.writerow(row)
+                print(row)
 
-        except InterruptedError:
-            break
+    except (KeyboardInterrupt, Exception) as e:
+        print(e.__class__.__name__, str(e))
+        position_detector.kill()
+        position_detector.join()
 
 
 if __name__ == "__main__":
-     main()
+    main()

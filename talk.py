@@ -3,11 +3,10 @@ serial communication with arduino
 """
 
 import threading
-
-import serial
-
 import time
+
 import numpy as np
+import serial
 
 from config.constants import PORT, BAUDRATE, MAX_ANGLE
 
@@ -24,7 +23,7 @@ class Reader(threading.Thread):
         threading.Thread.__init__(self)
         self.plot = plot
         self.ser = serial.Serial(PORT, BAUDRATE)
-        self.alive = True
+        self._alive = True
 
         self.i1_min = 0
         self.i1_max = 1024
@@ -48,7 +47,7 @@ class Reader(threading.Thread):
             self.i2_max = max(self.i2_max, i2)
         print('calibrating finished')
 
-        while self.alive:
+        while self._alive:
             i1, i2 = self.read_raw_values()
 
             # map raw data into 0..1 interval
@@ -63,17 +62,17 @@ class Reader(threading.Thread):
         self.ser.close()
 
     def kill(self):
-        """tell Reader thread to stop safely"""
-        self.alive = False
+        """tell thread to stop gracefully"""
+        self._alive = False
 
 
-class ServoController:
+class ServoController(object):
     """
     Connect by serial
     Set position and stiffness
     Send them to servos
+        ~Paulo Coelho
     """
-
     def __init__(self, plot=None):
         self.ser = serial.Serial(PORT, BAUDRATE)
         self.angle = 0

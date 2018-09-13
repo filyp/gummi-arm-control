@@ -7,11 +7,9 @@ handles mouse commands:
 """
 
 from collections import deque
-import time
 
 import matplotlib.pyplot as plt
 from scipy import signal
-import numpy as np
 
 import talk
 from config._matplotlib_animation_patch import *
@@ -20,9 +18,9 @@ from config.constants import FILTER_WINDOW_SIZE, FILTER_CUTOFF, \
 
 
 # plot class
-class SignalPlot:
+class SignalPlot(object):
     """
-    Receives raw data,
+    Receives raw data
     applies low pass filter to remove noise
     and plots
     """
