@@ -110,6 +110,33 @@ class PositionDetector(threading.Thread):
         except TimeoutError:
             return None
 
+    def record_glyph_coordinates(self, contours, imgray):
+        for contour in contours:
+            # approximate the contour
+            peri = cv2.arcLength(curve=contour, closed=True)
+            approx = cv2.approxPolyDP(curve=contour, epsilon=0.01 * peri, closed=True)
+            if len(approx) != 4:
+                continue
+            topdown_quad = get_topdown_quad(imgray, approx.reshape(4, 2))
+            bitmap = cv2.resize(topdown_quad, (5, 5))
+            self.recognize_glyph(bitmap, approx)
+
+    def recognize_glyph(self, bitmap, approx):
+        for glyph_pattern in GLYPH_PATTERNS:
+            for rotation_num in range(4):
+                if bitmap_matches_glyph(bitmap, GLYPH_PATTERNS[glyph_pattern]):
+                    # cv2.imshow("im", bitmap)
+                    flattened = flatten(approx)
+                    ordered = order_points(flattened)
+                    if glyph_pattern == "UPPER":
+                        self.top_glyph_coordinates.v = ordered
+                    elif glyph_pattern == "LOWER":
+                        self.lower_glyph_coordinates.v = ordered
+                    elif glyph_pattern == "ANGLE":
+                        self.lower_glyph_rotation_num.v = rotation_num
+                    break
+                bitmap = rotate_image(bitmap, 90)
+
     def run(self):
         while self._alive:
             is_open, frame = self.camera.read()
@@ -118,30 +145,7 @@ class PositionDetector(threading.Thread):
             imgray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             imgray = cv2.GaussianBlur(imgray, (3, 3), 0)
             contours = self.find_contours(imgray)
-
-            for contour in contours:
-                # approximate the contour
-                peri = cv2.arcLength(curve=contour, closed=True)
-                approx = cv2.approxPolyDP(curve=contour, epsilon=0.01 * peri, closed=True)
-                if len(approx) != 4:
-                    continue
-                topdown_quad = get_topdown_quad(imgray, approx.reshape(4, 2))
-                bitmap = cv2.resize(topdown_quad, (5, 5))
-
-                for glyph_pattern in GLYPH_PATTERNS:
-                    for rotation_num in range(4):
-                        if bitmap_matches_glyph(bitmap, GLYPH_PATTERNS[glyph_pattern]):
-                            # cv2.imshow("im", bitmap)
-                            flattened = flatten(approx)
-                            ordered = order_points(flattened)
-                            if glyph_pattern == "UPPER":
-                                self.top_glyph_coordinates.v = ordered
-                            elif glyph_pattern == "LOWER":
-                                self.lower_glyph_coordinates.v = ordered
-                            elif glyph_pattern == "ANGLE":
-                                self.lower_glyph_rotation_num.v = rotation_num
-                            break
-                        bitmap = rotate_image(bitmap, 90)
+            self.record_glyph_coordinates(contours, imgray)
 
     def kill(self):
         """tell thread to stop gracefully"""
