@@ -18,7 +18,7 @@ from config.constants import FILTER_WINDOW_SIZE, FILTER_CUTOFF, \
 
 
 # plot class
-class SignalPlot(object):
+class SignalPlot:
     """
     Receives raw data
     applies low pass filter to remove noise

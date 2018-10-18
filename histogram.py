@@ -12,17 +12,16 @@ def sunflower_generator(length):
     inverted_phi = 2 / (np.sqrt(5) + 1)
     ratio = 0
     while True:
-        ratio += inverted_phi
-        ratio %= 1
+        ratio = (ratio + inverted_phi) % 1
         yield int(ratio * length)
 
 
-class Histogram(object):
+class Histogram:
     """
     Compare in percentiles how a given value compares to previous values
     Adapts over time, so old values become less relevant
     Bigger length gives better resolution and also longer adaptation time
-    Works in O(n log(n)) where n is length
+    Works in O(log(length))
     """
 
     def __init__(self, length):

@@ -66,7 +66,7 @@ class Reader(threading.Thread):
         self._alive = False
 
 
-class ServoController(object):
+class ServoController:
     """
     Connect by serial
     Set position and stiffness

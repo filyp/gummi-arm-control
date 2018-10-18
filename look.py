@@ -32,7 +32,7 @@ GLYPH_PATTERNS = {
 }
 
 
-class TimingOut(object):
+class TimingOut:
     """
     When value is set
     Save the time, reading will fail
