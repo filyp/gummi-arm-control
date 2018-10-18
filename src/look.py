@@ -10,9 +10,9 @@ import os
 # print(cv2.getBuildInformation())
 
 import cv2
-import subprocess
 import threading
 import time
+import glob
 
 from src.look_helpers import *
 
@@ -61,9 +61,8 @@ class PositionDetector(threading.Thread):
     Detect marker positions
     Find out their angle
     """
-    def __init__(self, timeout, external_camera=False):
+    def __init__(self, timeout):
         threading.Thread.__init__(self)
-        self.camera, self.streaming_process = self.connect_camera(external=external_camera)
         # current glyphs coordinates
         self.top_glyph_coordinates = TimingOut(timeout)
         self.lower_glyph_coordinates = TimingOut(timeout)
@@ -71,22 +70,15 @@ class PositionDetector(threading.Thread):
         self._die = False
 
     @staticmethod
-    def connect_camera(external=False):
-        if not external:
-            if not os.path.exists('/dev/video0'):
-                raise IOError('No builtin camera found')
-            return cv2.VideoCapture(0), None
+    def connect_camera():
+        cameras = glob.glob('dev/video*')
+        if cameras:
+            raise IOError('No camera found')
 
-        # create loopback if it doesn't exist already
-        if not os.path.exists('/dev/video7'):
-            subprocess.run('sudo modprobe v4l2loopback video_nr=7', shell=True)
-
-        cmd = 'gphoto2 --stdout --capture-movie | ' \
-              'gst-launch-1.0 fdsrc fd=0 ! decodebin name=dec ! queue ! ' \
-              'videoconvert ! tee ! v4l2sink device=/dev/video7'
-        streaming_process = subprocess.Popen(cmd, shell=True)
-
-        return cv2.VideoCapture(7), streaming_process
+        # on default choose camera with biggest number (should be most recent)
+        camera = sorted(cameras)[-1]
+        device_number = camera[-1]
+        return cv2.VideoCapture(device_number)
 
     @staticmethod
     def find_contours(imgray):
@@ -105,14 +97,15 @@ class PositionDetector(threading.Thread):
             return None
 
     def run(self):
+        camera = self.connect_camera()
+
         while not self._die:
-            is_open, frame = self.camera.read()
+            is_open, frame = camera.read()
             if not is_open:
                 break
             imgray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             imgray = cv2.GaussianBlur(imgray, (3, 3), 0)
             contours = self.find_contours(imgray)
-
 
             for contour in contours:
                 # approximate the contour
@@ -136,7 +129,6 @@ class PositionDetector(threading.Thread):
                                 self.lower_glyph_rotation_num.set(rotation_num)
                             break
                         bitmap = rotate_image(bitmap, 90)
-        self.streaming_process.terminate()
 
     def kill(self):
         """tell the thread to die gracefully"""
