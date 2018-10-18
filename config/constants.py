@@ -6,6 +6,7 @@ change them for different behaviour
 # serial
 PORT = '/dev/tty.wchusbserial1420'
 BAUDRATE = 74880
+MAX_ANGLE = 180
 
 # plotting
 PLOT_X_SIZE = 200       # horizontal resolution of the plot
