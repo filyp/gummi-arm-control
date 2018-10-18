@@ -5,8 +5,11 @@ based on
 rdmilligan.wordpress.com/2015/07/19/glyph-recognition-using-opencv-and-python/
 """
 
+
 import os
 # print(cv2.getBuildInformation())
+
+import cv2
 import subprocess
 import threading
 import time
@@ -26,7 +29,7 @@ GLYPH_PATTERNS = {
               [0, 0, 0],
               [0, 1, 0]],
     "ANGLE": [[1, 0, 1],
-              [0, 0, 0],
+              [0, 1, 0],
               [1, 0, 0]]
 }
 
@@ -59,7 +62,6 @@ class PositionDetector(threading.Thread):
     Connect camera
     Detect marker positions
     Find out their angle
-        ~John Paul Jones
     """
     def __init__(self, timeout):
         threading.Thread.__init__(self)
