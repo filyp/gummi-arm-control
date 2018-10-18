@@ -19,7 +19,6 @@ from src.look_helpers import *
 # tweak these
 EDGE_LOWER_THRESHOLD = 30
 EDGE_UPPER_THRESHOLD = 90
-# substitute_image = cv2.imread('substitute.jpg')
 
 GLYPH_PATTERNS = {
     "UPPER": [[0, 1, 0],
@@ -41,20 +40,19 @@ class TimingOut:
     If you read too late
     """
     def __init__(self, timeout):
-        self.timeout = timeout
-        self.last_assignment_timestamp = 0
-        self.v = None
+        self._timeout = timeout
+        self._last_assignment_timestamp = 0
+        self._value = None
 
-    def __setattr__(self, name, value):
-        self.__dict__[name] = value
-        self.__dict__['last_assignment_timestamp'] = time.time()
+    def set(self, value):
+        self._value = value
+        self._last_assignment_timestamp = time.time()
 
-    def __getattr__(self, attr):
-        if attr != 'v':
-            raise KeyError('No such key found, use v instead')
-        if time.time() > self.last_assignment_timestamp + self.timeout:
+    def get(self):
+        expiration = self._last_assignment_timestamp + self._timeout
+        if time.time() > expiration:
             raise TimeoutError('Variable timed out')
-        return self.__dict__[attr]
+        return self._value
 
 
 class PositionDetector(threading.Thread):
@@ -63,36 +61,32 @@ class PositionDetector(threading.Thread):
     Detect marker positions
     Find out their angle
     """
-    def __init__(self, timeout):
+    def __init__(self, timeout, external_camera=False):
         threading.Thread.__init__(self)
-        # self.camera = self.connect_camera(external=True)
-        self.camera = cv2.VideoCapture(0)
+        self.camera, self.streaming_process = self.connect_camera(external=external_camera)
         # current glyphs coordinates
         self.top_glyph_coordinates = TimingOut(timeout)
         self.lower_glyph_coordinates = TimingOut(timeout)
         self.lower_glyph_rotation_num = TimingOut(timeout)
-        self._alive = True
+        self._die = False
 
     @staticmethod
     def connect_camera(external=False):
         if not external:
             if not os.path.exists('/dev/video0'):
                 raise IOError('No builtin camera found')
-            return cv2.VideoCapture(0)
+            return cv2.VideoCapture(0), None
+
         # create loopback if it doesn't exist already
-        if not os.path.exists('/dev/video1'):
-            subprocess.run('sudo modprobe v4l2loopback', shell=True)
-        if not os.path.exists('/dev/video1'):
-            # there was no builtin camera so the created loopback is /dev/video0
-            camera_num = 0
-        else:
-            # created loopback is /dev/video1
-            camera_num = 1
+        if not os.path.exists('/dev/video7'):
+            subprocess.run('sudo modprobe v4l2loopback video_nr=7', shell=True)
+
         cmd = 'gphoto2 --stdout --capture-movie | ' \
               'gst-launch-1.0 fdsrc fd=0 ! decodebin name=dec ! queue ! ' \
-              'videoconvert ! tee ! v4l2sink device=/dev/video{}'.format(camera_num)
-        subprocess.Popen(cmd, shell=True)  # run in background
-        return cv2.VideoCapture(camera_num)
+              'videoconvert ! tee ! v4l2sink device=/dev/video7'
+        streaming_process = subprocess.Popen(cmd, shell=True)
+
+        return cv2.VideoCapture(7), streaming_process
 
     @staticmethod
     def find_contours(imgray):
@@ -104,20 +98,21 @@ class PositionDetector(threading.Thread):
 
     def get_angle(self):
         try:
-            return calculate_angle(self.top_glyph_coordinates.v,
-                                   self.lower_glyph_coordinates.v,
-                                   self.lower_glyph_rotation_num.v)
+            return calculate_angle(self.top_glyph_coordinates.get(),
+                                   self.lower_glyph_coordinates.get(),
+                                   self.lower_glyph_rotation_num.get())
         except TimeoutError:
             return None
 
     def run(self):
-        while self._alive:
+        while not self._die:
             is_open, frame = self.camera.read()
             if not is_open:
                 break
             imgray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             imgray = cv2.GaussianBlur(imgray, (3, 3), 0)
             contours = self.find_contours(imgray)
+
 
             for contour in contours:
                 # approximate the contour
@@ -131,18 +126,18 @@ class PositionDetector(threading.Thread):
                 for glyph_pattern in GLYPH_PATTERNS:
                     for rotation_num in range(4):
                         if bitmap_matches_glyph(bitmap, GLYPH_PATTERNS[glyph_pattern]):
-                            # cv2.imshow("im", bitmap)
                             flattened = flatten(approx)
                             ordered = order_points(flattened)
                             if glyph_pattern == "UPPER":
-                                self.top_glyph_coordinates.v = ordered
+                                self.top_glyph_coordinates.set(ordered)
                             elif glyph_pattern == "LOWER":
-                                self.lower_glyph_coordinates.v = ordered
+                                self.lower_glyph_coordinates.set(ordered)
                             elif glyph_pattern == "ANGLE":
-                                self.lower_glyph_rotation_num.v = rotation_num
+                                self.lower_glyph_rotation_num.set(rotation_num)
                             break
                         bitmap = rotate_image(bitmap, 90)
+        self.streaming_process.terminate()
 
     def kill(self):
-        """tell thread to stop gracefully"""
-        self._alive = False
+        """tell the thread to die gracefully"""
+        self._die = True

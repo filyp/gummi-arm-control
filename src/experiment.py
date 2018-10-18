@@ -8,7 +8,7 @@ from src import talk, look
 
 def main():
     controller = talk.ServoController()
-    position_detector = look.PositionDetector(0.1)
+    position_detector = look.PositionDetector(0.1, external_camera=True)
     position_detector.start()
 
     try:
