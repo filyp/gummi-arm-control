@@ -16,7 +16,7 @@ def sunflower_generator(length):
         yield int(ratio * length)
 
 
-class Histogram:
+class Histogram(SortedList):
     """
     Compare in percentiles how a given value compares to previous values
     Adapts over time, so old values become less relevant
@@ -24,26 +24,26 @@ class Histogram:
     Works in O(log(length))
     """
 
-    def __init__(self, length):
-        self.length = length
-        self.histogram = SortedList()
-        self.gen = sunflower_generator(length)
+    def __init__(self, max_length):
+        SortedList.__init__(self)
+        self.max_length = max_length
+        self.gen = sunflower_generator(max_length)
 
-    def add(self, value):
-        if len(self.histogram) >= self.length:
-            to_remove = self.histogram[next(self.gen)]
-            self.histogram.remove(to_remove)
-        self.histogram.add(value)
+    def put(self, value):
+        if len(self) >= self.max_length:
+            index_to_remove = next(self.gen)
+            self.__delitem__(index_to_remove)
+        self.add(value)
 
     def get_percentile(self, value):
         """
         :param value:
         :return: what percentile (0..1) of previous values were smaller than this value
         """
-        leftmost = self.histogram.bisect_left(value)
-        rightmost = self.histogram.bisect_right(value)
+        leftmost = self.bisect_left(value)
+        rightmost = self.bisect_right(value)
         average = (leftmost + rightmost) / 2
-        return average / len(self.histogram)
+        return average / len(self)
 
     def get_value(self, percentile):
         """
@@ -51,5 +51,5 @@ class Histogram:
         :return: value that is larger than some percentile of previous values
         for example get_value(0.5) to get median
         """
-        index = int(percentile * (len(self.histogram) - 1))
-        return self.histogram[index]
+        index = int(percentile * (len(self) - 1))
+        return self[index]
