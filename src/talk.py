@@ -71,7 +71,6 @@ class ServoController:
     Connect by serial
     Set position and stiffness
     Send them to servos
-        ~Paulo Coelho
     """
     def __init__(self, plot=None):
         self.ser = serial.Serial(PORT, BAUDRATE)

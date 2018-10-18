@@ -3,8 +3,7 @@ import time
 
 import numpy as np
 
-import look
-import talk
+from src import talk, look
 
 
 def main():

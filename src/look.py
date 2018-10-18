@@ -5,19 +5,18 @@ based on
 rdmilligan.wordpress.com/2015/07/19/glyph-recognition-using-opencv-and-python/
 """
 
-import cv2
 import os
 # print(cv2.getBuildInformation())
 import subprocess
 import threading
 import time
 
-from look_helpers import *
+from src.look_helpers import *
 
 # tweak these
 EDGE_LOWER_THRESHOLD = 30
 EDGE_UPPER_THRESHOLD = 90
-substitute_image = cv2.imread('substitute.jpg')
+# substitute_image = cv2.imread('substitute.jpg')
 
 GLYPH_PATTERNS = {
     "UPPER": [[0, 1, 0],
@@ -37,7 +36,6 @@ class TimingOut:
     When value is set
     Save the time, reading will fail
     If you read too late
-        ~Pope John Paul II
     """
     def __init__(self, timeout):
         self.timeout = timeout
