@@ -11,16 +11,16 @@ from collections import deque
 import matplotlib.pyplot as plt
 from scipy import signal
 
-import talk
+from src import talk
 from config._matplotlib_animation_patch import *
 from config.constants import FILTER_WINDOW_SIZE, FILTER_CUTOFF, \
-    PLOT_EVERY_TH, PLOT_X_SIZE, YMIN, YMAX
+    PLOT_EVERY_TH, PLOT_X_SIZE, MAX_ANGLE
 
 
 # plot class
 class SignalPlot:
     """
-    Receives raw data,
+    Receives raw data
     applies low pass filter to remove noise
     and plots
     """
@@ -43,6 +43,7 @@ class SignalPlot:
         :param i1:    raw data from the current sensor 1
         :param i2:    raw data from the current sensor 2
         """
+
         i1, i2 = self.filter(i1, i2)
         self.counter = (self.counter + 1) % PLOT_EVERY_TH  # modulate plotting speed
         if self.counter == 0:
@@ -81,12 +82,6 @@ class SignalPlot:
         return plot1, plot2, info_display
 
 
-def key_command_handle(event):
-    """close window when q is pressed"""
-    if event.key == 'q':        # TODO 27 -> esc   ??
-        plt.close()
-
-
 def main():
     # set plot parameters
     plt.style.use('dark_background')
@@ -99,7 +94,7 @@ def main():
     reader.start()
 
     # set up animation
-    ax = plt.axes(xlim=(0, PLOT_X_SIZE), ylim=(YMIN, YMAX))
+    ax = plt.axes(xlim=(0, PLOT_X_SIZE), ylim=(0, 1))
     plot1, = ax.plot([], [])
     plot2, = ax.plot([], [])
     info_display = ax.text(0.05, 1.05, '', fontsize=14, transform=ax.transAxes)
@@ -109,9 +104,26 @@ def main():
                                    blit=True)
 
     # set callbacks
+    def key_command_handle(event):
+        """close window when q is pressed"""
+        if event.key == 'q':  # TODO 27 -> esc   ??
+            plt.close()
     fig.canvas.mpl_connect('key_press_event', key_command_handle)
-    fig.canvas.mpl_connect('motion_notify_event', controller.set_angle)
-    fig.canvas.mpl_connect('scroll_event', controller.set_stiffness)
+
+    def set_angle_by_mouse(event):
+        """handle changing angle mouse command"""
+        if event.inaxes:
+            mouse_position = event.xdata / PLOT_X_SIZE
+            controller.angle = int(mouse_position * MAX_ANGLE)
+            controller.send()
+    fig.canvas.mpl_connect('motion_notify_event', set_angle_by_mouse)
+
+    def set_stiffness_by_mouse(event):
+        """handle changing stiffness mouse command"""
+        controller.stiffness += event.step
+        controller.send()
+    fig.canvas.mpl_connect('scroll_event', set_stiffness_by_mouse)
+
 
     # show plot (blocking)
     plt.show()
