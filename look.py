@@ -5,16 +5,17 @@ based on
 rdmilligan.wordpress.com/2015/07/19/glyph-recognition-using-opencv-and-python/
 """
 
-import cv2
+
 import os
 # print(cv2.getBuildInformation())
+import cv2
 
 from look_helpers import *
 
 # tweak these
 EDGE_LOWER_THRESHOLD = 30
 EDGE_UPPER_THRESHOLD = 90
-substitute_image = cv2.imread('substitute.jpg')
+# substitute_image = cv2.imread('substitute.jpg')
 
 GLYPH_PATTERNS = {
     "UPPER": [[0, 1, 0],
@@ -24,7 +25,7 @@ GLYPH_PATTERNS = {
               [0, 0, 0],
               [0, 1, 0]],
     "ANGLE": [[1, 0, 1],
-              [0, 0, 0],
+              [0, 1, 0],
               [1, 0, 0]]
 }
 

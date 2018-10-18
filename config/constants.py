@@ -4,7 +4,7 @@ change them for different behaviour
 """
 
 # serial
-PORT = '/dev/ttyUSB0'
+PORT = '/dev/tty.wchusbserial1420'
 BAUDRATE = 74880
 
 # plotting
