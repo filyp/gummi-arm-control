@@ -17,7 +17,7 @@ ${installer} python3.5
 # OpenCV doesn’t play particularly well with virtualenvs,
 # so numpy needs to be installed on the system Python
 # credit: foxrow.com/installing-opencv-in-a-virtualenv
-${installer} python3-numpy
+# ${installer} python3-numpy
 
 
 # set up virtualenv

@@ -72,7 +72,7 @@ class PositionDetector(threading.Thread):
     @staticmethod
     def connect_camera():
         cameras = glob.glob('dev/video*')
-        if cameras:
+        if not cameras:
             raise IOError('No camera found')
 
         # on default choose camera with biggest number (should be most recent)
