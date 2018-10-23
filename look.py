@@ -20,14 +20,17 @@ EDGE_UPPER_THRESHOLD = 90
 # substitute_image = cv2.imread('substitute.jpg')
 
 GLYPH_PATTERNS = {
-    "UPPER": [[0, 1, 0],
+    "ALPHA": [[0, 1, 0],
               [1, 0, 0],
               [0, 1, 1]],
-    "LOWER": [[1, 1, 0],
-              [0, 0, 0],
-              [0, 1, 0]],
-    "ANGLE": [[1, 0, 1],
+    "BETA": [[1, 1, 0],
+             [0, 0, 0],
+             [0, 1, 0]],
+    "GAMMA": [[1, 0, 1],
               [0, 1, 0],
+              [1, 0, 0]],
+    "DELTA": [[1, 0, 1],
+              [0, 0, 0],
               [1, 0, 0]]
 }
 
@@ -45,15 +48,15 @@ class TimingOut(object):
     def __init__(self, timeout):
         self.timeout = timeout
         self.last_assignment_timestamp = 0
-        self.v = None
+        self.value = None
 
     def __setattr__(self, name, value):
         self.__dict__[name] = value
         self.__dict__['last_assignment_timestamp'] = time.time()
 
     def __getattr__(self, attr):
-        if attr != 'v':
-            raise KeyError('No such key found, use v instead')
+        if attr != 'value':
+            raise KeyError('No such key found, use value instead')
         if time.time() > self.last_assignment_timestamp + self.timeout:
             raise TimeoutError('Variable timed out')
         return self.__dict__[attr]
@@ -72,9 +75,10 @@ class PositionDetector(threading.Thread):
         # self.camera = self.connect_camera(external=True)
         self.camera = cv2.VideoCapture(0)
         # current glyphs coordinates
-        self.top_glyph_coordinates = TimingOut(timeout)
-        self.lower_glyph_coordinates = TimingOut(timeout)
-        self.lower_glyph_rotation_num = TimingOut(timeout)
+        self.alpha = TimingOut(timeout)
+        self.beta = TimingOut(timeout)
+        self.gamma = TimingOut(timeout)
+        self.delta = TimingOut(timeout)
         self._alive = True
 
     @staticmethod
@@ -93,52 +97,59 @@ class PositionDetector(threading.Thread):
 
     def get_angle(self):
         try:
-            return calculate_angle(self.top_glyph_coordinates.v,
-                                   self.lower_glyph_coordinates.v,
-                                   self.lower_glyph_rotation_num.v)
+            return calculate_angle_4_glyphs(self.alpha.value,
+                                            self.beta.value,
+                                            self.gamma.value,
+                                            self.delta.value)
         except TimeoutError:
             return None
+
+    def record_glyph_coordinates(self, contours, imgray):
+        for contour in contours:
+            # approximate the contour
+            peri = cv2.arcLength(curve=contour, closed=True)
+            approx = cv2.approxPolyDP(curve=contour, epsilon=0.01 * peri, closed=True)
+            if len(approx) != 4:
+                continue
+            topdown_quad = get_topdown_quad(imgray, approx.reshape(4, 2))
+            bitmap = cv2.resize(topdown_quad, (5, 5))
+            self.recognize_glyph(bitmap, approx)
+
+    def recognize_glyph(self, bitmap, approx):
+        for glyph_pattern in GLYPH_PATTERNS:
+            for rotation_num in range(4):
+                if bitmap_matches_glyph(bitmap, GLYPH_PATTERNS[glyph_pattern]):
+                    # cv2.imshow("im", bitmap)
+                    flattened = flatten(approx)
+                    ordered = order_points(flattened)
+                    if glyph_pattern == "ALPHA":
+                        self.alpha.value = ordered
+                    elif glyph_pattern == "BETA":
+                        self.beta.value = ordered
+                    elif glyph_pattern == "GAMMA":
+                        self.gamma.value = ordered
+                    elif glyph_pattern == "DELTA":
+                        self.delta.value = ordered
+                    break
+                bitmap = rotate_image(bitmap, 90)
+                angle = self.get_angle()
+                # print(self.alpha.value)
+                print(angle)
 
     def run(self):
         while self._alive:
             is_open, frame = self.camera.read()
-            # cv2.imshow("camera", frame)
             if not is_open:
                 break
             imgray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             imgray = cv2.GaussianBlur(imgray, (3, 3), 0)
             contours = self.find_contours(imgray)
-
-            for contour in contours:
-                # approximate the contour
-                peri = cv2.arcLength(curve=contour, closed=True)
-                approx = cv2.approxPolyDP(curve=contour, epsilon=0.01 * peri, closed=True)
-                if len(approx) != 4:
-                    continue
-                topdown_quad = get_topdown_quad(imgray, approx.reshape(4, 2))
-                bitmap = cv2.resize(topdown_quad, (5, 5))
-
-                for glyph_pattern in GLYPH_PATTERNS:
-                    for rotation_num in range(4):
-                        if bitmap_matches_glyph(bitmap, GLYPH_PATTERNS[glyph_pattern]):
-                            # cv2.imshow("im", bitmap)
-                            flattened = flatten(approx)
-                            ordered = order_points(flattened)
-                            if glyph_pattern == "UPPER":
-                                self.top_glyph_coordinates.v = ordered
-                            elif glyph_pattern == "LOWER":
-                                self.lower_glyph_coordinates.v = ordered
-                            elif glyph_pattern == "ANGLE":
-                                self.lower_glyph_rotation_num.v = rotation_num
-                            break
-                        bitmap = rotate_image(bitmap, 90)
-
-                        angle = self.get_angle()
-                        print(angle)
+            self.record_glyph_coordinates(contours, imgray)
 
     def kill(self):
         """tell thread to stop gracefully"""
         self._alive = False
+
 
 ania = PositionDetector(0.1)
 ania.start()
