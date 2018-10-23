@@ -126,7 +126,7 @@ class PositionDetector(threading.Thread):
     def run(self):
         camera = self.connect_camera()
         while self._die:
-            is_open, frame = self.camera.read()
+            is_open, frame = camera.read()
             if not is_open:
                 break
             imgray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
