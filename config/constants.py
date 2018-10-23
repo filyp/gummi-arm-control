@@ -3,10 +3,16 @@ constants
 change them for different behaviour
 """
 
+import platform
+
+
 # serial
-PORT = '/dev/ttyUSB0'
 BAUDRATE = 74880
 MAX_ANGLE = 180
+PORT = {
+    'Linux': '/dev/ttyUSB0',
+    'Darwin': '/dev/tty.wchusbserial1420'
+}[platform.system()]
 
 # plotting
 PLOT_X_SIZE = 200       # horizontal resolution of the plot

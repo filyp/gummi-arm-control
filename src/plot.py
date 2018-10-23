@@ -11,14 +11,14 @@ from collections import deque
 import matplotlib.pyplot as plt
 from scipy import signal
 
-import talk
+from src import talk
 from config._matplotlib_animation_patch import *
 from config.constants import FILTER_WINDOW_SIZE, FILTER_CUTOFF, \
     PLOT_EVERY_TH, PLOT_X_SIZE, MAX_ANGLE
 
 
 # plot class
-class SignalPlot(object):
+class SignalPlot:
     """
     Receives raw data
     applies low pass filter to remove noise

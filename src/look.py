@@ -5,19 +5,20 @@ based on
 rdmilligan.wordpress.com/2015/07/19/glyph-recognition-using-opencv-and-python/
 """
 
-import cv2
+
 import os
 # print(cv2.getBuildInformation())
-import subprocess
+
+import cv2
 import threading
 import time
+import glob
 
-from look_helpers import *
+from src.look_helpers import *
 
 # tweak these
 EDGE_LOWER_THRESHOLD = 30
 EDGE_UPPER_THRESHOLD = 90
-substitute_image = cv2.imread('substitute.jpg')
 
 GLYPH_PATTERNS = {
     "UPPER": [[0, 1, 0],
@@ -32,28 +33,26 @@ GLYPH_PATTERNS = {
 }
 
 
-class TimingOut(object):
+class TimingOut:
     """
     When value is set
     Save the time, reading will fail
     If you read too late
-        ~Pope John Paul II
     """
     def __init__(self, timeout):
-        self.timeout = timeout
-        self.last_assignment_timestamp = 0
-        self.v = None
+        self._timeout = timeout
+        self._last_assignment_timestamp = 0
+        self._value = None
 
-    def __setattr__(self, name, value):
-        self.__dict__[name] = value
-        self.__dict__['last_assignment_timestamp'] = time.time()
+    def set(self, value):
+        self._value = value
+        self._last_assignment_timestamp = time.time()
 
-    def __getattr__(self, attr):
-        if attr != 'v':
-            raise KeyError('No such key found, use v instead')
-        if time.time() > self.last_assignment_timestamp + self.timeout:
+    def get(self):
+        expiration = self._last_assignment_timestamp + self._timeout
+        if time.time() > expiration:
             raise TimeoutError('Variable timed out')
-        return self.__dict__[attr]
+        return self._value
 
 
 class PositionDetector(threading.Thread):
@@ -61,38 +60,25 @@ class PositionDetector(threading.Thread):
     Connect camera
     Detect marker positions
     Find out their angle
-        ~John Paul Jones
     """
     def __init__(self, timeout):
         threading.Thread.__init__(self)
-        # self.camera = self.connect_camera(external=True)
-        self.camera = cv2.VideoCapture(0)
         # current glyphs coordinates
         self.top_glyph_coordinates = TimingOut(timeout)
         self.lower_glyph_coordinates = TimingOut(timeout)
         self.lower_glyph_rotation_num = TimingOut(timeout)
-        self._alive = True
+        self._die = False
 
     @staticmethod
-    def connect_camera(external=False):
-        if not external:
-            if not os.path.exists('/dev/video0'):
-                raise IOError('No builtin camera found')
-            return cv2.VideoCapture(0)
-        # create loopback if it doesn't exist already
-        if not os.path.exists('/dev/video1'):
-            subprocess.run('sudo modprobe v4l2loopback', shell=True)
-        if not os.path.exists('/dev/video1'):
-            # there was no builtin camera so the created loopback is /dev/video0
-            camera_num = 0
-        else:
-            # created loopback is /dev/video1
-            camera_num = 1
-        cmd = 'gphoto2 --stdout --capture-movie | ' \
-              'gst-launch-1.0 fdsrc fd=0 ! decodebin name=dec ! queue ! ' \
-              'videoconvert ! tee ! v4l2sink device=/dev/video{}'.format(camera_num)
-        subprocess.Popen(cmd, shell=True)  # run in background
-        return cv2.VideoCapture(camera_num)
+    def connect_camera():
+        cameras = glob.glob('dev/video*')
+        if not cameras:
+            raise IOError('No camera found')
+
+        # on default choose camera with biggest number (should be most recent)
+        camera = sorted(cameras)[-1]
+        device_number = camera[-1]
+        return cv2.VideoCapture(device_number)
 
     @staticmethod
     def find_contours(imgray):
@@ -104,9 +90,9 @@ class PositionDetector(threading.Thread):
 
     def get_angle(self):
         try:
-            return calculate_angle(self.top_glyph_coordinates.v,
-                                   self.lower_glyph_coordinates.v,
-                                   self.lower_glyph_rotation_num.v)
+            return calculate_angle(self.top_glyph_coordinates.get(),
+                                   self.lower_glyph_coordinates.get(),
+                                   self.lower_glyph_rotation_num.get())
         except TimeoutError:
             return None
 
@@ -138,7 +124,8 @@ class PositionDetector(threading.Thread):
                 bitmap = rotate_image(bitmap, 90)
 
     def run(self):
-        while self._alive:
+        camera = self.connect_camera()
+        while self._die:
             is_open, frame = self.camera.read()
             if not is_open:
                 break
@@ -148,5 +135,5 @@ class PositionDetector(threading.Thread):
             self.record_glyph_coordinates(contours, imgray)
 
     def kill(self):
-        """tell thread to stop gracefully"""
-        self._alive = False
+        """tell the thread to die gracefully"""
+        self._die = True

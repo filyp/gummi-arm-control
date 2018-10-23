@@ -3,8 +3,7 @@ import time
 
 import numpy as np
 
-import look
-import talk
+from src import talk, look
 
 
 def main():
@@ -19,7 +18,7 @@ def main():
             if not controller._position_valid():
                 continue
             controller.send()
-            time.sleep(1.5)
+            time.sleep(1.1)
 
             angle = None
             while not angle:
