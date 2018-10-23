@@ -22,14 +22,17 @@ EDGE_UPPER_THRESHOLD = 90
 # substitute_image = cv2.imread('substitute.jpg')
 
 GLYPH_PATTERNS = {
-    "UPPER": [[0, 1, 0],
+    "ALPHA": [[0, 1, 0],
               [1, 0, 0],
               [0, 1, 1]],
-    "LOWER": [[1, 1, 0],
-              [0, 0, 0],
-              [0, 1, 0]],
-    "ANGLE": [[1, 0, 1],
+    "BETA": [[1, 1, 0],
+             [0, 0, 0],
+             [0, 1, 0]],
+    "GAMMA": [[1, 0, 1],
               [0, 1, 0],
+              [1, 0, 0]],
+    "DELTA": [[1, 0, 1],
+              [0, 0, 0],
               [1, 0, 0]]
 }
 
