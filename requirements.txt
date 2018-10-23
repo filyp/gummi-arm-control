@@ -4,10 +4,16 @@ iso8601==0.1.12
 kiwisolver==1.0.1
 matplotlib==2.2.2
 numpy==1.15.0
+pkg-resources==0.0.0        # may cause problems
 pyparsing==2.2.0
+pyserial==3.4
 python-dateutil==2.7.3
 pytz==2018.5
 PyYAML==3.13
 scipy==1.1.0
 serial==0.0.67
 six==1.11.0
+sortedcontainers==2.0.5
+
+# note that pyserial and serial may conflict
+# in case of problems use only pyserial on linux and serial on mac
