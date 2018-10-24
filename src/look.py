@@ -21,13 +21,16 @@ EDGE_LOWER_THRESHOLD = 30
 EDGE_UPPER_THRESHOLD = 90
 
 GLYPH_PATTERNS = {
-    "UPPER": [[0, 1, 0],
+    "ALPHA": [[0, 1, 0],
               [1, 0, 0],
               [0, 1, 1]],
-    "LOWER": [[1, 1, 0],
-              [0, 0, 0],
-              [0, 1, 0]],
-    "ANGLE": [[1, 0, 1],
+    "BETA": [[1, 1, 0],
+             [0, 0, 0],
+             [0, 1, 0]],
+    "GAMMA": [[1, 0, 1],
+              [0, 1, 0],
+              [1, 0, 0]],
+    "DELTA": [[1, 0, 1],
               [0, 0, 0],
               [1, 0, 0]]
 }
@@ -64,9 +67,10 @@ class PositionDetector(threading.Thread):
     def __init__(self, timeout):
         threading.Thread.__init__(self)
         # current glyphs coordinates
-        self.top_glyph_coordinates = TimingOut(timeout)
-        self.lower_glyph_coordinates = TimingOut(timeout)
-        self.lower_glyph_rotation_num = TimingOut(timeout)
+        self.alpha = TimingOut(timeout)
+        self.beta = TimingOut(timeout)
+        self.gamma = TimingOut(timeout)
+        self.delta = TimingOut(timeout)
         self._die = False
 
     @staticmethod
@@ -90,9 +94,10 @@ class PositionDetector(threading.Thread):
 
     def get_angle(self):
         try:
-            return calculate_angle(self.top_glyph_coordinates.get(),
-                                   self.lower_glyph_coordinates.get(),
-                                   self.lower_glyph_rotation_num.get())
+            return calculate_angle_4_glyphs(self.alpha._value,
+                                            self.beta._value,
+                                            self.gamma._value,
+                                            self.delta._value)
         except TimeoutError:
             return None
 
@@ -111,21 +116,22 @@ class PositionDetector(threading.Thread):
         for glyph_pattern in GLYPH_PATTERNS:
             for rotation_num in range(4):
                 if bitmap_matches_glyph(bitmap, GLYPH_PATTERNS[glyph_pattern]):
-                    # cv2.imshow("im", bitmap)
                     flattened = flatten(approx)
                     ordered = order_points(flattened)
-                    if glyph_pattern == "UPPER":
-                        self.top_glyph_coordinates.v = ordered
-                    elif glyph_pattern == "LOWER":
-                        self.lower_glyph_coordinates.v = ordered
-                    elif glyph_pattern == "ANGLE":
-                        self.lower_glyph_rotation_num.v = rotation_num
+                    if glyph_pattern == "ALPHA":
+                        self.alpha.set(ordered)
+                    elif glyph_pattern == "BETA":
+                        self.beta.set(ordered)
+                    elif glyph_pattern == "GAMMA":
+                        self.gamma.set(ordered)
+                    elif glyph_pattern == "DELTA":
+                        self.delta.set(ordered)
                     break
                 bitmap = rotate_image(bitmap, 90)
 
     def run(self):
         camera = self.connect_camera()
-        while self._die:
+        while self._die is False:
             is_open, frame = camera.read()
             if not is_open:
                 break
