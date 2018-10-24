@@ -5,29 +5,59 @@ import cv2
 from scipy.spatial import distance as dist
 
 
-def order_points(points):
-    s = points.sum(axis=1)
-    diff = np.diff(points, axis=1)
+class Point2d:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
-    ordered_points = np.zeros((4, 2), dtype="float32")
+    def __repr__(self):
+        return "x: {}, y:{}".format(self.x, self.y)
 
-    ordered_points[0] = points[np.argmin(s)]
-    ordered_points[2] = points[np.argmax(s)]
-    ordered_points[1] = points[np.argmin(diff)]
-    ordered_points[3] = points[np.argmax(diff)]
 
-    return ordered_points
+class Vector:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return "Vector: x: {}, y: {}".format(self.x, self.y)
+
+    def unit_vector(self):
+        vector_length = np.sqrt(self.x ** 2 + self.y ** 2)
+        return Vector(self.x / vector_length, self.y / vector_length)
+
+
+def to_point2d(point):
+    return Point2d(point[0], point[1])
+
+
+def to_vector(point_a, point_b):
+    return Vector(point_b.x - point_a.x, point_b.y - point_a.y)
+
+
+# def order_points_for_topdown_quad(points):
+#     s = points.sum(axis=1)
+#     diff = np.diff(points, axis=1)
+#
+#     ordered_points = np.zeros((4, 2), dtype="float32")
+#
+#     ordered_points[0] = to_point2d(points[np.argmin(s)])
+#     ordered_points[2] = to_point2d(points[np.argmax(s)])
+#     ordered_points[1] = to_point2d(points[np.argmin(diff)])
+#     ordered_points[3] = to_point2d(points[np.argmax(diff)])
+#
+#     return ordered_points
 
 
 def max_width_height(points):
     (tl, tr, br, bl) = points
 
-    top_width = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-    bottom_width = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
+    top_width = np.sqrt(((tr.x - tl.x) ** 2) + ((tr.y - tl.y) ** 2))
+    bottom_width = np.sqrt(((br.x - bl.x) ** 2) + ((br.y - bl.y) ** 2))
     max_width = max(int(top_width), int(bottom_width))
 
-    left_height = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-    right_height = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
+    left_height = np.sqrt(((tl.x - bl.x) ** 2) + ((tl.y - bl.y) ** 2))
+    right_height = np.sqrt(((tr.x - br.x) ** 2) + ((tr.y - br.y) ** 2))
     max_height = max(int(left_height), int(right_height))
 
     return (max_width, max_height)
@@ -48,8 +78,10 @@ def get_topdown_quad(image, src):
     (max_width, max_height) = max_width_height(src)
     dst = topdown_points(max_width, max_height)
 
+    np_array = np.array([[point.x, point.y] for point in src])
+
     # warp perspective
-    matrix = cv2.getPerspectiveTransform(src, dst)
+    matrix = cv2.getPerspectiveTransform(np_array, dst)
     warped = cv2.warpPerspective(image, matrix, max_width_height(src))
 
     # return top-down quad
@@ -160,25 +192,56 @@ def order_points(pts):
 
     # return the coordinates in top-left, top-right,
     # bottom-right, and bottom-left order
-    return np.array([tl, tr, br, bl], dtype="float32")
+    clockwise_array = np.array([tl, tr, br, bl], dtype="float32")
+    return [to_point2d(point) for point in clockwise_array]
 
 
-def calculate_angle(upper_glyph_coordinates, lower_glyph_coordinates, rotation_num):
-    if upper_glyph_coordinates is None or lower_glyph_coordinates is None or rotation_num is None:
+# def calculate_angle(upper_glyph_coordinates, lower_glyph_coordinates, rotation_num):
+#     if upper_glyph_coordinates is None or lower_glyph_coordinates is None or rotation_num is None:
+#         return None
+#     else:
+#         lower_top_coordinates = get_top_coordinates(lower_glyph_coordinates, rotation_num)
+#         upper_side_coordinates = upper_glyph_coordinates[1], upper_glyph_coordinates[2]
+#
+#         upper_vector = vector(*upper_side_coordinates)
+#         lower_vector = vector(*lower_top_coordinates)
+#
+#         upper_vector_u = upper_vector.unit_vector()
+#         lower_vector_u = lower_vector.unit_vector()
+#
+#         dot = np.dot(upper_vector_u, lower_vector_u)
+#         clip = np.clip(dot, -1.0, 1.0)
+#         return np.arccos(clip)
+
+#   ordered top-down
+def calculate_angle_4_glyphs(alpha, beta, gamma, delta):
+    if alpha is None or beta is None or gamma is None or delta is None:
         return None
     else:
-        lower_top_coordinates = get_top_coordinates(lower_glyph_coordinates, rotation_num)
-        upper_side_coordinates = upper_glyph_coordinates[1], upper_glyph_coordinates[2]
+        alpha_center = get_center_of_rectangle(alpha[0], alpha[2])
+        beta_center = get_center_of_rectangle(beta[0], beta[2])
+        gamma_center = get_center_of_rectangle(gamma[0], gamma[2])
+        delta_center = get_center_of_rectangle(delta[0], delta[2])
 
-        upper_vector = vector(*upper_side_coordinates)
-        lower_vector = vector(*lower_top_coordinates)
+        upper_vector = to_vector(beta_center, alpha_center)
+        lower_vector = to_vector(gamma_center, delta_center)
 
-        upper_vector_u = unit_vector(upper_vector)
-        lower_vector_u = unit_vector(lower_vector)
+        upper_vector_u = upper_vector.unit_vector()
+        lower_vector_u = lower_vector.unit_vector()
 
-        dot = np.dot(upper_vector_u, lower_vector_u)
+        dot = np.dot([upper_vector_u.x, upper_vector_u.y], [lower_vector_u.x, lower_vector_u.y])
         clip = np.clip(dot, -1.0, 1.0)
+        # print(np.arccos(clip))
         return np.arccos(clip)
+
+
+def get_center_of_rectangle(point_a, point_b):
+    # print(point_b)
+    # print(point_a)
+    x = (point_a.x + point_b.x) / 2
+    y = (point_a.y + point_b.y) / 2
+
+    return Point2d(x, y)
 
 
 def get_top_coordinates(lower_glyph_coordinates, rotation_num):
@@ -189,13 +252,8 @@ def get_top_coordinates(lower_glyph_coordinates, rotation_num):
         return sorted_coordinates[1], sorted_coordinates[0]
 
 
-def unit_vector(vector):
-    """ Returns the unit vector of the vector.  """
-    return vector / np.linalg.norm(vector)
-
-
 def vector(point_a, point_b):
-    return point_b - point_a
+    return to_vector(point_a, point_b)
 
 
 def flatten(nested_array):
