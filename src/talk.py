@@ -79,10 +79,10 @@ class ServoController:
         self.plot = plot
 
     def get_raw_angle1(self):
-        return self.angle - self.stiffness
+        return self.angle + self.stiffness
 
     def get_raw_angle2(self):
-        return 180 - self.angle - self.stiffness
+        return self.angle - self.stiffness
 
     def _position_valid(self):
         """return if the saved position is inside the servos range"""
