@@ -5,7 +5,7 @@ import numpy as np
 import scipy.linalg
 import csv
 
-input_file = csv.DictReader(open("collected_data.csv"))
+input_file = csv.DictReader(open("../src/collected_data.csv"))
 
 angle = []
 stiffness = []

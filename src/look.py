@@ -90,10 +90,10 @@ class PositionDetector(threading.Thread):
 
     def get_angle(self):
         try:
-            return calculate_angle_4_glyphs(self.alpha.get(),
-                                            self.beta.get(),
-                                            self.gamma.get(),
-                                            self.delta.get())
+            return calculate_angle_4_glyphs(self.alpha._value,
+                                            self.beta._value,
+                                            self.gamma._value,
+                                            self.delta._value)
         except TimeoutError:
             return None
 
@@ -115,17 +115,18 @@ class PositionDetector(threading.Thread):
                     flattened = flatten(approx)
                     ordered = order_points(flattened)
                     if glyph_pattern == "ALPHA":
-                        self.alpha.value = ordered
+                        self.alpha.set(ordered)
                     elif glyph_pattern == "BETA":
-                        self.beta.value = ordered
+                        self.beta.set(ordered)
                     elif glyph_pattern == "GAMMA":
-                        self.gamma.value = ordered
+                        self.gamma.set(ordered)
                     elif glyph_pattern == "DELTA":
-                        self.delta.value = ordered
+                        self.delta.set(ordered)
                     break
                 bitmap = rotate_image(bitmap, 90)
-                angle = self.get_angle()
-                print(angle)
+                # angle = self.get_angle()
+                # print(self.alpha._value)
+                # print(angle)
 
     def run(self):
         camera = cv2.VideoCapture(0)
@@ -143,5 +144,5 @@ class PositionDetector(threading.Thread):
         self._die = True
 
 
-ania = PositionDetector(0.1)
+ania = PositionDetector(1)
 ania.start()

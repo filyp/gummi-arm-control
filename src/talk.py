@@ -79,10 +79,10 @@ class ServoController:
         self.plot = plot
 
     def get_raw_angle1(self):
-        return self.angle - self.stiffness
+        return self.angle + self.stiffness
 
     def get_raw_angle2(self):
-        return 180 - self.angle - self.stiffness
+        return self.angle - self.stiffness
 
     def _position_valid(self):
         """return if the saved position is inside the servos range"""
@@ -94,6 +94,7 @@ class ServoController:
         error_msg = ''
 
         if self._position_valid():
+            print('dupa send valid')
             self.ser.write(b'A' + self.get_raw_angle1().to_bytes(1, 'little'))
             self.ser.write(b'B' + self.get_raw_angle2().to_bytes(1, 'little'))
         else:
@@ -102,3 +103,4 @@ class ServoController:
         if self.plot:
             self.plot.info_text = 'angle: {}  stiffness: {}  {}' \
                 .format(self.angle, self.stiffness, error_msg)
+

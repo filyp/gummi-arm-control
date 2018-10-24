@@ -228,8 +228,6 @@ def calculate_angle_4_glyphs(alpha, beta, gamma, delta):
 
         upper_vector_u = upper_vector.unit_vector()
         lower_vector_u = lower_vector.unit_vector()
-        # a = [upper_vector_u.x, upper_vector_u.y]
-        # b = [lower_vector_u.x, lower_vector_u.y]
 
         dot = np.dot([upper_vector_u.x, upper_vector_u.y], [lower_vector_u.x, lower_vector_u.y])
         clip = np.clip(dot, -1.0, 1.0)
