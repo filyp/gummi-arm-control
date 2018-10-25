@@ -94,7 +94,6 @@ class ServoController:
         error_msg = ''
 
         if self._position_valid():
-            print('dupa send valid')
             self.ser.write(b'A' + self.get_raw_angle1().to_bytes(1, 'little'))
             self.ser.write(b'B' + self.get_raw_angle2().to_bytes(1, 'little'))
         else:
