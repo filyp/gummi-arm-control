@@ -215,24 +215,21 @@ def order_points(pts):
 
 #   ordered top-down
 def calculate_angle_4_glyphs(alpha, beta, gamma, delta):
-    if alpha is None or beta is None or gamma is None or delta is None:
-        return None
-    else:
-        alpha_center = get_center_of_rectangle(alpha[0], alpha[2])
-        beta_center = get_center_of_rectangle(beta[0], beta[2])
-        gamma_center = get_center_of_rectangle(gamma[0], gamma[2])
-        delta_center = get_center_of_rectangle(delta[0], delta[2])
+    alpha_center = get_center_of_rectangle(alpha[0], alpha[2])
+    beta_center = get_center_of_rectangle(beta[0], beta[2])
+    gamma_center = get_center_of_rectangle(gamma[0], gamma[2])
+    delta_center = get_center_of_rectangle(delta[0], delta[2])
 
-        upper_vector = to_vector(beta_center, alpha_center)
-        lower_vector = to_vector(gamma_center, delta_center)
+    upper_vector = to_vector(beta_center, alpha_center)
+    lower_vector = to_vector(gamma_center, delta_center)
 
-        upper_vector_u = upper_vector.unit_vector()
-        lower_vector_u = lower_vector.unit_vector()
+    upper_vector_u = upper_vector.unit_vector()
+    lower_vector_u = lower_vector.unit_vector()
 
-        dot = np.dot([upper_vector_u.x, upper_vector_u.y], [lower_vector_u.x, lower_vector_u.y])
-        clip = np.clip(dot, -1.0, 1.0)
-        # print(np.arccos(clip))
-        return np.arccos(clip)
+    dot = np.dot([upper_vector_u.x, upper_vector_u.y], [lower_vector_u.x, lower_vector_u.y])
+    clip = np.clip(dot, -1.0, 1.0)
+    # print(np.arccos(clip))
+    return np.arccos(clip)
 
 
 def get_center_of_rectangle(point_a, point_b):

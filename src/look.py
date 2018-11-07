@@ -67,10 +67,12 @@ class PositionDetector(threading.Thread):
     def __init__(self, timeout):
         threading.Thread.__init__(self)
         # current glyphs coordinates
-        self.alpha = TimingOut(timeout)
-        self.beta = TimingOut(timeout)
-        self.gamma = TimingOut(timeout)
-        self.delta = TimingOut(timeout)
+        self.glyphs = {
+            'ALPHA': TimingOut(timeout),
+            'BETA': TimingOut(timeout),
+            'GAMMA': TimingOut(timeout),
+            'DELTA': TimingOut(timeout)
+        }
         self._die = False
 
     @staticmethod
@@ -94,10 +96,10 @@ class PositionDetector(threading.Thread):
 
     def get_angle(self):
         try:
-            return calculate_angle_4_glyphs(self.alpha._value,
-                                            self.beta._value,
-                                            self.gamma._value,
-                                            self.delta._value)
+            return calculate_angle_4_glyphs(self.glyphs['ALPHA'].get(),
+                                            self.glyphs['BETA'].get(),
+                                            self.glyphs['GAMMA'].get(),
+                                            self.glyphs['DELTA'].get())
         except TimeoutError:
             return None
 
@@ -118,14 +120,7 @@ class PositionDetector(threading.Thread):
                 if bitmap_matches_glyph(bitmap, GLYPH_PATTERNS[glyph_pattern]):
                     flattened = flatten(approx)
                     ordered = order_points(flattened)
-                    if glyph_pattern == "ALPHA":
-                        self.alpha.set(ordered)
-                    elif glyph_pattern == "BETA":
-                        self.beta.set(ordered)
-                    elif glyph_pattern == "GAMMA":
-                        self.gamma.set(ordered)
-                    elif glyph_pattern == "DELTA":
-                        self.delta.set(ordered)
+                    self.glyphs[glyph_pattern].set(ordered)
                     break
                 bitmap = rotate_image(bitmap, 90)
 

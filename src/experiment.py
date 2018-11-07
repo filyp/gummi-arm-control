@@ -3,40 +3,49 @@ import time
 
 import numpy as np
 
-from src import talk, look
+from src import position_controller
+from src import look
+
+MAX_STIFFNESS = 90
 
 
 def main():
-    controller = talk.ServoController()
-    position_detector = look.PositionDetector(0.1)
-    position_detector.start()
+    controller = position_controller.PositionController()
+    # position_detector = look.PositionDetector(0.1)
+    # position_detector.start()
 
     try:
         while True:
-            controller.angle = int(np.random.uniform(0, 180))
-            controller.stiffness = int(np.random.uniform(-60, 60))
-            if not controller._position_valid():
+            try:
+                angle = int(np.random.uniform(0, controller.MAX_ANGLE))
+                stiffness = int(np.random.uniform(0, MAX_STIFFNESS))
+                controller.send(angle, stiffness)
+            except ValueError:
                 continue
-            controller.send()
-            print(controller.angle, controller.stiffness)
+
+            print(angle, stiffness)
             time.sleep(1)
 
-            angle = None
-            while not angle:
-                angle = position_detector.get_angle()
+            # angle = None
+            # while not angle:
+            #     angle = position_detector.get_angle()
+            #
+            # with open("collected_data.csv", "a") as data:
+            #     writer = csv.writer(data)
+            #     row = [controller.angle,
+            #            controller.stiffness,
+            #            angle]
+            #     writer.writerow(row)
+            #     print(row)
 
-            with open("collected_data.csv", "a") as data:
-                writer = csv.writer(data)
-                row = [controller.angle,
-                       controller.stiffness,
-                       angle]
-                writer.writerow(row)
-                print(row)
-
-    except (KeyboardInterrupt, Exception) as e:
+    except Exception as e:
         print(e.__class__.__name__, str(e))
-        position_detector.kill()
-        position_detector.join()
+
+    except KeyboardInterrupt:
+        pass
+
+    # position_detector.kill()
+    # position_detector.join()
 
 
 if __name__ == "__main__":
