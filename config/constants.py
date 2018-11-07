@@ -19,5 +19,5 @@ PLOT_X_SIZE = 200       # horizontal resolution of the plot
 PLOT_EVERY_TH = 15      # for bigger value, plot flows slower
 
 # filter data
-FILTER_WINDOW_SIZE = 120
-FILTER_CUTOFF = .004    # plots get wavy at >0.04
+FILTER_WINDOW_SIZE = 160
+FILTER_CUTOFF = .002    # plots get wavy at >0.04

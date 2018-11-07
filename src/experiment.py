@@ -14,12 +14,12 @@ def main():
     try:
         while True:
             controller.angle = int(np.random.uniform(0, 180))
-            controller.stiffness = int(np.random.uniform(0, 0))
+            controller.stiffness = int(np.random.uniform(-60, 60))
             if not controller._position_valid():
-                print('dupa expo')
                 continue
             controller.send()
-            time.sleep(2)
+            print(controller.angle, controller.stiffness)
+            time.sleep(1)
 
             angle = None
             while not angle:

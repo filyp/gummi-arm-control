@@ -19,16 +19,18 @@ class Reader(threading.Thread):
     and sends them to signal plotter
     """
 
+    CALLIBRATION_TIME = 3
+
     def __init__(self, plot):
         threading.Thread.__init__(self)
         self.plot = plot
         self.ser = serial.Serial(PORT, BAUDRATE)
-        self._alive = True
+        self._die = threading.Event()
 
-        self.i1_min = 0
-        self.i1_max = 1024
-        self.i2_min = 0
-        self.i2_max = 1024
+        self.i1_min = 1024
+        self.i1_max = 0
+        self.i2_min = 1024
+        self.i2_max = 0
 
     def read_raw_values(self):
         line = self.ser.readline()
@@ -37,9 +39,8 @@ class Reader(threading.Thread):
     def run(self):
         print('calibrating...')
         print('please, put some load on servos')
-        i1, i2 = self.read_raw_values()
         start_time = time.time()
-        while time.time() < start_time + 10:
+        while time.time() - start_time < self.CALLIBRATION_TIME:
             i1, i2 = self.read_raw_values()
             self.i1_min = min(self.i1_min, i1)
             self.i1_max = max(self.i1_max, i1)
@@ -47,7 +48,7 @@ class Reader(threading.Thread):
             self.i2_max = max(self.i2_max, i2)
         print('calibrating finished')
 
-        while self._alive:
+        while not self._die.is_set():
             i1, i2 = self.read_raw_values()
 
             # map raw data into 0..1 interval
@@ -63,20 +64,22 @@ class Reader(threading.Thread):
 
     def kill(self):
         """tell thread to stop gracefully"""
-        self._alive = False
+        self._die.set()
 
 
-class ServoController:
+class ServoController(threading.Thread):
     """
     Connect by serial
     Set position and stiffness
     Send them to servos
     """
     def __init__(self, plot=None):
+        threading.Thread.__init__(self)
         self.ser = serial.Serial(PORT, BAUDRATE)
         self.angle = 0
         self.stiffness = 0
         self.plot = plot
+        self._die = threading.Event()
 
     def get_raw_angle1(self):
         return self.angle + self.stiffness
@@ -102,3 +105,11 @@ class ServoController:
         if self.plot:
             self.plot.info_text = 'angle: {}  stiffness: {}  {}' \
                 .format(self.angle, self.stiffness, error_msg)
+
+    def run(self):
+        while not self._die.is_set():
+            self.send()
+            time.sleep(0.01)
+
+    def kill(self):
+        self._die.set()

@@ -90,8 +90,9 @@ def main():
 
     # turn on serial communication
     controller = talk.ServoController(signal_plot)
-    reader = talk.Reader(signal_plot)
-    reader.start()
+    controller.start()
+    # reader = talk.Reader(signal_plot)
+    # reader.start()
 
     # set up animation
     ax = plt.axes(xlim=(0, PLOT_X_SIZE), ylim=(0, 1))
@@ -124,13 +125,14 @@ def main():
         controller.send()
     fig.canvas.mpl_connect('scroll_event', set_stiffness_by_mouse)
 
-
     # show plot (blocking)
     plt.show()
 
-    # clean up
-    reader.kill()
-    reader.join()
+    # # clean up
+    # reader.kill()
+    # reader.join()
+    controller.kill()
+    controller.join()
 
 
 if __name__ == '__main__':
