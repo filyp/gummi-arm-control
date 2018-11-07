@@ -35,20 +35,6 @@ def to_vector(point_a, point_b):
     return Vector(point_b.x - point_a.x, point_b.y - point_a.y)
 
 
-# def order_points_for_topdown_quad(points):
-#     s = points.sum(axis=1)
-#     diff = np.diff(points, axis=1)
-#
-#     ordered_points = np.zeros((4, 2), dtype="float32")
-#
-#     ordered_points[0] = to_point2d(points[np.argmin(s)])
-#     ordered_points[2] = to_point2d(points[np.argmax(s)])
-#     ordered_points[1] = to_point2d(points[np.argmin(diff)])
-#     ordered_points[3] = to_point2d(points[np.argmax(diff)])
-#
-#     return ordered_points
-
-
 def max_width_height(points):
     (tl, tr, br, bl) = points
 
@@ -86,57 +72,6 @@ def get_topdown_quad(image, src):
 
     # return top-down quad
     return warped
-
-
-def overlay(background, overlay_image, approx, rotation_num):
-    overlay_image = rotate_image(overlay_image, -rotation_num * 90)
-
-    overlay_height, overlay_width = overlay_image.shape[:2]
-    background_height, background_width = background.shape[:2]
-
-    points = np.asarray(
-        [np.asarray(x[0], dtype=np.float32) for x in approx],
-        dtype=np.float32
-    )
-    points = order_points(points)
-
-    input_coordinates = np.asarray(
-        [
-            np.asarray([0, 0], dtype=np.float32),
-            np.asarray([overlay_width, 0], dtype=np.float32),
-            np.asarray([overlay_width, overlay_height], dtype=np.float32),
-            np.asarray([0, overlay_height], dtype=np.float32)
-        ],
-        dtype=np.float32,
-    )
-
-    transformation_matrix = cv2.getPerspectiveTransform(
-        np.asarray(input_coordinates),
-        np.asarray(points),
-    )
-
-    warped_image = cv2.warpPerspective(
-        overlay_image,
-        transformation_matrix,
-        (background_width, background_height),
-    )
-
-    alpha_channel = np.ones(overlay_image.shape, dtype=np.float)
-    alpha_channel = cv2.warpPerspective(
-        alpha_channel,
-        transformation_matrix,
-        (background_width, background_height),
-    )
-
-    def normalize(im):
-        min_val = np.min(im.ravel())
-        max_val = np.max(im.ravel())
-        out = (im.astype('float') - min_val) / (max_val - min_val)
-        return out
-
-    background = normalize(background)
-    warped_image = normalize(warped_image)
-    return (warped_image * alpha_channel) + (background * (1 - alpha_channel))
 
 
 def bitmap_matches_glyph(bitmap, glyph_pattern_centre):
@@ -196,23 +131,6 @@ def order_points(pts):
     return [to_point2d(point) for point in clockwise_array]
 
 
-# def calculate_angle(upper_glyph_coordinates, lower_glyph_coordinates, rotation_num):
-#     if upper_glyph_coordinates is None or lower_glyph_coordinates is None or rotation_num is None:
-#         return None
-#     else:
-#         lower_top_coordinates = get_top_coordinates(lower_glyph_coordinates, rotation_num)
-#         upper_side_coordinates = upper_glyph_coordinates[1], upper_glyph_coordinates[2]
-#
-#         upper_vector = vector(*upper_side_coordinates)
-#         lower_vector = vector(*lower_top_coordinates)
-#
-#         upper_vector_u = upper_vector.unit_vector()
-#         lower_vector_u = lower_vector.unit_vector()
-#
-#         dot = np.dot(upper_vector_u, lower_vector_u)
-#         clip = np.clip(dot, -1.0, 1.0)
-#         return np.arccos(clip)
-
 #   ordered top-down
 def calculate_angle_4_glyphs(alpha, beta, gamma, delta):
     alpha_center = get_center_of_rectangle(alpha[0], alpha[2])
@@ -247,10 +165,6 @@ def get_top_coordinates(lower_glyph_coordinates, rotation_num):
         return sorted_coordinates[0], sorted_coordinates[1]
     else:
         return sorted_coordinates[1], sorted_coordinates[0]
-
-
-def vector(point_a, point_b):
-    return to_vector(point_a, point_b)
 
 
 def flatten(nested_array):
