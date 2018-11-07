@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-PROJECT_PATH=`pwd`
-
 # check os
 uname_out='$(uname -s)'
 case '${uname_out}' in
@@ -19,12 +17,15 @@ ${installer} python3.5
 # credit: foxrow.com/installing-opencv-in-a-virtualenv
 # ${installer} python3-numpy
 
-
 # set up virtualenv
 ${installer} virtualenv
 virtualenv -p python3.5 env
 source env/bin/activate
 pip install -r requirements.txt
 pip install opencv-python
+
+wget https://raw.githubusercontent.com/FRC4564/maestro/master/maestro.py
+mv maestro.py src/maestro.py
+# remember to set pololu to "USB Dual Port" serial mode
 
 echo 'Installed successfully'
