@@ -75,26 +75,47 @@ class PositionDetector(threading.Thread):
         }
         self._die = False
 
-    @staticmethod
-    def connect_camera():
-        cameras = glob.glob('dev/video*')
+    def connect_camera(self):
+        """Connect OpenCV to camera.
+
+        Looks for cameras in /dev/video*.
+        If more than one camera can be found,
+        choose the one with the biggest number (should be most recently added).
+        """
+        cameras = glob.glob('/dev/video*')
         if not cameras:
             raise IOError('No camera found')
 
-        # on default choose camera with biggest number (should be most recent)
         camera = sorted(cameras)[-1]
         device_number = camera[-1]
         return cv2.VideoCapture(device_number)
 
-    @staticmethod
-    def find_contours(imgray):
+    def find_contours(self, imgray, n):
+        """Find in the given image n contours with the biggest area.
+
+        Contours are found using Canny algorithm.
+
+        Args:
+            imgray: grayscale image
+            n: number of contours to find
+
+        Returns:
+            list of n contours
+
+        """
         edges = cv2.Canny(imgray, EDGE_LOWER_THRESHOLD, EDGE_UPPER_THRESHOLD)
         im2, contours, hierarchy = cv2.findContours(edges,
                                                     cv2.RETR_TREE,
                                                     cv2.CHAIN_APPROX_SIMPLE)
-        return sorted(contours, key=cv2.contourArea, reverse=True)[:100]
+        return sorted(contours, key=cv2.contourArea, reverse=True)[:n]
 
     def get_angle(self):
+        """Calculate angle between two pairs of glyphs.
+
+        If any of the glyph positions was measured more that some given time ago,
+        it means that the calculation can be out-of-date,
+        so wait for new measurements.
+        """
         while True:
             try:
                 return calculate_angle_4_glyphs(self.glyphs['ALPHA'].get(),
@@ -127,16 +148,17 @@ class PositionDetector(threading.Thread):
                 bitmap = rotate_image(bitmap, 90)
 
     def run(self):
+        """Continuously try to measure arm position."""
         camera = self.connect_camera()
         while self._die is False:
             is_open, frame = camera.read()
             if not is_open:
-                break
+                raise IOError("Can't connect to camera")
             imgray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             imgray = cv2.GaussianBlur(imgray, (3, 3), 0)
-            contours = self.find_contours(imgray)
+            contours = self.find_contours(imgray, 100)
             self.record_glyph_coordinates(contours, imgray)
 
     def kill(self):
-        """tell the thread to die gracefully"""
+        """Tell the thread to die gracefully."""
         self._die = True
