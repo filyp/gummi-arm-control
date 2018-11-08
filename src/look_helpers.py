@@ -35,20 +35,6 @@ def to_vector(point_a, point_b):
     return Vector(point_b.x - point_a.x, point_b.y - point_a.y)
 
 
-# def order_points_for_topdown_quad(points):
-#     s = points.sum(axis=1)
-#     diff = np.diff(points, axis=1)
-#
-#     ordered_points = np.zeros((4, 2), dtype="float32")
-#
-#     ordered_points[0] = to_point2d(points[np.argmin(s)])
-#     ordered_points[2] = to_point2d(points[np.argmax(s)])
-#     ordered_points[1] = to_point2d(points[np.argmin(diff)])
-#     ordered_points[3] = to_point2d(points[np.argmax(diff)])
-#
-#     return ordered_points
-
-
 def max_width_height(points):
     (tl, tr, br, bl) = points
 
@@ -196,23 +182,6 @@ def order_points(pts):
     return [to_point2d(point) for point in clockwise_array]
 
 
-# def calculate_angle(upper_glyph_coordinates, lower_glyph_coordinates, rotation_num):
-#     if upper_glyph_coordinates is None or lower_glyph_coordinates is None or rotation_num is None:
-#         return None
-#     else:
-#         lower_top_coordinates = get_top_coordinates(lower_glyph_coordinates, rotation_num)
-#         upper_side_coordinates = upper_glyph_coordinates[1], upper_glyph_coordinates[2]
-#
-#         upper_vector = vector(*upper_side_coordinates)
-#         lower_vector = vector(*lower_top_coordinates)
-#
-#         upper_vector_u = upper_vector.unit_vector()
-#         lower_vector_u = lower_vector.unit_vector()
-#
-#         dot = np.dot(upper_vector_u, lower_vector_u)
-#         clip = np.clip(dot, -1.0, 1.0)
-#         return np.arccos(clip)
-
 #   ordered top-down
 def calculate_angle_4_glyphs(alpha, beta, gamma, delta):
     if alpha is None or beta is None or gamma is None or delta is None:
@@ -250,10 +219,6 @@ def get_top_coordinates(lower_glyph_coordinates, rotation_num):
         return sorted_coordinates[0], sorted_coordinates[1]
     else:
         return sorted_coordinates[1], sorted_coordinates[0]
-
-
-def vector(point_a, point_b):
-    return to_vector(point_a, point_b)
 
 
 def flatten(nested_array):

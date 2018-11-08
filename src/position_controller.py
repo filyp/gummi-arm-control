@@ -1,4 +1,4 @@
-import maestro
+from src import maestro
 
 
 class PositionController:

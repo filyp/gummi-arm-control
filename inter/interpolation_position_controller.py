@@ -4,17 +4,17 @@ import threading
 import scipy.optimize
 import numpy as np
 
-from src import talk, look
+from src import position_controller
 from inter.interpolation import *
 
 
-class InterpolationController(threading.Thread):
+class InterpolationPositionController(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.angle = 90
 
     def run(self):
-        controller = talk.ServoController()
+        controller = position_controller.PositionController()
 
         executor = InterpolationExecutor()
         executor.import_from_csv()
@@ -28,12 +28,14 @@ class InterpolationController(threading.Thread):
                 x_a = scipy.optimize.fsolve(lambda x: f(x) - (3.1415 * int(self.angle) / 180), np.array([0]))
                 target_angle = x_a[0] * 180 / 3.1415
 
-                controller.angle = int(target_angle)
-                controller.stiffness = int(0)
-                if not controller._position_valid():
-                    print('error: not valid position')
-                    continue
-                controller.send()
+                angle = int(target_angle)
+                stiffness = int(0)
+                try:
+                    controller.send(angle, stiffness)
+                    break
+                except ValueError:
+                    # chosen values were out of servos' range, so choose once again
+                    pass
                 time.sleep(1)
 
         except (KeyboardInterrupt, Exception) as e:
@@ -41,19 +43,19 @@ class InterpolationController(threading.Thread):
 
 
 class InputReader(threading.Thread):
-    def __init__(self, InterpolationController):
+    def __init__(self, InterpolationPositionController):
         threading.Thread.__init__(self)
-        self.InterpolationController = InterpolationController
+        self.InterpolationPositionController = InterpolationPositionController
 
     def run(self):
         print('Enter angle (60 - 100):')
         while True:
             angle = input()
-            self.InterpolationController.angle = angle
+            self.InterpolationPositionController.angle = angle
 
 
-interpolation_controller = InterpolationController()
+interpolation_controller = InterpolationPositionController()
 interpolation_controller.start()
 
-input_reader = InputReader(interpolation_controller)
-input_reader.start()
+# input_reader = InputReader(interpolation_controller)
+# input_reader.start()

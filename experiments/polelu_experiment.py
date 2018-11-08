@@ -10,7 +10,7 @@ from src import position_controller
 
 MAX_STIFFNESS = 90
 FILENAME_BASE = 'data/experiment'
-DELAY_BETWEEN_ITERATIONS = 1
+DELAY_BETWEEN_ITERATIONS = 5
 
 
 def save_row(filename, row):

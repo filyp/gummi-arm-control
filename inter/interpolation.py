@@ -13,7 +13,7 @@ class InterpolationExecutor:
         self.camera = []
         self.function = None
 
-    def import_from_csv(self, file_path = "../src/collected_data.csv"):
+    def import_from_csv(self, file_path="../src/collected_data.csv"):
         input_file = csv.DictReader(open(file_path))
 
         for row in input_file:
@@ -47,7 +47,6 @@ class InterpolationExecutor:
         return new_fx, Z
 
     def interpolate_2(self):
-
         # c_ method added items along second axis
         data = np.c_[self.angle, self.stiffness, self.camera]
 
@@ -62,7 +61,7 @@ class InterpolationExecutor:
         C, _, _, _ = scipy.linalg.lstsq(A, data[:, 2])
 
         # evaluate it on a grid
-        Z = C[4]*X**2. + C[5]*Y**2. + C[3]*X*Y + C[1]*X + C[2]*Y + C[0]
+        Z = C[4] * X ** 2. + C[5] * Y ** 2. + C[3] * X * Y + C[1] * X + C[2] * Y + C[0]
 
         return Z
 
