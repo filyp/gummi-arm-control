@@ -1,5 +1,6 @@
 import csv
 import time
+import datetime
 
 import numpy as np
 
@@ -7,12 +8,16 @@ from src import position_controller
 from src import look
 
 MAX_STIFFNESS = 90
+FILENAME_BASE = 'data/experiment'
 
 
 def main():
     controller = position_controller.PositionController()
     position_detector = look.PositionDetector(0.1)
     position_detector.start()
+
+    timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    filename = '{} {}.csv'.format(FILENAME_BASE, timestamp)
 
     try:
         while True:
@@ -23,18 +28,15 @@ def main():
             except ValueError:
                 continue
 
-            print(angle, stiffness)
             time.sleep(1)
 
-            angle = None
-            while not angle:
-                angle = position_detector.get_angle()
+            angle_from_camera = position_detector.get_angle()
 
-            with open("collected_data.csv", "a") as data:
+            with open(filename, 'a') as data:
                 writer = csv.writer(data)
-                row = [controller.angle,
-                       controller.stiffness,
-                       angle]
+                row = [angle,
+                       stiffness,
+                       angle_from_camera]
                 writer.writerow(row)
                 print(row)
 

@@ -95,13 +95,15 @@ class PositionDetector(threading.Thread):
         return sorted(contours, key=cv2.contourArea, reverse=True)[:100]
 
     def get_angle(self):
-        try:
-            return calculate_angle_4_glyphs(self.glyphs['ALPHA'].get(),
-                                            self.glyphs['BETA'].get(),
-                                            self.glyphs['GAMMA'].get(),
-                                            self.glyphs['DELTA'].get())
-        except TimeoutError:
-            return None
+        while True:
+            try:
+                return calculate_angle_4_glyphs(self.glyphs['ALPHA'].get(),
+                                                self.glyphs['BETA'].get(),
+                                                self.glyphs['GAMMA'].get(),
+                                                self.glyphs['DELTA'].get())
+            except TimeoutError:
+                print('getting angle timed out')
+                continue
 
     def record_glyph_coordinates(self, contours, imgray):
         for contour in contours:

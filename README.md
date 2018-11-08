@@ -9,3 +9,4 @@
 * build neural network
     * use Levenberg-Marquardt backpropagation with single hidden layer
 * use histograms to estimate how good is the readout
+* use logger instead of printing
