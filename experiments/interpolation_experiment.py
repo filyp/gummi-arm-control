@@ -8,7 +8,7 @@ from src import look
 from src import position_controller
 
 
-MAX_STIFFNESS = 90
+MAX_STIFFNESS = 5
 FILENAME_BASE = 'data/experiment'
 DELAY_BETWEEN_ITERATIONS = 5
 
