@@ -15,15 +15,12 @@ class InterpolationController(threading.Thread):
 
     def run(self):
         controller = talk.ServoController()
-        # position_detector = look.PositionDetector(0.1)
-        # position_detector.start()
 
         executor = InterpolationExecutor()
         executor.import_from_csv()
         f, _ = executor.interpolate()
 
         # f(angle) = (self.angle -> camera)
-
         # arg dla f sa stopnie, bo angle
 
         try:
