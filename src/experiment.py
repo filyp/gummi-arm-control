@@ -1,14 +1,38 @@
 import csv
-import time
 import datetime
+import time
 
 import numpy as np
 
-from src import position_controller
 from src import look
+from src import position_controller
+
 
 MAX_STIFFNESS = 90
 FILENAME_BASE = 'data/experiment'
+DELAY_BETWEEN_ITERATIONS = 1
+
+
+def save_row(filename, row):
+    with open(filename, 'a') as data:
+        writer = csv.writer(data)
+        writer.writerow(row)
+        print(row)
+
+
+def experiment_iteration(controller, position_detector, filename):
+    angle = int(np.random.uniform(0, controller.MAX_ANGLE))
+    stiffness = int(np.random.uniform(0, MAX_STIFFNESS))
+    try:
+        controller.send(angle, stiffness)
+    except ValueError:
+        return
+
+    time.sleep(DELAY_BETWEEN_ITERATIONS)
+    angle_from_camera = position_detector.get_angle()
+
+    row = [angle, stiffness, angle_from_camera]
+    save_row(filename, row)
 
 
 def main():
@@ -21,33 +45,12 @@ def main():
 
     try:
         while True:
-            try:
-                angle = int(np.random.uniform(0, controller.MAX_ANGLE))
-                stiffness = int(np.random.uniform(0, MAX_STIFFNESS))
-                controller.send(angle, stiffness)
-            except ValueError:
-                continue
-
-            time.sleep(1)
-
-            angle_from_camera = position_detector.get_angle()
-
-            with open(filename, 'a') as data:
-                writer = csv.writer(data)
-                row = [angle,
-                       stiffness,
-                       angle_from_camera]
-                writer.writerow(row)
-                print(row)
-
-    except Exception as e:
-        print(e.__class__.__name__, str(e))
-
+            experiment_iteration(controller, position_detector, filename)
     except KeyboardInterrupt:
         pass
-
-    position_detector.kill()
-    position_detector.join()
+    finally:
+        position_detector.kill()
+        position_detector.join()
 
 
 if __name__ == "__main__":
