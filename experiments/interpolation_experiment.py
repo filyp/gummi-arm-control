@@ -9,8 +9,9 @@ from src import position_controller
 
 
 MAX_STIFFNESS = 5
-FILENAME_BASE = 'data/experiment'
-DELAY_BETWEEN_ITERATIONS = 5
+FILENAME_BASE = '../data/experiment'
+DELAY_BETWEEN_ITERATIONS = 3
+DETECTION_TIMEOUT = 1
 
 
 def save_row(filename, row):
@@ -60,7 +61,7 @@ def experiment_iteration(controller, position_detector, filename):
 
 def main():
     controller = position_controller.PositionController()
-    position_detector = look.PositionDetector(0.1)
+    position_detector = look.PositionDetector(DETECTION_TIMEOUT)
     position_detector.start()
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")

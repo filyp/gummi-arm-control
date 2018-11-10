@@ -4,14 +4,16 @@ import time
 
 import numpy as np
 
+from inter.interpolation_position_controller import InterpolationPositionController
 from src import look
 from src import position_controller
 
 
-MAX_STIFFNESS = 5
-FILENAME_BASE = 'data/experiment'
-DELAY_BETWEEN_ITERATIONS = 5
+MAX_ANGLE = 180
+FILENAME_BASE = '../data/validation_experiment'
+DELAY = 5
 EXAMINE_ANGLE = 90
+STIFFNESS = 0
 
 
 def save_row(filename, row):
@@ -40,11 +42,12 @@ def experiment_iteration(controller, position_detector, filename):
         controller: PositionController that communicates with servos
         position_detector: PositionDetector that reads arm angle from the camera
         filename: .csv file where data is saved
+        interpolation_controller: ...
 
     """
     while True:
-        angle = int(np.random.uniform(0, controller.MAX_ANGLE))
-        stiffness = int(np.random.uniform(0, MAX_STIFFNESS))
+        angle = int(np.random.uniform(0, MAX_ANGLE))
+        stiffness = STIFFNESS
         try:
             controller.send(angle, stiffness)
             break
@@ -52,7 +55,18 @@ def experiment_iteration(controller, position_detector, filename):
             # chosen values were out of servos' range, so choose once again
             pass
 
-    time.sleep(DELAY_BETWEEN_ITERATIONS)
+    time.sleep(DELAY)
+
+    # while True:
+    #     examine_angle = EXAMINE_ANGLE
+    #     stiffness = STIFFNESS
+    #     try:
+    #         interpolation_controller.send(examine_angle, stiffness)
+    #         break
+    #     except ValueError:
+    #         # chosen values were out of servos' range, so choose once again
+    #         pass
+
     angle_from_camera = position_detector.get_angle()
 
     row = [angle, stiffness, angle_from_camera]
@@ -61,8 +75,11 @@ def experiment_iteration(controller, position_detector, filename):
 
 def main():
     controller = position_controller.PositionController()
-    position_detector = look.PositionDetector(0.1)
+    position_detector = look.PositionDetector(1)
     position_detector.start()
+
+    # interpolation_controller = InterpolationPositionController()
+    # interpolation_controller.start()
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     filename = '{} {}.csv'.format(FILENAME_BASE, timestamp)

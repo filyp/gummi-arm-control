@@ -1,6 +1,5 @@
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-from scipy import interpolate
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import scipy.linalg
 import csv
@@ -13,11 +12,11 @@ class InterpolationExecutor:
         self.camera = []
         self.function = None
 
-    def import_from_csv(self, file_path="../src/collected_data.csv"):
+    def import_from_csv(self, file_path="../data/interpolation_data.csv"):
         input_file = csv.DictReader(open(file_path))
 
         for row in input_file:
-            self.angle.append((3.1415 * int(row['angle'])) / 180)
+            self.angle.append(int(row['angle']))
             self.stiffness.append(int(row['stiffness']))
             self.camera.append(float(row['camera']))
 
@@ -50,11 +49,9 @@ class InterpolationExecutor:
         # c_ method added items along second axis
         data = np.c_[self.angle, self.stiffness, self.camera]
 
-        x_range = np.arange(0, 3.14, 0.25)
-        y_range = np.arange(-60, 60, 20)
+        x_range = np.arange(0, 200, 20)
+        y_range = np.arange(0, 6, 1)
         X, Y = np.meshgrid(x_range, y_range)
-        XX = X.flatten()
-        YY = Y.flatten()
         #
         # best-fit quadratic curve
         A = np.c_[np.ones(data.shape[0]), data[:, :2], np.prod(data[:, :2], axis=1), data[:, :2] ** 2]
@@ -62,18 +59,31 @@ class InterpolationExecutor:
 
         # evaluate it on a grid
         Z = C[4] * X ** 2. + C[5] * Y ** 2. + C[3] * X * Y + C[1] * X + C[2] * Y + C[0]
+        result_fxy = lambda x, y: C[4] * x ** 2. + C[5] * y ** 2. + C[3] * x * y + C[1] * x + C[2] * y + C[0]
 
-        return Z
+        return result_fxy, Z
 
     def plot(self, Z):
+        x_range = np.arange(0, 200, 20)
+        y_range = np.arange(0, 6, 1)
+        X, Y = np.meshgrid(x_range, y_range)
+
         # plots 3D chart
         fig = plt.figure()
         ax = fig.gca(projection='3d')
-        ax.scatter(self.angle, self.stiffness, Z)
+
+        ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.6)
+        # ax.scatter(self.angle, self.stiffness, Z)
         ax.scatter(self.angle, self.stiffness, self.camera, c='r', marker='o')
 
-        plt.xlabel('angle')
+        plt.xlabel('servo angle')
         plt.ylabel('stiffness')
-        ax.set_zlabel('camera')
+        ax.set_zlabel('camera angle')
 
         plt.show()
+
+
+# executor = InterpolationExecutor()
+# executor.import_from_csv()
+# Z = executor.interpolate_2()
+# executor.plot(Z)

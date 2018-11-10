@@ -18,8 +18,8 @@ def main():
 
     m = maestro.Controller()
 
-    angle1 = 180
-    angle2 = 0
+    angle1 = 90
+    angle2 = 90
 
     while True:
         target1 = degrees_to_quarter_millis(angle1)
