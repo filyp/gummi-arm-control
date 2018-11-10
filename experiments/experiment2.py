@@ -30,7 +30,7 @@ def save_row(filename, row):
         print(row)
 
 
-def experiment_iteration(controller, position_detector, filename):
+def experiment_iteration(controller, interpolation_controller, position_detector, filename):
     """Carry out one iteration of the experiment.
 
     Randomly choose angle and stiffness, and send them to arm.
@@ -47,9 +47,8 @@ def experiment_iteration(controller, position_detector, filename):
     """
     while True:
         angle = int(np.random.uniform(0, MAX_ANGLE))
-        stiffness = STIFFNESS
         try:
-            controller.send(angle, stiffness)
+            # controller.send(angle, STIFFNESS)
             break
         except ValueError:
             # chosen values were out of servos' range, so choose once again
@@ -57,19 +56,10 @@ def experiment_iteration(controller, position_detector, filename):
 
     time.sleep(DELAY)
 
-    # while True:
-    #     examine_angle = EXAMINE_ANGLE
-    #     stiffness = STIFFNESS
-    #     try:
-    #         interpolation_controller.send(examine_angle, stiffness)
-    #         break
-    #     except ValueError:
-    #         # chosen values were out of servos' range, so choose once again
-    #         pass
-
+    servo_angle = interpolation_controller.send(EXAMINE_ANGLE, STIFFNESS)
     angle_from_camera = position_detector.get_angle()
 
-    row = [angle, stiffness, angle_from_camera]
+    row = [angle, servo_angle, STIFFNESS, angle_from_camera]
     save_row(filename, row)
 
 
@@ -78,15 +68,14 @@ def main():
     position_detector = look.PositionDetector(1)
     position_detector.start()
 
-    # interpolation_controller = InterpolationPositionController()
-    # interpolation_controller.start()
+    interpolation_controller = InterpolationPositionController()
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     filename = '{} {}.csv'.format(FILENAME_BASE, timestamp)
 
     try:
         while True:
-            experiment_iteration(controller, position_detector, filename)
+            experiment_iteration(controller, interpolation_controller, position_detector, filename)
     except KeyboardInterrupt:
         pass
     finally:
