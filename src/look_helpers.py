@@ -147,7 +147,7 @@ def calculate_angle_4_glyphs(alpha, beta, gamma, delta):
     dot = np.dot([upper_vector_u.x, upper_vector_u.y], [lower_vector_u.x, lower_vector_u.y])
     clip = np.clip(dot, -1.0, 1.0)
     # print(np.arccos(clip))
-    return np.arccos(clip)
+    return ((np.arccos(clip)) * 180) / 3.1415
 
 
 def get_center_of_rectangle(point_a, point_b):
