@@ -11,9 +11,9 @@ from src import position_controller
 
 MAX_ANGLE = 180
 FILENAME_BASE = '../data/validation_experiment'
-DELAY = 5
+DELAY = 4
 EXAMINE_ANGLE = 90
-STIFFNESS = 0
+STIFFNESS = 5
 
 
 def save_row(filename, row):
@@ -48,7 +48,7 @@ def experiment_iteration(controller, interpolation_controller, position_detector
     while True:
         angle = int(np.random.uniform(0, MAX_ANGLE))
         try:
-            # controller.send(angle, STIFFNESS)
+            controller.send(angle, STIFFNESS)
             break
         except ValueError:
             # chosen values were out of servos' range, so choose once again
@@ -56,10 +56,15 @@ def experiment_iteration(controller, interpolation_controller, position_detector
 
     time.sleep(DELAY)
 
+    angle_from_camera_prev = position_detector.get_angle()
+
     servo_angle = interpolation_controller.send(EXAMINE_ANGLE, STIFFNESS)
+
+    time.sleep(DELAY)
+
     angle_from_camera = position_detector.get_angle()
 
-    row = [angle, servo_angle, STIFFNESS, angle_from_camera]
+    row = [angle, angle_from_camera_prev,  servo_angle, STIFFNESS, angle_from_camera]
     save_row(filename, row)
 
 
