@@ -139,5 +139,5 @@ class PositionDetector(threading.Thread):
         self._die = True
 
 
-ania = PositionDetector(1)
-ania.start()
+# ania = PositionDetector(1)
+# ania.start()
