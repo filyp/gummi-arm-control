@@ -85,5 +85,5 @@ class InterpolationExecutor:
 
 # executor = InterpolationExecutor()
 # executor.import_from_csv()
-# Z = executor.interpolate_2()
+# f, Z = executor.interpolate_2()
 # executor.plot(Z)

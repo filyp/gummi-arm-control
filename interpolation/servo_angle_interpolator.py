@@ -6,9 +6,9 @@ from interpolation.interpolation import InterpolationExecutor
 
 
 class ServoAngleInterpolator:
-    def __init__(self):
+    def __init__(self, file_path="data/interpolation_data.csv"):
         executor = InterpolationExecutor()
-        executor.import_from_csv()
+        executor.import_from_csv(file_path)
         self.f, _ = executor.interpolate_2()
 
     def get_servo_angle(self, result_angle, stiffness):

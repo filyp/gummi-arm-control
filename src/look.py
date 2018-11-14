@@ -124,6 +124,7 @@ class PositionDetector(threading.Thread):
                                                 self.glyphs['DELTA'].get())
             except TimeoutError:
                 print('getting angle timed out')
+                time.sleep(0.5)
                 continue
 
     def record_glyph_coordinates(self, contours, imgray):
