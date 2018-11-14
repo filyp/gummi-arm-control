@@ -10,6 +10,7 @@ case ${uname_out} in
 esac
 
 ${installer} python3.6
+${installer} python3.6-tk
 
 # set up virtualenv
 ${installer} virtualenv
