@@ -8,8 +8,10 @@ class PositionController:
     Send them to servos
     """
     MAX_ANGLE = 180
-    MIN_MAESTRO = 4000
-    MAX_MAESTRO = 8000
+    MIN_MAESTRO = 4 * 496
+    MAX_MAESTRO = 4 * 2496
+    # 496 and 2496 are min and max values set in
+    # MaestroControlCenter -> Channel Settings
     BACK_SERVO = 0
     FRONT_SERVO = 1
 
