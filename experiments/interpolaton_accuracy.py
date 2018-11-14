@@ -78,6 +78,9 @@ def main():
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     filename = '{} {}.csv'.format(FILENAME_BASE, timestamp)
 
+    labels = ["prev_angle_servo", "prev_angle", "angle_servo", "stiffness", "angle"]
+    save_row(filename, labels)
+
     try:
         while True:
             experiment_iteration(controller, interpolation_controller, position_detector, filename)
