@@ -8,9 +8,8 @@ from inter.interpolation_position_controller import InterpolationPositionControl
 from src import look
 from src import position_controller
 
-
 MAX_ANGLE = 180
-FILENAME_BASE = '../data/validation_experiment'
+FILENAME_BASE = '../data/validation/validation_experiment'
 DELAY = 4
 EXAMINE_ANGLE = 90
 STIFFNESS = 5
@@ -64,7 +63,7 @@ def experiment_iteration(controller, interpolation_controller, position_detector
 
     angle_from_camera = position_detector.get_angle()
 
-    row = [angle, angle_from_camera_prev,  servo_angle, STIFFNESS, angle_from_camera]
+    row = [angle, angle_from_camera_prev, servo_angle, STIFFNESS, angle_from_camera]
     save_row(filename, row)
 
 
@@ -77,6 +76,9 @@ def main():
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     filename = '{} {}.csv'.format(FILENAME_BASE, timestamp)
+
+    labels = ["prev_angle_servo", "prev_angle", "angle_servo", "stiffness", "angle"]
+    save_row(filename, labels)
 
     try:
         while True:
