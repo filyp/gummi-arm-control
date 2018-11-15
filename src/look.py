@@ -64,7 +64,7 @@ class PositionDetector(threading.Thread):
     Detect marker positions
     Find out their angle
     """
-    def __init__(self, timeout):
+    def __init__(self, timeout, camera_ip_and_port=None):
         threading.Thread.__init__(self)
         # current glyphs coordinates
         self.glyphs = {
@@ -74,20 +74,28 @@ class PositionDetector(threading.Thread):
             'DELTA': TimingOut(timeout)
         }
         self._die = False
+        self.camera_ip_and_port = camera_ip_and_port
 
     def connect_camera(self):
         """Connect OpenCV to camera.
 
-        Looks for cameras in /dev/video*.
+        If camera IP and port were specified during initialization, use them.
+        Otherwise, look for cameras in /dev/video*.
         If more than one camera can be found,
         choose the one with the biggest number (should be most recently added).
         """
+        if self.camera_ip_and_port:
+            full_camera_address = 'http://{}/mjpegfeed'.format(self.camera_ip_and_port)
+            print('connecting to device {}'.format(full_camera_address))
+            return cv2.VideoCapture(full_camera_address)
+
         cameras = glob.glob('/dev/video*')
         if not cameras:
             raise IOError('No camera found')
 
         camera = sorted(cameras)[-1]
-        device_number = camera[-1]
+        device_number = int(camera[-1])
+        print('connecting to device /dev/video{}'.format(device_number))
         return cv2.VideoCapture(device_number)
 
     def find_contours(self, imgray, n):
@@ -124,7 +132,7 @@ class PositionDetector(threading.Thread):
                                                 self.glyphs['DELTA'].get())
             except TimeoutError:
                 print('getting angle timed out')
-                time.sleep(0.5)
+                time.sleep(0.03)
                 continue
 
     def record_glyph_coordinates(self, contours, imgray):
