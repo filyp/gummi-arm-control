@@ -8,7 +8,7 @@ from inter.interpolation import InterpolationExecutor
 class ServoAngleInterpolator:
     def __init__(self):
         executor = InterpolationExecutor()
-        executor.import_from_csv()
+        # executor.import_from_csv()
         self.f, _ = executor.interpolate_2()
 
     def get_servo_angle(self, result_angle, stiffness):

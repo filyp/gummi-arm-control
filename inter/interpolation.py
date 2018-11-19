@@ -1,18 +1,44 @@
+import csv
+import datetime
+import os  # os module imported here
+
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import scipy.linalg
-import csv
+
+
+def get_default_file():
+    location = '../data/interpolation'
+    least_timestamp = None
+    file_name = None
+
+    for file in os.listdir(location):
+        try:
+            if file.endswith(".csv"):
+                file_name, timestamp_string = file.split('_')
+                t = datetime.datetime.strptime(timestamp_string, "%Y-%m-%d %H:%M:%S")
+
+                if least_timestamp is None:
+                    least_timestamp = t
+                else:
+                    least_timestamp = max((least_timestamp, t))
+
+        except Exception as e:
+            print("No files found here!")
+            raise e
+    return file_name + least_timestamp
 
 
 class InterpolationExecutor:
-    def __init__(self):
+    def __init__(self, file_path=get_default_file()):
         self.angle = []
         self.stiffness = []
         self.camera = []
         self.function = None
 
-    def import_from_csv(self, file_path="../data/interpolation_data.csv"):
+        self.import_from_csv(file_path)
+
+    def import_from_csv(self, file_path):
         input_file = csv.DictReader(open(file_path))
 
         for row in input_file:
@@ -81,7 +107,6 @@ class InterpolationExecutor:
         ax.set_zlabel('camera angle')
 
         plt.show()
-
 
 # executor = InterpolationExecutor()
 # executor.import_from_csv()
