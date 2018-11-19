@@ -64,7 +64,7 @@ def start(iteration_number=400):
     position_detector.start()
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    filename = '{} {}.csv'.format(FILENAME_BASE, timestamp)
+    filename = '{}_{}.csv'.format(FILENAME_BASE, timestamp)
 
     try:
         for i in range(iteration_number):
