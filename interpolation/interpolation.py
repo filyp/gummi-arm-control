@@ -83,7 +83,7 @@ class InterpolationExecutor:
         plt.show()
 
 
-# executor = InterpolationExecutor()
-# executor.import_from_csv()
-# Z = executor.interpolate_2()
-# executor.plot(Z)
+executor = InterpolationExecutor()
+executor.import_from_csv()
+_, Z = executor.interpolate_2()
+executor.plot(Z)

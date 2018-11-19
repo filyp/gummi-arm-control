@@ -17,7 +17,6 @@ class InterpolationPositionController:
                 print('sent')
                 break
             except ValueError:
-                print('dupa')
                 # chosen values were out of servos' range, so choose once again
                 pass
 
