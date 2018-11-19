@@ -7,7 +7,6 @@ import numpy as np
 from src import look
 from src import position_controller
 
-
 MAX_STIFFNESS = 5
 FILENAME_BASE = '../data/experiment'
 DELAY_BETWEEN_ITERATIONS = 3
@@ -59,7 +58,7 @@ def experiment_iteration(controller, position_detector, filename):
     save_row(filename, row)
 
 
-def main():
+def start(iteration_number=400):
     controller = position_controller.PositionController()
     position_detector = look.PositionDetector(DETECTION_TIMEOUT)
     position_detector.start()
@@ -68,7 +67,7 @@ def main():
     filename = '{} {}.csv'.format(FILENAME_BASE, timestamp)
 
     try:
-        while True:
+        for i in range(iteration_number):
             experiment_iteration(controller, position_detector, filename)
     except KeyboardInterrupt:
         pass
@@ -78,4 +77,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    start()
