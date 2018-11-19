@@ -48,40 +48,17 @@ class InterpolationExecutor:
             self.stiffness.append(int(row['stiffness']))
             self.camera.append(float(row['camera']))
 
-    # def interpolate(self):
-    #     degree = 3
-    #
-    #     # np.vander(input array, number of columns in the output)
-    #     A_angle = np.vander(self.angle, degree)
-    #     A_stiffness = np.vander(self.stiffness, degree)
-    #     A = np.hstack((A_angle, A_stiffness))
-    #
-    #     # Solve for a least squares estimate
-    #     (coeffs, residuals, rank, sing_vals) = np.linalg.lstsq(A, self.camera)
-    #
-    #     # Extract coefficients and create polynomials in x and y
-    #     xcoeffs = coeffs[0:degree]
-    #     ycoeffs = coeffs[degree:2 * degree]
-    #     print(ycoeffs)
-    #
-    #     fx = np.poly1d(xcoeffs)
-    #     fy = np.poly1d(ycoeffs)
-    #
-    #     self.function = fx
-    #     Z = np.array([fx(a) + fy(s) for (a, s) in zip(self.angle, self.stiffness)])
-    #
-    #     new_fx = lambda x: fx(x) + 0.9335
-    #     return new_fx, Z
-
     def interpolate_2(self):
         # c_ method added items along second axis
         data = np.c_[self.angle, self.stiffness, self.camera]
 
-        # best-fit quadratic curve
+        # Best-fit quadratic curve
         A = np.c_[np.ones(data.shape[0]), data[:, :2], np.prod(data[:, :2], axis=1), data[:, :2] ** 2]
+        # Solve for a least squares estimate
         self.coeffs, _, _, _ = scipy.linalg.lstsq(A, data[:, 2])
 
-        result_fxy = lambda x, y: self.coeffs[4] * x ** 2. + self.coeffs[5] * y ** 2. + self.coeffs[3] * x * y + self.coeffs[1] * x + self.coeffs[2] * y + self.coeffs[0]
+        result_fxy = lambda x, y: self.coeffs[4] * x ** 2. + self.coeffs[5] * y ** 2. + self.coeffs[3] * x * y \
+                                  + self.coeffs[1] * x + self.coeffs[2] * y + self.coeffs[0]
 
         return result_fxy
 
@@ -93,14 +70,14 @@ class InterpolationExecutor:
         X, Y = np.meshgrid(x_range, y_range)
 
         # evaluate it on a grid
-        Z = self.coeffs[4] * X ** 2. + self.coeffs[5] * Y ** 2. + self.coeffs[3] * X * Y + self.coeffs[1] * X + self.coeffs[2] * Y + self.coeffs[0]
+        Z = self.coeffs[4] * X ** 2. + self.coeffs[5] * Y ** 2. + self.coeffs[3] * X * Y + \
+            self.coeffs[1] * X + self.coeffs[2] * Y + self.coeffs[0]
 
         # plots 3D chart
         fig = plt.figure()
         ax = fig.gca(projection='3d')
 
         ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.6)
-        # ax.scatter(self.angle, self.stiffness, Z)
         ax.scatter(self.angle, self.stiffness, self.camera, c='r', marker='o')
 
         plt.xlabel('servo angle')
@@ -109,7 +86,3 @@ class InterpolationExecutor:
 
         plt.show()
 
-# executor = InterpolationExecutor()
-# executor.import_from_csv()
-# Z = executor.interpolate_2()
-# executor.plot(Z)
