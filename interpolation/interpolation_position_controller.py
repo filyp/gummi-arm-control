@@ -13,8 +13,6 @@ class InterpolationPositionController:
         while True:
             try:
                 self.controller.send(servo_angle, stiffness)
-                print(servo_angle)
-                print('sent')
                 break
             except ValueError:
                 # chosen values were out of servos' range, so choose once again
