@@ -1,3 +1,4 @@
+import ast
 import csv
 import datetime
 import time
@@ -8,9 +9,8 @@ from interpolation.interpolation_position_controller import InterpolationPositio
 from src import look
 from src import position_controller
 
-
 MAX_ANGLE = 180
-FILENAME_BASE = '../data/validation_experiment'
+FILENAME_BASE = '../data/validation/validation_experiment'
 DELAY = 4
 EXAMINE_ANGLE = 90
 STIFFNESS = 5
@@ -30,7 +30,7 @@ def save_row(filename, row):
         print(row)
 
 
-def experiment_iteration(controller, interpolation_controller, position_detector, filename):
+def experiment_iteration(controller, interpolation_controller, position_detector, filename, examine_angle, stiffnes_tuple):
     """Carry out one iteration of the experiment.
 
     Randomly choose angle and stiffness, and send them to arm.
@@ -45,30 +45,35 @@ def experiment_iteration(controller, interpolation_controller, position_detector
         interpolation_controller: ...
 
     """
-    while True:
-        angle = int(np.random.uniform(0, MAX_ANGLE))
-        try:
-            controller.send(angle, STIFFNESS)
-            break
-        except ValueError:
-            # chosen values were out of servos' range, so choose once again
-            pass
+    for stiffness in stiffnes_tuple:
+        while True:
+            angle = int(np.random.uniform(0, MAX_ANGLE))
+            try:
+                controller.send(angle, stiffness)
+                break
+            except ValueError:
+                # chosen values were out of servos' range, so choose once again
+                pass
 
-    time.sleep(DELAY)
+        time.sleep(DELAY)
 
-    angle_from_camera_prev = position_detector.get_angle()
+        angle_from_camera_prev = position_detector.get_angle()
 
-    servo_angle = interpolation_controller.send(EXAMINE_ANGLE, STIFFNESS)
+        servo_angle = interpolation_controller.send(examine_angle, stiffness)
 
-    time.sleep(DELAY)
+        time.sleep(DELAY)
 
-    angle_from_camera = position_detector.get_angle()
+        angle_from_camera = position_detector.get_angle()
 
-    row = [angle, angle_from_camera_prev,  servo_angle, STIFFNESS, angle_from_camera]
-    save_row(filename, row)
+        row = [angle, angle_from_camera_prev, servo_angle, stiffness, angle_from_camera]
+        save_row(filename, row)
 
 
-def main():
+def extract_configurations_to_list(configuration_string):
+    return list(ast.literal_eval(configuration_string))
+
+
+def start(configuration_string='(90, (0,3,5))'):
     controller = position_controller.PositionController()
     position_detector = look.PositionDetector(1)
     position_detector.start()
@@ -81,9 +86,12 @@ def main():
     labels = ["prev_angle_servo", "prev_angle", "angle_servo", "stiffness", "angle"]
     save_row(filename, labels)
 
+    list_of_configurations = extract_configurations_to_list(configuration_string)
+
     try:
-        while True:
-            experiment_iteration(controller, interpolation_controller, position_detector, filename)
+        for config in list_of_configurations:
+            experiment_iteration(controller, interpolation_controller,
+                                 position_detector, filename, config[0], config[1])
     except KeyboardInterrupt:
         pass
     finally:
@@ -92,4 +100,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    start()
