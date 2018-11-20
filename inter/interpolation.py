@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg
 
-location = '../data/interpolation'
+location = '../data/interpolation/interpolation'
 
 
 def get_default_file():
