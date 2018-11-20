@@ -1,12 +1,5 @@
-import csv
-import time
-import threading
-import scipy.optimize
-import numpy as np
-
 from inter.servo_angle_interpolator import ServoAngleInterpolator
 from src import position_controller
-from inter.interpolation import *
 
 
 class InterpolationPositionController:
