@@ -3,11 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os  # os module imported here
 
-PATH = "../data/validation/"
+location = '../data/validation'
 
 
 def create_files_list():
-    location = "/Users/Anna/Desktop/GummiArm/data/validation"
     counter = 0  # keep a count of all files found
     csv_files = []  # list to store all csv files found at location
 
@@ -26,7 +25,7 @@ def create_files_list():
 
 
 def generate_accuracy_chart(file_name, baseline_value, index):
-    input_file = csv.DictReader(open(PATH + file_name))
+    input_file = csv.DictReader(open(location + file_name))
 
     prev_angle = []
     angle = []
@@ -46,16 +45,17 @@ def generate_accuracy_chart(file_name, baseline_value, index):
     plt.title("Examine angle: {} Stiffness: {}".format(baseline_value, stiffness))
     plt.xlabel('starting position (deg)')
     plt.ylabel('ending position (deg)')
+    plt.savefig('accuracy_experiment' + index + '.png')
 
 
-def main():
+def start():
     files_list = create_files_list()
     current_baseline_value = 90
 
     for file in files_list:
         generate_accuracy_chart(file, current_baseline_value, files_list.index(file))
-    plt.show()
+    # plt.show()
 
 
 if __name__ == "__main__":
-    main()
+    start()
