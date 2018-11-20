@@ -1,4 +1,4 @@
-from inter.interpolation import InterpolationExecutor
+from interpolation.interpolation import InterpolationExecutor
 from src.look import PositionDetector
 import experiments.interpolation_experiment as interpolation_experiment
 import experiments.accuracy_experiment as accuracy_experiment
