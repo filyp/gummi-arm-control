@@ -84,5 +84,6 @@ class InterpolationExecutor:
         plt.ylabel('stiffness')
         ax.set_zlabel('camera angle')
 
-        plt.show()
+        # plt.show()
+        plt.savefig('interpolation_experiment.png')
 
