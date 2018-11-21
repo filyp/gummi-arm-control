@@ -6,43 +6,25 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import scipy.linalg
 
-location = '../data/interpolation/*'
+LOCATION = '../data/interpolation/*'
 
 
-def get_default_file():
+def get_default_file(location):
     datafiles = glob.glob(location)
     if not datafiles:
         raise IOError('No datafiles found')
     return sorted(datafiles)[-1]
 
-    # latest_timestamp = None
-    # file_name = None
-    #
-    # for file in os.listdir(location):
-    #     try:
-    #         if file.endswith(".csv"):
-    #             file_name, timestamp_string = file.split('_')
-    #             timestamp_string = timestamp_string.replace('.csv', '')
-    #             print(timestamp_string)
-    #             t = datetime.datetime.strptime(timestamp_string, "%Y-%m-%d %H:%M:%S")
-    #
-    #             if latest_timestamp is None:
-    #                 latest_timestamp = t
-    #             else:
-    #                 latest_timestamp = max((latest_timestamp, t))
-    #
-    #     except Exception as e:
-    #         print("No files found here")
-    #         raise e
-    # return '{}_{}.csv'.format(file_name, latest_timestamp.strftime("%Y-%m-%d %H:%M:%S"))
-
 
 class InterpolationExecutor:
-    def __init__(self, file_name=get_default_file()):
+    def __init__(self, file_name=None):
         self.angle = []
         self.stiffness = []
         self.camera = []
         self.coeffs = None
+
+        if not file_name:
+            file_name = get_default_file(LOCATION)
 
         self.import_from_csv(file_name)
 
@@ -57,6 +39,7 @@ class InterpolationExecutor:
                 self.angle.append(int(row['angle']))
                 self.stiffness.append(int(row['stiffness']))
                 self.camera.append(float(row['camera']))
+        self.filter_outliers(10)
 
     def get_approximating_function(self):
         # c_ method added items along second axis
@@ -74,9 +57,29 @@ class InterpolationExecutor:
                             self.coeffs[2] * y + \
                             self.coeffs[0]
 
+    def filter_outliers(self, threshold):
+        # warning: very ugly function
+        # compute Mahalanobis distance from the mean
+        data = np.matrix([self.angle, self.stiffness, self.camera])
+        covariance_matrix = np.cov(data)
+        inv_covariance = np.linalg.inv(covariance_matrix)
+        mean = np.mean(data, axis=1)
+
+        filtered_values = []
+        for data_tuple in data.transpose():
+            euclidean_distance = data_tuple.transpose() - mean
+            mahalanobis_deviation = euclidean_distance.transpose() \
+                                    * inv_covariance \
+                                    * euclidean_distance
+
+            if mahalanobis_deviation[0, 0] < threshold:
+                filtered_values.append(data_tuple.tolist()[0])
+
+        self.angle, self.stiffness, self.camera = np.transpose(filtered_values)
+
     def plot(self):
-        x_range = np.linspace(min(self.angle), max(self.angle), 50)
-        y_range = np.linspace(min(self.stiffness), max(self.stiffness), 50)
+        x_range = np.linspace(min(self.angle), max(self.angle), 10)
+        y_range = np.linspace(min(self.stiffness), max(self.stiffness), 10)
         X, Y = np.meshgrid(x_range, y_range)
 
         approximating_function = self.get_approximating_function()
