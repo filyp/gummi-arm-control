@@ -59,6 +59,7 @@ def experiment_iteration(controller, position_detector, filename):
 
 
 def start(iteration_number=400):
+    print(iteration_number)
     controller = position_controller.PositionController()
     position_detector = look.PositionDetector(DETECTION_TIMEOUT)
     position_detector.start()
