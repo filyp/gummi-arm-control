@@ -25,7 +25,7 @@ def create_files_list():
 
 
 def generate_accuracy_chart(file_name, baseline_value, index):
-    input_file = csv.DictReader(open(location + file_name))
+    input_file = csv.DictReader(open(location + '/' + file_name))
 
     prev_angle = []
     angle = []
@@ -39,13 +39,13 @@ def generate_accuracy_chart(file_name, baseline_value, index):
     baseline = np.arange(70, 140)
 
     print(index)
-    plt.figure(index+1)  # to let the index start at 1
+    plt.figure(index + 1)  # to let the index start at 1
     plt.plot(baseline, np.ones_like(baseline) * baseline_value, prev_angle, angle, 'ro')
     plt.yticks(range(88, 93))
     plt.title("Examine angle: {} Stiffness: {}".format(baseline_value, stiffness))
     plt.xlabel('starting position (deg)')
     plt.ylabel('ending position (deg)')
-    plt.savefig('accuracy_experiment' + index + '.png')
+    plt.savefig('accuracy_experiment' + str(index) + '.png')
 
 
 def start():
