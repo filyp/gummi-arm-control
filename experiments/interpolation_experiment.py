@@ -8,7 +8,7 @@ from src import look
 from src import position_controller
 
 MAX_STIFFNESS = 5
-FILENAME_BASE = '../data/experiment'
+FILENAME_BASE = '../data/interpolation/experiment'
 DELAY_BETWEEN_ITERATIONS = 3
 DETECTION_TIMEOUT = 1
 
@@ -59,6 +59,7 @@ def experiment_iteration(controller, position_detector, filename):
 
 
 def start(iteration_number=400):
+    print(iteration_number)
     controller = position_controller.PositionController()
     position_detector = look.PositionDetector(DETECTION_TIMEOUT)
     position_detector.start()

@@ -3,10 +3,11 @@ import datetime
 import os  # os module imported here
 
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import scipy.linalg
 
-location = '../data/interpolation/interpolation'
+location = '../data/interpolation'
 
 
 def get_default_file():
@@ -17,6 +18,8 @@ def get_default_file():
         try:
             if file.endswith(".csv"):
                 file_name, timestamp_string = file.split('_')
+                timestamp_string = timestamp_string.replace('.csv', '')
+                print(timestamp_string)
                 t = datetime.datetime.strptime(timestamp_string, "%Y-%m-%d %H:%M:%S")
 
                 if latest_timestamp is None:
@@ -27,7 +30,7 @@ def get_default_file():
         except Exception as e:
             print("No files found here")
             raise e
-    return file_name + latest_timestamp
+    return '{}_{}.csv'.format(file_name, latest_timestamp.strftime("%Y-%m-%d %H:%M:%S"))
 
 
 class InterpolationExecutor:
@@ -40,6 +43,7 @@ class InterpolationExecutor:
         self.import_from_csv(file_name)
 
     def import_from_csv(self, file_name):
+        print(file_name)
         file_path = location + '/' + file_name
         input_file = csv.DictReader(open(file_path))
 
@@ -84,6 +88,6 @@ class InterpolationExecutor:
         plt.ylabel('stiffness')
         ax.set_zlabel('camera angle')
 
-        # plt.show()
-        plt.savefig('interpolation_experiment.png')
+        plt.show()
+        # plt.savefig('../data/interpolation_experiment.png')
 

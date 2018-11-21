@@ -74,6 +74,9 @@ def extract_configurations_to_list(configuration_string):
 
 
 def start(configuration_string='(90, (0,3,5))'):
+    print(configuration_string)
+    list_of_configurations = extract_configurations_to_list(configuration_string)
+    print(list_of_configurations)
     controller = position_controller.PositionController()
     position_detector = look.PositionDetector(1)
     position_detector.start()
@@ -85,8 +88,6 @@ def start(configuration_string='(90, (0,3,5))'):
 
     labels = ["prev_angle_servo", "prev_angle", "angle_servo", "stiffness", "angle"]
     save_row(filename, labels)
-
-    list_of_configurations = extract_configurations_to_list(configuration_string)
 
     try:
         for config in list_of_configurations:
