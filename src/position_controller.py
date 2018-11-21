@@ -22,7 +22,7 @@ class PositionController:
         return (180 - angle) + stiffness
 
     def get_front_angle(self, angle, stiffness):
-        proportional_stiffness = stiffness - 1 if (stiffness != 0) else stiffness
+        proportional_stiffness = stiffness
         return angle - proportional_stiffness
 
     def _angle_valid(self, angle):
