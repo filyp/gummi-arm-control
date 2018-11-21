@@ -80,8 +80,10 @@ def start(iteration_number=10000):
     You can stop it manually by CTRL+C
     Results still will be saved
     """
-
     print(textwrap.dedent(info))
+
+    row = ['angle', 'stiffness', 'camera']
+    save_row(filename, row)
 
     try:
         for i in range(iteration_number):

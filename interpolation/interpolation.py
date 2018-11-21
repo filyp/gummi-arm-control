@@ -1,36 +1,40 @@
 import csv
-import datetime
-import os  # os module imported here
+import glob
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import scipy.linalg
 
-location = '../data/interpolation'
+location = '../data/interpolation/*'
 
 
 def get_default_file():
-    latest_timestamp = None
-    file_name = None
+    datafiles = glob.glob(location)
+    if not datafiles:
+        raise IOError('No datafiles found')
+    return sorted(datafiles)[-1]
 
-    for file in os.listdir(location):
-        try:
-            if file.endswith(".csv"):
-                file_name, timestamp_string = file.split('_')
-                timestamp_string = timestamp_string.replace('.csv', '')
-                print(timestamp_string)
-                t = datetime.datetime.strptime(timestamp_string, "%Y-%m-%d %H:%M:%S")
-
-                if latest_timestamp is None:
-                    latest_timestamp = t
-                else:
-                    latest_timestamp = max((latest_timestamp, t))
-
-        except Exception as e:
-            print("No files found here")
-            raise e
-    return '{}_{}.csv'.format(file_name, latest_timestamp.strftime("%Y-%m-%d %H:%M:%S"))
+    # latest_timestamp = None
+    # file_name = None
+    #
+    # for file in os.listdir(location):
+    #     try:
+    #         if file.endswith(".csv"):
+    #             file_name, timestamp_string = file.split('_')
+    #             timestamp_string = timestamp_string.replace('.csv', '')
+    #             print(timestamp_string)
+    #             t = datetime.datetime.strptime(timestamp_string, "%Y-%m-%d %H:%M:%S")
+    #
+    #             if latest_timestamp is None:
+    #                 latest_timestamp = t
+    #             else:
+    #                 latest_timestamp = max((latest_timestamp, t))
+    #
+    #     except Exception as e:
+    #         print("No files found here")
+    #         raise e
+    # return '{}_{}.csv'.format(file_name, latest_timestamp.strftime("%Y-%m-%d %H:%M:%S"))
 
 
 class InterpolationExecutor:
@@ -43,16 +47,18 @@ class InterpolationExecutor:
         self.import_from_csv(file_name)
 
     def import_from_csv(self, file_name):
-        print(file_name)
-        file_path = location + '/' + file_name
-        input_file = csv.DictReader(open(file_path))
+        with open(file_name) as datafile:
+            print(file_name)
+            input_data = csv.DictReader(datafile)
 
-        for row in input_file:
-            self.angle.append(int(row['angle']))
-            self.stiffness.append(int(row['stiffness']))
-            self.camera.append(float(row['camera']))
+            for row in input_data:
+                if row['camera'] == 'nan':
+                    continue
+                self.angle.append(int(row['angle']))
+                self.stiffness.append(int(row['stiffness']))
+                self.camera.append(float(row['camera']))
 
-    def interpolate_2(self):
+    def get_approximating_function(self):
         # c_ method added items along second axis
         data = np.c_[self.angle, self.stiffness, self.camera]
 
@@ -61,21 +67,20 @@ class InterpolationExecutor:
         # Solve for a least squares estimate
         self.coeffs, _, _, _ = scipy.linalg.lstsq(A, data[:, 2])
 
-        result_fxy = lambda x, y: self.coeffs[4] * x ** 2. + self.coeffs[5] * y ** 2. + self.coeffs[3] * x * y \
-                                  + self.coeffs[1] * x + self.coeffs[2] * y + self.coeffs[0]
-
-        return result_fxy
+        return lambda x, y: self.coeffs[4] * x ** 2. + \
+                            self.coeffs[5] * y ** 2. + \
+                            self.coeffs[3] * x * y + \
+                            self.coeffs[1] * x + \
+                            self.coeffs[2] * y + \
+                            self.coeffs[0]
 
     def plot(self):
-        _ = self.interpolate_2()
-
-        x_range = np.arange(0, 200, 20)
-        y_range = np.arange(0, 6, 1)
+        x_range = np.linspace(min(self.angle), max(self.angle), 50)
+        y_range = np.linspace(min(self.stiffness), max(self.stiffness), 50)
         X, Y = np.meshgrid(x_range, y_range)
 
-        # evaluate it on a grid
-        Z = self.coeffs[4] * X ** 2. + self.coeffs[5] * Y ** 2. + self.coeffs[3] * X * Y + \
-            self.coeffs[1] * X + self.coeffs[2] * Y + self.coeffs[0]
+        approximating_function = self.get_approximating_function()
+        Z = approximating_function(X, Y)
 
         # plots 3D chart
         fig = plt.figure()
@@ -90,4 +95,9 @@ class InterpolationExecutor:
 
         plt.show()
         # plt.savefig('../data/interpolation_experiment.png')
+
+
+if __name__ == '__main__':
+    ie = InterpolationExecutor()
+    ie.plot()
 

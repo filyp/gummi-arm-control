@@ -2,7 +2,7 @@ import os
 
 from interpolation.interpolation import InterpolationExecutor
 from src.look import PositionDetector
-import experiments.interpolation_experiment as interpolation_experiment
+import experiments.collect_data as interpolation_experiment
 import experiments.accuracy_experiment as accuracy_experiment
 import utils.chart_drawer as accuracy_chart_drawer
 
