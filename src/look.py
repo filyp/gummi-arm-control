@@ -85,8 +85,8 @@ class PositionDetector(threading.Thread):
         choose the one with the biggest number (should be most recently added).
         """
         if self.camera_ip_and_port:
-            full_camera_address = 'http://{}/mjpegfeed'.format(self.camera_ip_and_port)
-            print('connecting to device {}'.format(full_camera_address))
+            full_camera_address = f'http://{self.camera_ip_and_port}/mjpegfeed'
+            print(f'connecting to device {full_camera_address}...')
             return cv2.VideoCapture(full_camera_address)
 
         cameras = glob.glob('/dev/video*')
@@ -95,7 +95,7 @@ class PositionDetector(threading.Thread):
 
         camera = sorted(cameras)[-1]
         device_number = int(camera[-1])
-        print('connecting to device /dev/video{}'.format(device_number))
+        print(f'connecting to device /dev/video{device_number}...')
         return cv2.VideoCapture(device_number)
 
     def find_contours(self, imgray, n):
@@ -124,6 +124,7 @@ class PositionDetector(threading.Thread):
         it means that the calculation can be out-of-date,
         so wait for new measurements.
         """
+        message_already_printed = False
         while True:
             try:
                 return calculate_angle_4_glyphs(self.glyphs['ALPHA'].get(),
@@ -131,9 +132,11 @@ class PositionDetector(threading.Thread):
                                                 self.glyphs['GAMMA'].get(),
                                                 self.glyphs['DELTA'].get())
             except TimeoutError:
-                print('getting angle timed out')
-                time.sleep(0.03)
-                continue
+                time.sleep(0.1)
+                if message_already_printed:
+                    continue
+                print('Waiting for valid position from camera...')
+                message_already_printed = True
 
     def record_glyph_coordinates(self, contours, imgray):
         for contour in contours:
@@ -163,6 +166,11 @@ class PositionDetector(threading.Thread):
             is_open, frame = camera.read()
             if not is_open:
                 raise IOError("Can't connect to camera")
+
+            # display what camera sees
+            cv2.imshow('image', frame)
+            cv2.waitKey(1)
+
             imgray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             imgray = cv2.GaussianBlur(imgray, (3, 3), 0)
             contours = self.find_contours(imgray, 100)

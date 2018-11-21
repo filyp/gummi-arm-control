@@ -6,11 +6,17 @@ import numpy as np
 
 from src import look
 from src import position_controller
+import textwrap
 
-MAX_STIFFNESS = 5
+# these values were set by playing with position_controller.manual_control
+# and seeing how the arm behaves
+MAX_STIFFNESS = 60
+MIN_STIFFNESS = -20
+
 FILENAME_BASE = '../data/interpolation/experiment'
 DELAY_BETWEEN_ITERATIONS = 3
-DETECTION_TIMEOUT = 1
+DETECTION_TIMEOUT = 0.3
+CAMERA_ADDRESS = '192.168.0.52:4747'
 
 
 def save_row(filename, row):
@@ -43,7 +49,7 @@ def experiment_iteration(controller, position_detector, filename):
     """
     while True:
         angle = int(np.random.uniform(0, controller.MAX_ANGLE))
-        stiffness = int(np.random.uniform(0, MAX_STIFFNESS))
+        stiffness = int(np.random.uniform(MIN_STIFFNESS, MAX_STIFFNESS))
         try:
             controller.send(angle, stiffness)
             break
@@ -58,14 +64,24 @@ def experiment_iteration(controller, position_detector, filename):
     save_row(filename, row)
 
 
-def start(iteration_number=400):
-    print(iteration_number)
+def start(iteration_number=10000):
     controller = position_controller.PositionController()
-    position_detector = look.PositionDetector(DETECTION_TIMEOUT)
+    position_detector = look.PositionDetector(DETECTION_TIMEOUT, CAMERA_ADDRESS)
     position_detector.start()
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    filename = '{}_{}.csv'.format(FILENAME_BASE, timestamp)
+    filename = f'{FILENAME_BASE}_{timestamp}.csv'
+
+    info = f"""
+    Number of iterations:          {iteration_number}
+    Estimated running time:        {DELAY_BETWEEN_ITERATIONS * iteration_number // 60} minutes
+    File with experiment results:  {filename}
+    
+    You can stop it manually by CTRL+C
+    Results still will be saved
+    """
+
+    print(textwrap.dedent(info))
 
     try:
         for i in range(iteration_number):
