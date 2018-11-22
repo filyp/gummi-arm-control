@@ -50,7 +50,7 @@ class PositionController:
         quarter_millis = self.MIN_MAESTRO + (self.MAX_MAESTRO - self.MIN_MAESTRO) * ratio
         return int(quarter_millis)
 
-    def send(self, arm_angle, stiffness):
+    def send(self, arm_angle, stiffness, polite=False):
         """Send given position to the arm."""
         angle1 = self.get_back_angle(arm_angle, stiffness)
         angle2 = self.get_front_angle(arm_angle, stiffness)
@@ -59,6 +59,8 @@ class PositionController:
             target2 = self.degrees_to_quarter_millis(angle2)
             self.maestro.setTarget(self.BACK_SERVO, target1)
             self.maestro.setTarget(self.FRONT_SERVO, target2)
+        elif polite:
+            print('servo command out of range')
         else:
             raise ValueError('servo command out of range')
 

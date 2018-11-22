@@ -7,6 +7,6 @@ class InterpolationPositionController:
         self.interpolator = ServoAngleInterpolator()
         self.controller = raw_controller.PositionController()
 
-    def send(self, angle, stiffness):
+    def send(self, angle, stiffness, polite=False):
         servo_angle = self.interpolator.get_servo_angle(angle, stiffness)
-        self.controller.send(servo_angle, stiffness)
+        self.controller.send(servo_angle, stiffness, polite)

@@ -17,6 +17,7 @@ scipy==1.1.0
 #serial==0.0.67
 six==1.11.0
 sortedcontainers==2.0.5
+xlib==0.21
 
 # note that pyserial and serial may conflict
 # in case of problems use only pyserial on linux and serial on mac
