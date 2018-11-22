@@ -7,7 +7,7 @@ import numpy as np
 
 from interpolation.interpolation_position_controller import InterpolationPositionController
 from src import look
-from src import position_controller
+from src import raw_controller
 
 MAX_ANGLE = 180
 FILENAME_BASE = '../data/validation/validation_experiment'
@@ -77,7 +77,7 @@ def start(configuration_string='(90, (0,3,5))'):
     print(configuration_string)
     list_of_configurations = extract_configurations_to_list(configuration_string)
     print(list_of_configurations)
-    controller = position_controller.PositionController()
+    controller = raw_controller.PositionController()
     position_detector = look.PositionDetector(1)
     position_detector.start()
 

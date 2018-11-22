@@ -5,28 +5,35 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import scipy.linalg
+import dill
+from scipy.stats import binned_statistic
 
-LOCATION = '../data/interpolation/*'
+DATA_LOCATION = 'data/interpolation/*'
+LEARNED_FUNCTION_FILE = 'data/learned_function.pickle'
 
 
 def get_default_file(location):
     datafiles = glob.glob(location)
     if not datafiles:
-        raise IOError('No datafiles found')
+        raise IOError(f'No datafiles found in {location}')
     return sorted(datafiles)[-1]
 
 
 class InterpolationExecutor:
-    def __init__(self, file_name=None):
+    def __init__(self, file_name=None, outlier_threshold=10):
         self.angle = []
         self.stiffness = []
         self.camera = []
         self.coeffs = None
 
         if not file_name:
-            file_name = get_default_file(LOCATION)
+            file_name = get_default_file(DATA_LOCATION)
 
         self.import_from_csv(file_name)
+        self.filter_outliers(outlier_threshold)
+        self.approximating_function = self.get_approximating_function()
+        with open(LEARNED_FUNCTION_FILE, 'wb') as file:
+            dill.dump(self.approximating_function, file)
 
     def import_from_csv(self, file_name):
         with open(file_name) as datafile:
@@ -39,7 +46,6 @@ class InterpolationExecutor:
                 self.angle.append(int(row['angle']))
                 self.stiffness.append(int(row['stiffness']))
                 self.camera.append(float(row['camera']))
-        self.filter_outliers(10)
 
     def get_approximating_function(self):
         # c_ method added items along second axis
@@ -77,20 +83,19 @@ class InterpolationExecutor:
 
         self.angle, self.stiffness, self.camera = np.transpose(filtered_values)
 
-    def plot(self):
+    def plot_approximating_function(self):
         x_range = np.linspace(min(self.angle), max(self.angle), 10)
         y_range = np.linspace(min(self.stiffness), max(self.stiffness), 10)
         X, Y = np.meshgrid(x_range, y_range)
 
-        approximating_function = self.get_approximating_function()
-        Z = approximating_function(X, Y)
+        Z = self.approximating_function(X, Y)
 
         # plots 3D chart
         fig = plt.figure()
         ax = fig.gca(projection='3d')
 
         ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.6)
-        ax.scatter(self.angle, self.stiffness, self.camera, c='r', marker='o')
+        ax.scatter(self.angle, self.stiffness, self.camera, c='r', s=3)
 
         plt.xlabel('servo angle')
         plt.ylabel('stiffness')
@@ -99,8 +104,36 @@ class InterpolationExecutor:
         plt.show()
         # plt.savefig('../data/interpolation_experiment.png')
 
+    def plot_errors(self):
+        predictions = self.approximating_function(self.angle, self.stiffness)
+        errors = self.camera - predictions
+
+        # plots 3D chart
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+
+        ax.scatter(self.angle, self.stiffness, errors, c='r', s=3)
+
+        plt.xlabel('servo angle')
+        plt.ylabel('stiffness')
+        ax.set_zlabel('prediction error')
+
+        plt.show()
+
+    def plot_deviations_for_given_stiffness(self, bins_number):
+        predictions = self.approximating_function(self.angle, self.stiffness)
+        squared_errors = (self.camera - predictions) ** 2
+
+        variances = binned_statistic(self.stiffness, squared_errors, bins=bins_number)[0]
+        deviations = np.sqrt(variances)
+
+        bin_range = np.linspace(min(self.stiffness), max(self.stiffness), bins_number+1)[:-1]
+        plt.plot(bin_range, deviations)
+        plt.show()
+
 
 if __name__ == '__main__':
-    ie = InterpolationExecutor()
-    ie.plot()
-
+    ie = InterpolationExecutor(outlier_threshold=10)
+    ie.plot_approximating_function()
+    ie.plot_errors()
+    ie.plot_deviations_for_given_stiffness(bins_number=10)

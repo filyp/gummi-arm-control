@@ -16,8 +16,7 @@ ${installer} python3.6-tk
 ${installer} virtualenv
 virtualenv -p python3.6 env
 source env/bin/activate
-pip install -r requirements.txt
-pip install opencv-python
+pip install -r requirements.txt     # TODO this command needs testing
 
 wget https://raw.githubusercontent.com/FRC4564/maestro/master/maestro.py
 mv maestro.py src/maestro.py

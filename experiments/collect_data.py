@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 from src import look
-from src import position_controller
+from src import raw_controller
 import textwrap
 
 # these values were set by playing with position_controller.manual_control
@@ -16,7 +16,6 @@ MIN_STIFFNESS = -20
 FILENAME_BASE = '../data/interpolation/experiment'
 DELAY_BETWEEN_ITERATIONS = 3
 DETECTION_TIMEOUT = 0.3
-CAMERA_ADDRESS = '192.168.0.52:4747'
 
 
 def save_row(filename, row):
@@ -64,17 +63,18 @@ def experiment_iteration(controller, position_detector, filename):
     save_row(filename, row)
 
 
-def start(iteration_number=10000):
-    controller = position_controller.PositionController()
-    position_detector = look.PositionDetector(DETECTION_TIMEOUT, CAMERA_ADDRESS)
+def start(running_time=2, camera_address=None):
+    controller = raw_controller.PositionController()
+    position_detector = look.PositionDetector(DETECTION_TIMEOUT, camera_address)
     position_detector.start()
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     filename = f'{FILENAME_BASE}_{timestamp}.csv'
+    iteration_number = running_time * 3600 / DELAY_BETWEEN_ITERATIONS
 
     info = f"""
     Number of iterations:          {iteration_number}
-    Estimated running time:        {DELAY_BETWEEN_ITERATIONS * iteration_number // 60} minutes
+    Estimated running time:        {running_time} hours
     File with experiment results:  {filename}
     
     You can stop it manually by CTRL+C

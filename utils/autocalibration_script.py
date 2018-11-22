@@ -45,7 +45,7 @@ try:
         print('Cannot open file')
         pass
     # plotting and saving chart
-    executor.plot()
+    executor.plot_approximating_function()
     # print("Result chart with interpolated surface in .... dir")
 
     # accuracy experiment

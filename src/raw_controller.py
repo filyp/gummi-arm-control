@@ -81,7 +81,10 @@ def manual_control():
     while True:
         angle_str, stiffness_str = input().split()
         angle, stiffness = int(angle_str), int(stiffness_str)
-        controller.send(angle, stiffness)
+        try:
+            controller.send(angle, stiffness)
+        except ValueError as e:
+            print(e)
 
 
 if __name__ == '__main__':
