@@ -3,6 +3,7 @@ from src import raw_controller
 
 
 class PositionController:
+    # TODO add config file
     def __init__(self):
         self.interpolator = ServoAngleInterpolator()
         self.controller = raw_controller.PositionController()

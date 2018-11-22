@@ -1,13 +1,15 @@
 import csv
 import glob
+import os
+import textwrap
 
+import dill
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import scipy.linalg
-import dill
-import os
 from scipy.stats import binned_statistic
+
+from experiments import collect_data
 
 DATA_LOCATION = os.path.join(os.path.dirname(__file__),
                              '../data/approximation/*')
@@ -16,10 +18,22 @@ LEARNED_FUNCTION_FILE = os.path.join(os.path.dirname(__file__),
 
 
 def get_default_file(location):
-    # TODO search for newest file (assume names can be incorrect)
+    # TODO search for newest file (assume names can be incorrect) also TEST IT
+    # maybe refactor
     datafiles = glob.glob(location)
     if not datafiles:
-        raise IOError(f'No datafiles found in {location}')
+        info = """
+            Looks like you haven't trained your arm yet.
+
+            Connect your arm and camera.
+            If you want to use remote camera type in it's address
+                example:    '192.168.0.52:4747'
+
+            If you want to use built-in or USB camera just hit enter.
+            """
+        cameara_address = input(textwrap.dedent(info))
+        collect_data.start(camera_address=cameara_address)
+        datafiles = glob.glob(location)
     return sorted(datafiles)[-1]
 
 

@@ -20,21 +20,6 @@ banner_string = 'GummiControl'
 print(figlet_format(banner_string, font='rectangles'))
 
 
-if not glob.glob(DATA_LOCATION):
-    # TODO this section needs testing
-    info = """
-    Looks like you haven't trained your arm yet.
-    
-    Connect your arm and camera.
-    If you want to use remote camera type in it's address
-        example:    '192.168.0.52:4747'
-        
-    If you want to use built-in or USB camera just hit enter.
-    """
-    cameara_address = input(textwrap.dedent(info))
-    collect_data.start(camera_address=cameara_address)
-
-
 controller = PositionController()
 
 
@@ -94,4 +79,3 @@ while True:
 
 
 # TODO better mouse range
-# TODO better out of range and connection error printing
