@@ -13,7 +13,7 @@ import textwrap
 MAX_STIFFNESS = 60
 MIN_STIFFNESS = -20
 
-FILENAME_BASE = '../data/interpolation/experiment'
+FILENAME_BASE = '../data/approximation/experiment'
 DELAY_BETWEEN_ITERATIONS = 3
 DETECTION_TIMEOUT = 0.3
 

@@ -6,20 +6,24 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import scipy.linalg
 import dill
+import os
 from scipy.stats import binned_statistic
 
-DATA_LOCATION = 'data/interpolation/*'
-LEARNED_FUNCTION_FILE = 'data/learned_function.pickle'
+DATA_LOCATION = os.path.join(os.path.dirname(__file__),
+                             '../data/approximation/*')
+LEARNED_FUNCTION_FILE = os.path.join(os.path.dirname(__file__),
+                                     '../data/learned_function.pickle')
 
 
 def get_default_file(location):
+    # TODO search for newest file (assume names can be incorrect)
     datafiles = glob.glob(location)
     if not datafiles:
         raise IOError(f'No datafiles found in {location}')
     return sorted(datafiles)[-1]
 
 
-class InterpolationExecutor:
+class ApproximationExecutor:
     def __init__(self, file_name=None, outlier_threshold=10):
         self.angle = []
         self.stiffness = []
@@ -133,7 +137,7 @@ class InterpolationExecutor:
 
 
 if __name__ == '__main__':
-    ie = InterpolationExecutor(outlier_threshold=10)
+    ie = ApproximationExecutor(outlier_threshold=10)
     ie.plot_approximating_function()
     ie.plot_errors()
     ie.plot_deviations_for_given_stiffness(bins_number=10)

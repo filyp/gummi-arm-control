@@ -5,7 +5,7 @@ import time
 
 import numpy as np
 
-from interpolation.interpolation_position_controller import InterpolationPositionController
+from approximation.position_controller import InterpolationPositionController
 from src import look
 from src import raw_controller
 

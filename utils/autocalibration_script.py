@@ -1,6 +1,6 @@
 import os
 
-from interpolation.interpolation import InterpolationExecutor
+from approximation.approximation import ApproximationExecutor
 from src.look import PositionDetector
 import experiments.collect_data as interpolation_experiment
 import experiments.accuracy_experiment as accuracy_experiment
@@ -16,31 +16,31 @@ try:
     position_detector.kill()
     position_detector.join()
 
-    # interpolation experiment
+    # approximation experiment
     # ask about custom iteration number
     try:
-        iteration_number = int(input("""If you want, put number of iterations of interpolation
+        iteration_number = int(input("""If you want, put number of iterations of approximation
         experiment. Default number is 400"""))
-        print('Started interpolation experiment with iteration number: %'.format(iteration_number))
+        print('Started approximation experiment with iteration number: %'.format(iteration_number))
         interpolation_experiment.start(iteration_number=iteration_number)
     except ValueError:
-        print('Started interpolation experiment with default iteration number')
+        print('Started approximation experiment with default iteration number')
         interpolation_experiment.start()
         pass
 
     print("Experiment finished. Results in data dir")
 
-    # drawing interpolation data
-    # ask about source interpolation data file
+    # drawing approximation data
+    # ask about source approximation data file
     executor = None
     try:
-        file_name = input("""Put interpolation data .csv file name from data/interpolation dir. 
+        file_name = input("""Put approximation data .csv file name from data/approximation dir. 
         Default is the latest one""")
-        if os.path.isfile('../data/interpolation/' + file_name):
-            executor = InterpolationExecutor(file_name)
+        if os.path.isfile('../data/approximation/' + file_name):
+            executor = ApproximationExecutor(file_name)
         else:
-            print('Used default interpolation data .csv file')
-            executor = InterpolationExecutor()
+            print('Used default approximation data .csv file')
+            executor = ApproximationExecutor()
     except IOError:
         print('Cannot open file')
         pass
@@ -57,7 +57,7 @@ try:
         if configuration_string != '':
             accuracy_experiment.start(configuration_string=configuration_string)
         else:
-            print('Started examining interpolation accuracy with default configuration')
+            print('Started examining approximation accuracy with default configuration')
             accuracy_experiment.start()
     except IOError:
         print('Error while getting configuration string')

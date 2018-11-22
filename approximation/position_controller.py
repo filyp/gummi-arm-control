@@ -1,4 +1,4 @@
-from interpolation.servo_angle_interpolator import ServoAngleInterpolator
+from approximation.servo_angle_interpolator import ServoAngleInterpolator
 from src import raw_controller
 
 

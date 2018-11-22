@@ -7,8 +7,8 @@ from Xlib import display
 from scipy.interpolate import interp1d
 
 from experiments import collect_data
-from interpolation.interpolation import DATA_LOCATION
-from interpolation.interpolation_position_controller import InterpolationPositionController
+from approximation.approximation import DATA_LOCATION
+from approximation.position_controller import InterpolationPositionController
 
 banner_string = 'GummiControl'
 try:
@@ -60,7 +60,7 @@ while True:
         mouse_control()
     try:
         angle_str, stiffness_str = cmd.split()
-        angle, stiffness = int(angle_str), int(stiffness_str)
+        angle, stiffness = float(angle_str), float(stiffness_str)
         controller.send(angle, stiffness, polite=True)
     except ValueError:
         help_string = f"""
@@ -73,3 +73,8 @@ while True:
         To turn on mouse control press 'm'
         """
         print(textwrap.dedent(help_string))
+
+
+# TODO better mouse range
+# TODO better out of range and connection error printing
+# TODO quitting mouse mode
