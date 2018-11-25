@@ -3,7 +3,6 @@
 # shebang for virtualenv execution from any location
 # credit: stackoverflow.com/questions/20095351
 
-import glob
 import textwrap
 from time import time, sleep
 
@@ -11,11 +10,8 @@ from Xlib.display import Display
 from pyfiglet import figlet_format
 from scipy.interpolate import interp1d
 
-from approximation.approximation import DATA_LOCATION
-from approximation.position_controller import PositionController
-from experiments import collect_data
-from src.raw_controller import OutOfRangeError
-
+from position_control.position_controller import PositionController
+from position_control.raw_controller import OutOfRangeError
 
 banner_string = 'GummiControl'
 print(figlet_format(banner_string, font='rectangles'))
@@ -78,7 +74,6 @@ help_string = f"""
     """
 
 if __name__ == '__main__':
-
     controller = PositionController()
     mouse_handler = MouseHandler()
 

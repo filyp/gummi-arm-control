@@ -5,16 +5,11 @@ based on
 rdmilligan.wordpress.com/2015/07/19/glyph-recognition-using-opencv-and-python/
 """
 
-
-import os
-# print(cv2.getBuildInformation())
-
-import cv2
 import threading
 import time
 import glob
 
-from src.look_helpers import *
+from position_detection.position_detector_helpers import *
 
 # tweak these
 EDGE_LOWER_THRESHOLD = 30
@@ -83,6 +78,9 @@ class PositionDetector(threading.Thread):
         Otherwise, look for cameras in /dev/video*.
         If more than one camera can be found,
         choose the one with the biggest number (should be most recently added).
+
+        Raises:
+            IOError:    if no camera was found
         """
         if self.camera_ip_and_port:
             full_camera_address = f'http://{self.camera_ip_and_port}/mjpegfeed'

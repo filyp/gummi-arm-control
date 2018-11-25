@@ -5,9 +5,9 @@ import time
 
 import numpy as np
 
-from approximation.position_controller import PositionController
-from src import look
-from src import raw_controller
+from position_control.position_controller import PositionController
+from position_detection.position_detector import PositionDetector
+from position_control import raw_controller
 
 MAX_ANGLE = 180
 FILENAME_BASE = '../data/validation/validation_experiment'
@@ -78,7 +78,7 @@ def start(configuration_string='(90, (0,3,5))'):
     list_of_configurations = extract_configurations_to_list(configuration_string)
     print(list_of_configurations)
     controller = raw_controller.RawController()
-    position_detector = look.PositionDetector(1)
+    position_detector = PositionDetector(1)
     position_detector.start()
 
     interpolation_controller = PositionController()

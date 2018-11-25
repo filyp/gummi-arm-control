@@ -1,4 +1,4 @@
-from src import maestro
+from position_control import maestro
 
 
 class OutOfRangeError(ValueError):

@@ -1,10 +1,10 @@
 import os
 
-from approximation.approximation import ApproximationExecutor
-from src.look import PositionDetector
-import experiments.collect_data as interpolation_experiment
-import experiments.accuracy_experiment as accuracy_experiment
-import utils.chart_drawer as accuracy_chart_drawer
+from calibration.approximation import ApproximatingFunctionFinder
+from position_detection.position_detector import PositionDetector
+import calibration.collect_data as interpolation_experiment
+import benchmark.accuracy_experiment as accuracy_experiment
+import benchmark.chart_drawer as accuracy_chart_drawer
 
 # TODO change to only testing script, without auto calibration
 
@@ -39,10 +39,10 @@ try:
         file_name = input("""Put approximation data .csv file name from data/approximation dir. 
         Default is the latest one""")
         if os.path.isfile('../data/approximation/' + file_name):
-            executor = ApproximationExecutor(file_name)
+            executor = ApproximatingFunctionFinder(file_name)
         else:
             print('Used default approximation data .csv file')
-            executor = ApproximationExecutor()
+            executor = ApproximatingFunctionFinder()
     except IOError:
         print('Cannot open file')
         pass

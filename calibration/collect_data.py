@@ -4,8 +4,7 @@ import time
 
 import numpy as np
 
-from src import look
-from src import raw_controller
+from position_control import raw_controller
 import textwrap
 
 # these values were set by playing with position_controller.manual_control
@@ -65,7 +64,7 @@ def experiment_iteration(controller, position_detector, filename):
 
 def start(running_time=2, camera_address=None):
     controller = raw_controller.RawController()
-    position_detector = look.PositionDetector(DETECTION_TIMEOUT, camera_address)
+    position_detector = position_detector.PositionDetector(DETECTION_TIMEOUT, camera_address)
     position_detector.start()
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")

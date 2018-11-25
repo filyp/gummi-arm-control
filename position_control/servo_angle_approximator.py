@@ -4,16 +4,16 @@ import dill
 import numpy as np
 import scipy.optimize
 
-from approximation import approximation
+from calibration import approximation
 
 
-class ServoAngleInterpolator:
+class ServoAngleApproximator:
     def __init__(self):
-        if not os.path.isfile(approximation.LEARNED_FUNCTION_FILE):
+        if not os.path.isfile(approximation.APPROXIMATING_FUNCTION_FILE):
             print('Training arm on collected values...')
-            approximation.ApproximationExecutor()
+            approximation.ApproximatingFunctionFinder()
 
-        with open(approximation.LEARNED_FUNCTION_FILE, 'rb') as file:
+        with open(approximation.APPROXIMATING_FUNCTION_FILE, 'rb') as file:
             self.f = dill.load(file)
 
     def get_servo_angle(self, result_angle, stiffness):

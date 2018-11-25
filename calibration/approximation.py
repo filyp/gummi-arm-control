@@ -9,12 +9,12 @@ import numpy as np
 import scipy.linalg
 from scipy.stats import binned_statistic
 
-from experiments import collect_data
+from calibration import collect_data
 
 DATA_LOCATION = os.path.join(os.path.dirname(__file__),
                              '../data/approximation/*')
-LEARNED_FUNCTION_FILE = os.path.join(os.path.dirname(__file__),
-                                     '../data/learned_function.pickle')
+APPROXIMATING_FUNCTION_FILE = os.path.join(os.path.dirname(__file__),
+                                           '../data/approximating_function.pickle')
 
 
 def get_default_file(location):
@@ -37,7 +37,7 @@ def get_default_file(location):
     return sorted(datafiles)[-1]
 
 
-class ApproximationExecutor:
+class ApproximatingFunctionFinder:
     def __init__(self, file_name=get_default_file(DATA_LOCATION), outlier_threshold=10):
         self.angle = []
         self.stiffness = []
@@ -48,7 +48,7 @@ class ApproximationExecutor:
         self.filter_outliers(outlier_threshold)
 
         self.approximating_function = self.get_approximating_function()
-        with open(LEARNED_FUNCTION_FILE, 'wb') as file:
+        with open(APPROXIMATING_FUNCTION_FILE, 'wb') as file:
             dill.dump(self.approximating_function, file)
 
     def import_from_csv(self, file_name):
@@ -149,7 +149,7 @@ class ApproximationExecutor:
 
 
 if __name__ == '__main__':
-    ie = ApproximationExecutor(outlier_threshold=10)
+    ie = ApproximatingFunctionFinder(outlier_threshold=10)
     ie.plot_approximating_function()
     ie.plot_errors()
     ie.plot_deviations_for_given_stiffness(bins_number=10)
