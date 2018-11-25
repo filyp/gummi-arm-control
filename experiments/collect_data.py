@@ -13,7 +13,7 @@ import textwrap
 MAX_STIFFNESS = 60
 MIN_STIFFNESS = -20
 
-FILENAME_BASE = '../data/approximation/experiment'
+FILENAME_BASE = '../data/approximation/experiment'  # TODO change to absolute path
 DELAY_BETWEEN_ITERATIONS = 3
 DETECTION_TIMEOUT = 0.3
 
@@ -62,14 +62,15 @@ def experiment_iteration(controller, position_detector, filename):
     row = [angle, stiffness, angle_from_camera]
     save_row(filename, row)
 
+
 def start(running_time=2, camera_address=None):
-    controller = raw_controller.PositionController()
+    controller = raw_controller.RawController()
     position_detector = look.PositionDetector(DETECTION_TIMEOUT, camera_address)
     position_detector.start()
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     filename = f'{FILENAME_BASE}_{timestamp}.csv'
-    iteration_number = running_time * 3600 / DELAY_BETWEEN_ITERATIONS
+    iteration_number = running_time * 3600 // DELAY_BETWEEN_ITERATIONS
 
     info = f"""
     Number of iterations:          {iteration_number}

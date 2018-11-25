@@ -6,6 +6,8 @@ import experiments.collect_data as interpolation_experiment
 import experiments.accuracy_experiment as accuracy_experiment
 import utils.chart_drawer as accuracy_chart_drawer
 
+# TODO change to only testing script, without auto calibration
+
 print("welcome in  auto-calibration mode. Please, enjoy your arm!")
 print("""Put camera in front of arm's glyphs and make sure that all four glyphs in max/min arm position are visible""")
 

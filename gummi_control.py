@@ -14,6 +14,7 @@ from scipy.interpolate import interp1d
 from approximation.approximation import DATA_LOCATION
 from approximation.position_controller import PositionController
 from experiments import collect_data
+from src.raw_controller import OutOfRangeError
 
 
 banner_string = 'GummiControl'
@@ -31,32 +32,37 @@ class MouseHandler:
         self.angle_mapper = interp1d([0, screen_width],
                                      [min_angle, max_angle])
 
+        self.last_command = None
+        self.last_update_time = None
+
     def get_cmd_from_mouse_position(self):
         qp = self.root.query_pointer()
         angle = self.angle_mapper(qp.root_x)
         stiffness = self.stiffness_mapper(qp.root_y)
-        return angle, stiffness
+
+        if [angle, stiffness] != self.last_command:
+            position_changed = True
+            self.last_command = [angle, stiffness]
+            self.last_update_time = time()
+        else:
+            position_changed = False
+        return angle, stiffness, position_changed
 
     def continuous_control(self, controller, timeout=float('inf')):
-        last_cmd = None
-        last_update_time = time()
-        while time() - last_update_time < timeout:
+        self.last_update_time = time()
+        while time() - self.last_update_time < timeout:
             sleep(0.001)
-            cmd = self.get_cmd_from_mouse_position()
-            if cmd == last_cmd:
+            angle, stiffness, position_changed = self.get_cmd_from_mouse_position()
+            if not position_changed:
                 continue
-            last_cmd = cmd
-            last_update_time = time()
-            angle, stiffness = cmd
             try:
                 controller.send(angle, stiffness)
                 print(f'angle: {angle:3.0f}   stiffness: {stiffness:3.0f}')
-            except ValueError as err:
-                print(err)
+            except OutOfRangeError:
+                print('servo out of range')
 
 
-if __name__ == '__main__':
-    help_string = f"""
+help_string = f"""
     Type commands that will be sent to the arm:
         command:     "<angle> <stiffness>"
         for example: "120 10"
@@ -70,28 +76,35 @@ if __name__ == '__main__':
     Quit:
         press 'q'
     """
+
+if __name__ == '__main__':
+
     controller = PositionController()
     mouse_handler = MouseHandler()
-    while True:
-        cmd = input()
 
-        if cmd == 'q':
+    while True:
+        line = input()
+
+        if line == 'q':
             exit()
-        if cmd == 'm':
+        if line == 'm':
             try:
-                mouse_handler.continuous_control(controller, timeout=10)
+                mouse_handler.continuous_control(controller)
             except KeyboardInterrupt:
                 pass
             print('\nQuited mouse mode')
             continue
 
+        # parse
         try:
-            angle_str, stiffness_str = cmd.split()
+            angle_str, stiffness_str = line.split()
             angle, stiffness = float(angle_str), float(stiffness_str)
         except ValueError:
             print(textwrap.dedent(help_string))
             continue
+
+        # send
         try:
             controller.send(angle, stiffness)
-        except ValueError as err:
-            print(err)
+        except OutOfRangeError:
+            print('servo out of range')

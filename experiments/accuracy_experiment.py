@@ -77,7 +77,7 @@ def start(configuration_string='(90, (0,3,5))'):
     print(configuration_string)
     list_of_configurations = extract_configurations_to_list(configuration_string)
     print(list_of_configurations)
-    controller = raw_controller.PositionController()
+    controller = raw_controller.RawController()
     position_detector = look.PositionDetector(1)
     position_detector.start()
 
