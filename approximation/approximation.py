@@ -31,24 +31,22 @@ def get_default_file(location):
 
             If you want to use built-in or USB camera just hit enter.
             """
-        cameara_address = input(textwrap.dedent(info))
-        collect_data.start(camera_address=cameara_address)
+        camera_address = input(textwrap.dedent(info))
+        collect_data.start(camera_address=camera_address)
         datafiles = glob.glob(location)
     return sorted(datafiles)[-1]
 
 
 class ApproximationExecutor:
-    def __init__(self, file_name=None, outlier_threshold=10):
+    def __init__(self, file_name=get_default_file(DATA_LOCATION), outlier_threshold=10):
         self.angle = []
         self.stiffness = []
         self.camera = []
         self.coeffs = None
 
-        if not file_name:
-            file_name = get_default_file(DATA_LOCATION)
-
         self.import_from_csv(file_name)
         self.filter_outliers(outlier_threshold)
+
         self.approximating_function = self.get_approximating_function()
         with open(LEARNED_FUNCTION_FILE, 'wb') as file:
             dill.dump(self.approximating_function, file)

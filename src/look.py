@@ -57,7 +57,7 @@ class TimingOut:
             raise TimeoutError('Variable timed out')
         return self._value
 
-
+# TODO camera address in config file. Default build-in
 class PositionDetector(threading.Thread):
     """
     Connect camera
@@ -103,7 +103,7 @@ class PositionDetector(threading.Thread):
 
         Contours are found using Canny algorithm.
 
-        Args:
+        Args:,
             imgray: grayscale image
             n: number of contours to find
 

@@ -62,7 +62,6 @@ def experiment_iteration(controller, position_detector, filename):
     row = [angle, stiffness, angle_from_camera]
     save_row(filename, row)
 
-
 def start(running_time=2, camera_address=None):
     controller = raw_controller.PositionController()
     position_detector = look.PositionDetector(DETECTION_TIMEOUT, camera_address)
