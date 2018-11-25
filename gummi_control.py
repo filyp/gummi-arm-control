@@ -5,9 +5,9 @@
 
 import glob
 import textwrap
-import time
+from time import time, sleep
 
-from Xlib import display
+from Xlib.display import Display
 from pyfiglet import figlet_format
 from scipy.interpolate import interp1d
 
@@ -20,62 +20,78 @@ banner_string = 'GummiControl'
 print(figlet_format(banner_string, font='rectangles'))
 
 
-controller = PositionController()
+class MouseHandler:
+    def __init__(self, min_angle=50, max_angle=180):
+        self.root = Display().screen().root
+        screen_width = self.root.get_geometry().width
+        screen_height = self.root.get_geometry().height
 
+        self.stiffness_mapper = interp1d([0, screen_height],
+                                         [50, -30])
+        self.angle_mapper = interp1d([0, screen_width],
+                                     [min_angle, max_angle])
 
-def mouse_control():
-    try:
-        root = display.Display().screen().root
-        screen_width = root.get_geometry().width
-        screen_height = root.get_geometry().height
-        stiffness_mapper = interp1d([0, screen_height], [50, -30])
-        angle_mapper = interp1d([0, screen_width], [0, 180])
-        while True:
-            qp = root.query_pointer()
-            angle = angle_mapper(qp.root_x)
-            stiffness = stiffness_mapper(qp.root_y)
+    def get_cmd_from_mouse_position(self):
+        qp = self.root.query_pointer()
+        angle = self.angle_mapper(qp.root_x)
+        stiffness = self.stiffness_mapper(qp.root_y)
+        return angle, stiffness
+
+    def continuous_control(self, controller, timeout=float('inf')):
+        last_cmd = None
+        last_update_time = time()
+        while time() - last_update_time < timeout:
+            sleep(0.001)
+            cmd = self.get_cmd_from_mouse_position()
+            if cmd == last_cmd:
+                continue
+            last_cmd = cmd
+            last_update_time = time()
+            angle, stiffness = cmd
             try:
                 controller.send(angle, stiffness)
                 print(f'angle: {angle:3.0f}   stiffness: {stiffness:3.0f}')
             except ValueError as err:
                 print(err)
-            time.sleep(0.001)
-    except KeyboardInterrupt:
-        print('\nQuited mouse mode')
 
 
-while True:
-    cmd = input()
+if __name__ == '__main__':
+    help_string = f"""
+    Type commands that will be sent to the arm:
+        command:     "<angle> <stiffness>"
+        for example: "120 10"
 
-    if cmd == 'q':
-        exit()
-    if cmd == 'm':
-        mouse_control()
-        continue
-    try:
-        angle_str, stiffness_str = cmd.split()
-        angle, stiffness = float(angle_str), float(stiffness_str)
-    except ValueError:
-        help_string = f"""
-        Type commands that will be sent to the arm:
-            command:     "<angle> <stiffness>"
-            for example: "120 10"
-        
-        Mouse control:
-            press 'm' to turn on
-            CTRL+C to turn off
-            move mouse left-right to control arm position
-            move mouse up-down to control arm stiffness
-        
-        Quit:
-            press 'q'
-        """
-        print(textwrap.dedent(help_string))
-        continue
-    try:
-        controller.send(angle, stiffness)
-    except ValueError as err:
-        print(err)
+    Mouse control:
+        press 'm' to turn on
+        CTRL+C to turn off
+        move mouse left-right to control arm position
+        move mouse up-down to control arm stiffness
 
+    Quit:
+        press 'q'
+    """
+    controller = PositionController()
+    mouse_handler = MouseHandler()
+    while True:
+        cmd = input()
 
-# TODO better mouse range
+        if cmd == 'q':
+            exit()
+        if cmd == 'm':
+            try:
+                mouse_handler.continuous_control(controller, timeout=10)
+            except KeyboardInterrupt:
+                pass
+            print('\nQuited mouse mode')
+            continue
+
+        try:
+            angle_str, stiffness_str = cmd.split()
+            angle, stiffness = float(angle_str), float(stiffness_str)
+        except ValueError:
+            print(textwrap.dedent(help_string))
+            continue
+        try:
+            controller.send(angle, stiffness)
+        except ValueError as err:
+            print(err)
