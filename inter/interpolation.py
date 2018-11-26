@@ -91,3 +91,6 @@ class InterpolationExecutor:
         plt.show()
         # plt.savefig('../data/interpolation_experiment.png')
 
+
+executor = InterpolationExecutor()
+executor.plot()
