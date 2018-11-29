@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os  # os module imported here
 
-location = '../data/validation'
+location = '../../../../data/approximation/validation'
 
 
 def create_files_list():

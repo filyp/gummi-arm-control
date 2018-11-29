@@ -49,7 +49,7 @@ try:
     # plotting and saving chart
     executor.plot_approximating_function()
     # print("Result chart with interpolated surface in .... dir")
-
+##############################################################################################################################
     # accuracy experiment
     try:
         configuration_string = input("""If you want, put array of tuples of accuracy test data 

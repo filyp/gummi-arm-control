@@ -5,6 +5,7 @@ import time
 import numpy as np
 
 from src.control import raw_controller
+from src.position_detection import position_detector as pd
 import textwrap
 
 # these values were set by playing with position_controller.manual_control
@@ -12,7 +13,7 @@ import textwrap
 MAX_STIFFNESS = 60
 MIN_STIFFNESS = -20
 
-FILENAME_BASE = '../data/data_for_approximation/experiment'  # TODO change to absolute path
+FILENAME_BASE = '../../../data/data_for_approximation/experiment'  # TODO change to absolute path
 DELAY_BETWEEN_ITERATIONS = 3
 DETECTION_TIMEOUT = 0.3
 
@@ -64,7 +65,7 @@ def experiment_iteration(controller, position_detector, filename):
 
 def start(running_time=2, camera_address=None):
     controller = raw_controller.RawController()
-    position_detector = position_detector.PositionDetector(DETECTION_TIMEOUT, camera_address)
+    position_detector = pd.PositionDetector(DETECTION_TIMEOUT, camera_address)
     position_detector.start()
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
