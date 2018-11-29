@@ -1,10 +1,10 @@
 import os
 
-from calibration.approximation import ApproximatingFunctionFinder
-from position_detection.position_detector import PositionDetector
-import calibration.collect_data as interpolation_experiment
-import benchmark.accuracy_experiment as accuracy_experiment
-import benchmark.chart_drawer as accuracy_chart_drawer
+from src.control.approximation.approximation import ApproximatingFunctionFinder
+from src.position_detection.position_detector import PositionDetector
+import src.benchmark.collect_data_for_approximation as interpolation_experiment
+import src.benchmark.accuracy_experiment as accuracy_experiment
+import src.benchmark.test_utils.accuracy_chart_drawer as accuracy_chart_drawer
 
 # TODO change to only testing script, without auto calibration
 
@@ -18,30 +18,30 @@ try:
     position_detector.kill()
     position_detector.join()
 
-    # approximation experiment
+    # data_for_approximation experiment
     # ask about custom iteration number
     try:
-        iteration_number = int(input("""If you want, put number of iterations of approximation
+        iteration_number = int(input("""If you want, put number of iterations of data_for_approximation
         experiment. Default number is 400"""))
-        print('Started approximation experiment with iteration number: %'.format(iteration_number))
+        print('Started data_for_approximation experiment with iteration number: %'.format(iteration_number))
         interpolation_experiment.start(iteration_number=iteration_number)
     except ValueError:
-        print('Started approximation experiment with default iteration number')
+        print('Started data_for_approximation experiment with default iteration number')
         interpolation_experiment.start()
         pass
 
     print("Experiment finished. Results in data dir")
 
-    # drawing approximation data
-    # ask about source approximation data file
+    # drawing data_for_approximation data
+    # ask about source data_for_approximation data file
     executor = None
     try:
-        file_name = input("""Put approximation data .csv file name from data/approximation dir. 
+        file_name = input("""Put data_for_approximation data .csv file name from data/data_for_approximation dir. 
         Default is the latest one""")
-        if os.path.isfile('../data/approximation/' + file_name):
+        if os.path.isfile('../data/data_for_approximation/' + file_name):
             executor = ApproximatingFunctionFinder(file_name)
         else:
-            print('Used default approximation data .csv file')
+            print('Used default data_for_approximation data .csv file')
             executor = ApproximatingFunctionFinder()
     except IOError:
         print('Cannot open file')
@@ -59,7 +59,7 @@ try:
         if configuration_string != '':
             accuracy_experiment.start(configuration_string=configuration_string)
         else:
-            print('Started examining approximation accuracy with default configuration')
+            print('Started examining data_for_approximation accuracy with default configuration')
             accuracy_experiment.start()
     except IOError:
         print('Error while getting configuration string')

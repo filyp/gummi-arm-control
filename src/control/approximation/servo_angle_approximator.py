@@ -4,7 +4,7 @@ import dill
 import numpy as np
 import scipy.optimize
 
-from calibration import approximation
+from src.control.approximation import approximation
 
 
 class ServoAngleApproximator:

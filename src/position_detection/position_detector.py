@@ -9,7 +9,7 @@ import threading
 import time
 import glob
 
-from position_detection.position_detector_helpers import *
+from src.position_detection.position_detector_helpers import *
 
 # tweak these
 EDGE_LOWER_THRESHOLD = 30

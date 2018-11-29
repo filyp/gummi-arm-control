@@ -9,10 +9,10 @@ import numpy as np
 import scipy.linalg
 from scipy.stats import binned_statistic
 
-from calibration import collect_data
+from src.benchmark import collect_data_for_approximation
 
 DATA_LOCATION = os.path.join(os.path.dirname(__file__),
-                             '../data/approximation/*')
+                             '../data/data_for_approximation/*')
 APPROXIMATING_FUNCTION_FILE = os.path.join(os.path.dirname(__file__),
                                            '../data/approximating_function.pickle')
 
@@ -32,7 +32,7 @@ def get_default_file(location):
             If you want to use built-in or USB camera just hit enter.
             """
         camera_address = input(textwrap.dedent(info))
-        collect_data.start(camera_address=camera_address)
+        collect_data_for_approximation.start(camera_address=camera_address)
         datafiles = glob.glob(location)
     return sorted(datafiles)[-1]
 

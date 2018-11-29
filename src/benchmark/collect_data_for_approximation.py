@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 
-from position_control import raw_controller
+from src.control import raw_controller
 import textwrap
 
 # these values were set by playing with position_controller.manual_control
@@ -12,7 +12,7 @@ import textwrap
 MAX_STIFFNESS = 60
 MIN_STIFFNESS = -20
 
-FILENAME_BASE = '../data/approximation/experiment'  # TODO change to absolute path
+FILENAME_BASE = '../data/data_for_approximation/experiment'  # TODO change to absolute path
 DELAY_BETWEEN_ITERATIONS = 3
 DETECTION_TIMEOUT = 0.3
 

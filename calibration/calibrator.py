@@ -1,3 +1,0 @@
-
-class Calibrator:
-    pass

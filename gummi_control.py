@@ -10,8 +10,8 @@ from Xlib.display import Display
 from pyfiglet import figlet_format
 from scipy.interpolate import interp1d
 
-from position_control.position_controller import PositionController
-from position_control.raw_controller import OutOfRangeError
+from src.control.position_controller import PositionController
+from src.control.raw_controller import OutOfRangeError
 
 banner_string = 'GummiControl'
 print(figlet_format(banner_string, font='rectangles'))

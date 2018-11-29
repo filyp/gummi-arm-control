@@ -1,5 +1,5 @@
-from position_control.servo_angle_approximator import ServoAngleApproximator
-from position_control.raw_controller import RawController
+from src.control.approximation.servo_angle_approximator import ServoAngleApproximator
+from src.control.raw_controller import RawController
 from calibration.calibrator import Calibrator
 
 

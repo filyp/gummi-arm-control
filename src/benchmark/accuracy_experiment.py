@@ -5,9 +5,9 @@ import time
 
 import numpy as np
 
-from position_control.position_controller import PositionController
-from position_detection.position_detector import PositionDetector
-from position_control import raw_controller
+from src.control.position_controller import PositionController
+from src.position_detection.position_detector import PositionDetector
+from src.control import raw_controller
 
 MAX_ANGLE = 180
 FILENAME_BASE = '../data/validation/validation_experiment'
