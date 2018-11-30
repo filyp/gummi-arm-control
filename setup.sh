@@ -19,7 +19,8 @@ source env/bin/activate
 pip install -r requirements.txt
 
 wget https://raw.githubusercontent.com/FRC4564/maestro/master/maestro.py
-mv maestro.py src/maestro.py
-# remember to set pololu to "USB Dual Port" serial mode
+mv maestro.py src/control/maestro.py
+#
 
 echo 'Installed successfully'
+echo "Remember to set Pololu to 'USB Dual Port' serial mode"
