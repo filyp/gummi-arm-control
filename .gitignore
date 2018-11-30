@@ -1,2 +1,4 @@
+.idea
+__pycache__
 env
-scr/control/maestro.py
+src/control/maestro.py
