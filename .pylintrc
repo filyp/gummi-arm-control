@@ -1,7 +1,8 @@
-# [MESSAGES CONTROL]
-#
+[MESSAGES CONTROL]
 # disable=invalid-name
 
 [FORMAT]
-
 good-names=i1,i2,ax
+
+[REPORTS]
+msg-template={abspath}:{line}:{column} [{msg_id}({symbol}), {obj}] {msg}
