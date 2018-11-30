@@ -20,7 +20,8 @@ pip install -r requirements.txt
 
 wget https://raw.githubusercontent.com/FRC4564/maestro/master/maestro.py
 mv maestro.py src/control/maestro.py
-#
 
 echo 'Installed successfully'
-echo "Remember to set Pololu to 'USB Dual Port' serial mode"
+
+YELLOW='\033[0;31m'
+echo -e "${YELLOW}Remember to set Pololu to 'USB Dual Port' serial mode"
