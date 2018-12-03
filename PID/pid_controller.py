@@ -7,9 +7,9 @@ class PIDController:
         self.position_detector = position_detector
         self.raw_controller = raw_controller
 
-    def control(self, target_angle, current_servo_angle, stiffness):
+    def control(self, target_angle, starting_servo_angle, stiffness):
         self.pid.set_point(target_angle)
-
+        current_servo_angle = starting_servo_angle
         while True:
             current_angle = self.position_detector.get_angle()
             delta_angle = self.pid.update(current_angle)
