@@ -2,7 +2,7 @@ import os
 
 from src.control.approximation.approximation import ApproximatingFunctionFinder
 from src.position_detection.position_detector import PositionDetector
-import src.benchmark.collect_data_for_approximation as interpolation_experiment
+import src.benchmark.collect_data_for_approximation as approximation_experiment
 import src.benchmark.accuracy_experiment as accuracy_experiment
 import src.benchmark.test_utils.accuracy_chart_drawer as accuracy_chart_drawer
 
@@ -19,15 +19,14 @@ try:
     position_detector.join()
 
     # data_for_approximation experiment
-    # ask about custom iteration number
+    # ask about custom duration of experiment
     try:
-        iteration_number = int(input("""If you want, put number of iterations of data_for_approximation
-        experiment. Default number is 400"""))
-        print('Started data_for_approximation experiment with iteration number: %'.format(iteration_number))
-        interpolation_experiment.start(iteration_number=iteration_number)
+        duration = int(input("""Put experiment duration in seconds. Default is 2"""))
+        print('Started data_for_approximation experiment with duration: %'.format(duration))
+        approximation_experiment.start()
     except ValueError:
         print('Started data_for_approximation experiment with default iteration number')
-        interpolation_experiment.start()
+        approximation_experiment.start()
         pass
 
     print("Experiment finished. Results in data dir")
@@ -36,8 +35,10 @@ try:
     # ask about source data_for_approximation data file
     executor = None
     try:
-        file_name = input("""Put data_for_approximation data .csv file name from data/data_for_approximation dir. 
+        file_name = input("""For drawing put data .csv filename from data/approximation/data_for_approximation dir. 
         Default is the latest one""")
+
+        # TODO change path
         if os.path.isfile('../data/data_for_approximation/' + file_name):
             executor = ApproximatingFunctionFinder(file_name)
         else:
