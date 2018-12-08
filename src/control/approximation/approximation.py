@@ -9,8 +9,6 @@ import numpy as np
 import scipy.linalg
 from scipy.stats import binned_statistic
 
-from src.benchmark import collect_data_for_approximation
-
 DATA_LOCATION = os.path.join(os.path.dirname(__file__),
                              '../data/data_for_approximation/*')
 APPROXIMATING_FUNCTION_FILE = os.path.join(os.path.dirname(__file__),
@@ -21,19 +19,7 @@ def get_default_file(location):
     # TODO search for newest file (assume names can be incorrect) also TEST IT
     # maybe refactor
     datafiles = glob.glob(location)
-    if not datafiles:
-        info = """
-            Looks like you haven't trained your arm yet.
 
-            Connect your arm and camera.
-            If you want to use remote camera type in it's address
-                example:    '192.168.0.52:4747'
-
-            If you want to use built-in or USB camera just hit enter.
-            """
-        camera_address = input(textwrap.dedent(info))
-        collect_data_for_approximation.start(camera_address=camera_address)
-        datafiles = glob.glob(location)
     return sorted(datafiles)[-1]
 
 

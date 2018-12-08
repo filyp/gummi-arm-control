@@ -52,6 +52,7 @@ class TimingOut:
             raise TimeoutError('Variable timed out')
         return self._value
 
+
 # TODO camera address in config file. Default build-in
 class PositionDetector(threading.Thread):
     """
