@@ -10,11 +10,8 @@ import scipy.linalg
 from scipy.stats import binned_statistic
 
 from src.benchmark import collect_data_for_approximation
-
-DATA_LOCATION = os.path.join(os.path.dirname(__file__),
-                             '../data/data_for_approximation/*')
-APPROXIMATING_FUNCTION_FILE = os.path.join(os.path.dirname(__file__),
-                                           '../data/approximating_function.pickle')
+from src.constants import DATA_FOR_APPROXIMATION, \
+    DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS
 
 
 def get_default_file(location):
@@ -38,7 +35,7 @@ def get_default_file(location):
 
 
 class ApproximatingFunctionFinder:
-    def __init__(self, file_name=get_default_file(DATA_LOCATION), outlier_threshold=10):
+    def __init__(self, file_name=get_default_file(DATA_FOR_APPROXIMATION), outlier_threshold=10):
         self.angle = []
         self.stiffness = []
         self.camera = []
@@ -48,7 +45,11 @@ class ApproximatingFunctionFinder:
         self.filter_outliers(outlier_threshold)
 
         self.approximating_function = self.get_approximating_function()
-        with open(APPROXIMATING_FUNCTION_FILE, 'wb') as file:
+        self.save_function_to_file(DEFAULT_FUNCTION)
+
+    def save_function_to_file(self, filename):
+        absolute_filename = os.path.join(APPROXIMATING_FUNCTIONS, filename)
+        with open(absolute_filename, 'wb') as file:
             dill.dump(self.approximating_function, file)
 
     def import_from_csv(self, file_name):
@@ -99,6 +100,7 @@ class ApproximatingFunctionFinder:
 
         self.angle, self.stiffness, self.camera = np.transpose(filtered_values)
 
+    # TODO move plotting functions somewhere else
     def plot_approximating_function(self):
         x_range = np.linspace(min(self.angle), max(self.angle), 10)
         y_range = np.linspace(min(self.stiffness), max(self.stiffness), 10)

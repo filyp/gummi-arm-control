@@ -1,12 +1,9 @@
 import os
 
-from src.control.approximation.approximation import ApproximatingFunctionFinder
+from src.control.approximation.approximation_finder import ApproximatingFunctionFinder
 from src.position_detection.position_detector import PositionDetector
 import src.benchmark.collect_data_for_approximation as interpolation_experiment
-import src.benchmark.accuracy_experiment as accuracy_experiment
-import src.benchmark.test_utils.accuracy_chart_drawer as accuracy_chart_drawer
 
-# TODO change to only testing script, without auto calibration
 
 print("welcome in  auto-calibration mode. Please, enjoy your arm!")
 print("""Put camera in front of arm's glyphs and make sure that all four glyphs in max/min arm position are visible""")
@@ -48,29 +45,6 @@ try:
         pass
     # plotting and saving chart
     executor.plot_approximating_function()
-    # print("Result chart with interpolated surface in .... dir")
-##############################################################################################################################
-    # accuracy experiment
-    try:
-        configuration_string = input("""If you want, put array of tuples of accuracy test data 
-        (examine_angle_1, (examine_stiffness_1, examine_stiffness_2)),
-        (examine_angle_2, examine_stiffness_3, examine_stiffness_4). Default is (90, (0,3,5))""")
-        # TODO pupa tutaj, sprawdzac pattern
-        if configuration_string != '':
-            accuracy_experiment.start(configuration_string=configuration_string)
-        else:
-            print('Started examining data_for_approximation accuracy with default configuration')
-            accuracy_experiment.start()
-    except IOError:
-        print('Error while getting configuration string')
-        pass
-
-    print("Experiment finished. Results in data dir")
-
-    # drawing accuracy data
-    accuracy_chart_drawer.start()
-    print("Result charts with interpolated surface in .... dir")
-
 
 except IOError:
     print('No camera found')

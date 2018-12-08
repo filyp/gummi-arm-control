@@ -1,4 +1,4 @@
-from src.control.approximation.servo_angle_approximator import ServoAngleApproximator
+from src.control.approximation.approximator import ServoAngleApproximator
 from src.control.raw_controller import RawController
 
 
@@ -12,8 +12,8 @@ class PositionController:
         """
 
         Args:
-            angle:
-            stiffness:
+            angle:      angle that you want the arm to move to
+            stiffness:  how tense tendons should be
 
         Raises:
             OutOfRangeError:    if given command is out of servos' range
