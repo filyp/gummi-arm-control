@@ -32,6 +32,15 @@ class PositionController:
         quarter_millis = self.MIN_MAESTRO + (self.MAX_MAESTRO - self.MIN_MAESTRO) * ratio
         return int(quarter_millis)
 
+    def quarter_millis_to_degrees(self, angle_in_quarter_millis):
+        angle = self.MAX_ANGLE * (angle_in_quarter_millis - self.MIN_MAESTRO) / (self.MAX_MAESTRO - self.MIN_MAESTRO)
+        return int(angle)
+
+    def get_servo_position(self):
+        angle_in_quarter_millis = self.maestro.getPosition(1)
+        angle_in_degrees = self.quarter_millis_to_degrees(angle_in_quarter_millis)
+        return angle_in_degrees
+
     def send(self, arm_angle, stiffness):
         """send given position to the arm"""
         angle1 = self.get_back_angle(arm_angle, stiffness)
