@@ -1,9 +1,9 @@
 {
     "approximation": {
-        "filename": "default.pickle"
+        "function_file": "default.pickle"
     },
     "movement_control": {
-        "stiffness_slope": 0,
+        "stiffness_slope": 1,
         "max_servo_speed": 250
     }
 }

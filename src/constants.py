@@ -4,7 +4,7 @@ import os
 project_path = os.path.join(os.path.dirname(__file__), '../')
 
 data_for_approximation = 'data/approximation/data_for_approximation/*'
-approximating_functions = 'data/approximation/learned_functions/'
+approximating_functions = 'data/approximation/functions/'
 config_files = 'data/config/'
 
 

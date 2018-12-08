@@ -1,6 +1,6 @@
 import os
 
-from src.control.approximation.approximation_finder import ApproximatingFunctionFinder
+from src.control.approximation.approximating_function_finder import ApproximatingFunctionFinder
 from src.position_detection.position_detector import PositionDetector
 import src.benchmark.collect_data_for_approximation as interpolation_experiment
 

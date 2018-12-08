@@ -43,32 +43,52 @@ class Configurator:
             json.dump(self.config, file, indent=4)
 
     def turn_on_pid(self, P, I, D, interception_moment=1):
+        """
+
+        Args:
+            P:
+            I:
+            D:
+            interception_moment:
+
+        Notes:
+            Parameters passed to this method must be the same as
+            passed to <PID controller>.__init__.
+
+        """
         self.config['PID'] = self._get_parameters(locals())
 
-    def turn_on_approximating_function(self, filename=DEFAULT_FUNCTION):
-        self.config['approximation'] = self._get_parameters(locals())
+    def turn_on_approximating_function(self, function_file=DEFAULT_FUNCTION):
+        """Find servo angles using function from given file.
 
-    def turn_on_naive_approximation(self, linear_map={0: 0, 180: 180}):
-        """
-
-        Args:
-            linear_map:
-
-        """
-        self.config['approximation'] = self._get_parameters(locals())
-
-    def turn_on_movement_control(self, max_servo_speed=250, stiffness_slope=0):
-        """
+        File should contain pickled function:
+        (servo angle, stiffness) -> arm angle
+        We'll reverse it to find servo angle.
+        See ServoAngleApproximator.get_servo_angle
 
         Args:
-            max_servo_speed:    speed in degrees/second
-            stiffness_slope:    float between 0 and 2,
+            function_file: .pickle file containing the function
+
+        Notes:
+            Parameters passed to this method must be the same as
+            passed to ServoAngleApproximator.__init__.
+        """
+        self.config['approximation'] = self._get_parameters(locals())
+
+    def turn_on_movement_control(self, max_servo_speed=250, stiffness_slope=1):
+        """Specify how stiffness should change during movement.
+
+        For detailed description see MovementController.__init__
+
+        Notes:
+            Parameters passed to this method must be the same as
+            passed to MovementController.__init__.
 
         """
         self.config['movement_control'] = self._get_parameters(locals())
         # for movement control, some angle approximation is needed
         if 'approximation' not in self.config:
-            self.turn_on_naive_approximation()
+            self.turn_on_approximating_function()
 
     def turn_off_pid(self):
         self._turn_off('PID')
