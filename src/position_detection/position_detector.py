@@ -74,26 +74,12 @@ class PositionDetector(threading.Thread):
     def connect_camera(self):
         """Connect OpenCV to camera.
 
-        If camera IP and port were specified during initialization, use them.
-        Otherwise, look for cameras in /dev/video*.
-        If more than one camera can be found,
-        choose the one with the biggest number (should be most recently added).
+        Connects to built-in camera
 
         Raises:
             IOError:    if no camera was found
         """
-        if self.camera_ip_and_port:
-            full_camera_address = f'http://{self.camera_ip_and_port}/mjpegfeed'
-            print(f'connecting to device {full_camera_address}...')
-            return cv2.VideoCapture(full_camera_address)
-
-        cameras = glob.glob('/dev/video*')
-        if not cameras:
-            raise IOError('No camera found')
-
-        camera = sorted(cameras)[-1]
-        device_number = int(camera[-1])
-        print(f'connecting to device /dev/video{device_number}...')
+        device_number = 0
         return cv2.VideoCapture(device_number)
 
     def find_contours(self, imgray, n):
