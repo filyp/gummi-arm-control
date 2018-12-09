@@ -6,10 +6,11 @@ import time
 import numpy as np
 
 from src.control.position_controller import PositionController
-from src.position_detection.position_detector import PositionDetector
-from src.control import raw_controller
+
 
 MAX_ANGLE = 180
+
+# TODO move to constants
 FILENAME_BASE = '../../../data/experiments_results/accuracy_experiment/data/accuracy_experiment'
 DELAY = 4
 
@@ -69,13 +70,12 @@ def experiment_iteration(controller, interpolation_controller, position_detector
 def start(angle, stiffness_list):
     print(angle)
     print(stiffness_list)
-    controller = raw_controller.RawController()
-    position_detector = PositionDetector(1)
-    position_detector.start()
 
-    # TODO move creating PC to loader
     position_controller = PositionController()
     position_controller.load_config()
+
+    controller = position_controller.raw_controller
+    position_detector = position_controller.position_detector
 
     try:
         for stiffness in stiffness_list:
