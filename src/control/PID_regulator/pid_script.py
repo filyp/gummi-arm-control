@@ -9,7 +9,6 @@ STIFFNESS = 10
 TARGET_ANGLE = 90
 STIFFNESS_FUNCTION = lambda x: x**2 # stub function of stiffness course
 
-maestro = maestro.Controller()
 position_detector = PositionDetector(1.0)
 raw_controller = RawController()
 
