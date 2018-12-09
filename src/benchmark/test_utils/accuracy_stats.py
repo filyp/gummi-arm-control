@@ -6,7 +6,7 @@ import glob
 import os  # os module imported here
 
 location = '../../../data/experiments_results/accuracy_experiment/data/*'
-results_location = '../../../data/experiments_results/accuracy_experiment/result/'
+results_location = '../../../data/experiments_results/accuracy_experiment/results/'
 
 
 class OneExperimentStats:
@@ -17,7 +17,7 @@ class OneExperimentStats:
         self.stats_file_name = stats_file_name
 
     def load_data(self, file_name):
-        input_file = csv.DictReader(open(location[:-1] + file_name))
+        input_file = csv.DictReader(open(file_name))
 
         prev_angle = []
         angle = []
@@ -61,7 +61,6 @@ class OneExperimentStats:
 class AccuracyStats:
     def create_files_list(self):
         datafiles = glob.glob(location)
-        print(datafiles)
         return datafiles
 
     def generate_statistics(self):
@@ -77,9 +76,8 @@ class AccuracyStats:
         except IOError:
             print('dupa dupa')
 
-        print(files_list)
-
         for file in files_list:
+            print(file)
             one_stat = OneExperimentStats(file, stats_file_name)
             one_stat.save_chart()
             one_stat.save_statistics()

@@ -10,7 +10,7 @@ import scipy.linalg
 from scipy.stats import binned_statistic
 
 DATA_LOCATION = os.path.join(os.path.dirname(__file__),
-                             '../../../data/approximation/data_for_approximation/*')
+                             '../../../data/data_for_approximation/*')
 APPROXIMATING_FUNCTION_FILE = os.path.join(os.path.dirname(__file__),
                                            '../data/approximating_function.pickle')
 
