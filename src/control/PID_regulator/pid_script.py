@@ -26,4 +26,4 @@ if direction == -1:
     stiffness_grid = reversed(stiffness_grid)
 
 pid_controller = PIDController(position_detector, raw_controller)
-pid_controller.control(TARGET_ANGLE, starting_servo_position, stiffness_grid, tick)
+pid_controller.control(TARGET_ANGLE, starting_servo_position, STIFFNESS, tick, starting_position)
