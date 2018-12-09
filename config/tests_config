@@ -1,0 +1,11 @@
+# accuracy experiment configuration
+
+accuracy_experiment:
+  first:
+    angle: 90
+    stiffness: [0, 10, 40]
+  second:
+    angle: 100
+    stiffness: [0, 10, 40]
+
+dupa_experiment: null
