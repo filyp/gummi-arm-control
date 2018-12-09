@@ -2,16 +2,19 @@ import logging
 import textwrap
 
 from src.configurator import Configurator
+from src.control.PID_regulator.pid_controller import PIDController
 from src.control.approximation.approximator import ServoAngleApproximator
 from src.control.movement_controller import MovementController
 from src.control.raw_controller import RawController
 from src.constants import DEFAULT_CONFIG
+from src.position_detection.position_detector import PositionDetector
 
 
 class PositionController:
 
     def __init__(self):
         self.raw_controller = RawController()
+        self.position_detector = PositionDetector(1)
         self.configurator = Configurator()
         self.config = {}
         self.modules = None
@@ -67,7 +70,9 @@ class PositionController:
             # self.pid = PIDControllerOrWhatever(**pid_params)
         elif self.modules == {'PID'}:
             pid_params = self.config['PID']
-            # self.pid = PIDControllerOrWhatever(**pid_params)
+
+            # in pid_params: stiffness_function, P, I, D coeffs
+            self.pid = PIDController(self.position_detector, self.raw_controller, **pid_params)
         else:
             logging.error(error_str.format(self.modules))
 
@@ -96,6 +101,9 @@ class PositionController:
         elif self.modules == {'approximation', 'movement_control', 'PID'}:
             raise NotImplementedError
         elif self.modules == {'PID'}:
-            raise NotImplementedError
+            self.position_detector.start()
+            starting_servo_position = self.raw_controller.get_servo_position()
+            starting_position = int(self.position_detector.get_angle())
+            self.pid.control(angle, starting_servo_position, stiffness, starting_position)
         elif not self.modules:
             logging.error('to send, you must first load some configuration')
