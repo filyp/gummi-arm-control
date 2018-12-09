@@ -146,7 +146,7 @@ class PositionDetector(threading.Thread):
 
     def run(self):
         """Continuously try to measure arm position."""
-        camera = self.connect_camera()
+        camera = cv2.VideoCapture(0)
         while self._die is False:
             is_open, frame = camera.read()
             if not is_open:
@@ -164,3 +164,7 @@ class PositionDetector(threading.Thread):
     def kill(self):
         """Tell the thread to die gracefully."""
         self._die = True
+
+
+a = PositionDetector(1)
+a.start()
