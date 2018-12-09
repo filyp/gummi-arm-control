@@ -12,8 +12,6 @@ from src.control import raw_controller
 MAX_ANGLE = 180
 FILENAME_BASE = '../../../data/data_for_approximation/validation'
 DELAY = 4
-EXAMINE_ANGLE = 90
-STIFFNESS = 5
 
 
 def save_row(filename, row):
@@ -30,7 +28,7 @@ def save_row(filename, row):
         print(row)
 
 
-def experiment_iteration(controller, interpolation_controller, position_detector, filename, examine_angle, stiffnes_tuple):
+def experiment_iteration(controller, interpolation_controller, position_detector, filename, examine_angle, stiffnes_list):
     """Carry out one iteration of the experiment.
 
     Randomly choose angle and stiffness, and send them to arm.
@@ -45,7 +43,7 @@ def experiment_iteration(controller, interpolation_controller, position_detector
         interpolation_controller: ...
 
     """
-    for stiffness in stiffnes_tuple:
+    for stiffness in stiffnes_list:
         while True:
             angle = int(np.random.uniform(0, MAX_ANGLE))
             try:
@@ -65,18 +63,13 @@ def experiment_iteration(controller, interpolation_controller, position_detector
 
         angle_from_camera = position_detector.get_angle()
 
-        row = [angle, angle_from_camera_prev, servo_angle, stiffness, angle_from_camera]
+        row = [angle, angle_from_camera_prev, servo_angle, stiffness, angle_from_camera, examine_angle]
         save_row(filename, row)
 
 
-def extract_configurations_to_list(configuration_string):
-    return list(ast.literal_eval(configuration_string))
-
-
-def start(configuration_string='(90, (0,3,5))'):
-    print(configuration_string)
-    list_of_configurations = extract_configurations_to_list(configuration_string)
-    print(list_of_configurations)
+def start(angle, stiffness_list):
+    # print(angle)
+    # print(stiffness_list)
     controller = raw_controller.RawController()
     position_detector = PositionDetector(1)
     position_detector.start()
@@ -86,13 +79,11 @@ def start(configuration_string='(90, (0,3,5))'):
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     filename = '{} {}.csv'.format(FILENAME_BASE, timestamp)
 
-    labels = ["prev_angle_servo", "prev_angle", "angle_servo", "stiffness", "angle"]
+    labels = ["prev_angle_servo", "prev_angle", "angle_servo", "stiffness", "angle", 'examine_angle']
     save_row(filename, labels)
 
     try:
-        for config in list_of_configurations:
-            experiment_iteration(controller, interpolation_controller,
-                                 position_detector, filename, config[0], config[1])
+        experiment_iteration(controller, interpolation_controller, position_detector, filename, angle, stiffness_list)
     except KeyboardInterrupt:
         pass
     finally:
