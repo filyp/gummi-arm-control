@@ -5,7 +5,8 @@ import glob
 
 import os  # os module imported here
 
-location = '../../../../data/approximation/validation/*'
+location = '../../../data/approximation/validation/*'
+results_location = '../../../data/experiment_results/accuracy/'
 
 
 class OneExperimentStats:
@@ -31,13 +32,16 @@ class OneExperimentStats:
         return prev_angle, angle, stiffness, examine_angle
 
     def save_chart(self):
+        print('saving chart')
+        plt.figure()
         baseline = np.arange(min(self.prev_angle) - self.MARGIN_X, max(self.prev_angle) + self.MARGIN_X)
         plt.plot(baseline, np.ones_like(baseline) * self.baseline_value, self.prev_angle, self.angle, 'ro')
         plt.yticks(range(self.baseline_value - self.MARGIN_Y, self.baseline_value + self.MARGIN_Y))
         plt.title("Examine angle: {} Stiffness: {}".format(self.baseline_value, self.stiffness))
         plt.xlabel('starting position (deg)')
         plt.ylabel('ending position (deg)')
-        plt.savefig('accuracy_experiment' + str(self.baseline_value) + str(self.stiffness) + '.png')
+        plt.savefig(results_location + 'accuracy_experiment-' + str(self.baseline_value) + '-' +
+                    str(self.stiffness) + '.png')
 
     def save_statistics(self):
         mean = np.mean(self.angle)
@@ -46,28 +50,36 @@ class OneExperimentStats:
 
         row = [self.baseline_value, self.stiffness, mean, median, std]
 
-        with open(self.stats_file_name, 'w+') as f:
+        with open(results_location + self.stats_file_name, 'a+') as f:
             writer = csv.writer(f)
             writer.writerow(row)
+
+    def __del__(self):
+        print("deleted")
 
 
 class AccuracyStats:
     def create_files_list(self):
         datafiles = glob.glob(location)
+        print(datafiles)
         return datafiles
 
     def generate_statistics(self):
+        print('in genarate')
         files_list = self.create_files_list()
-        stats_file_name = "accuracy_experiment_statistics"
+        stats_file_name = "accuracy_experiment_statistics.csv"
 
         row = ['examine_angle', 'stiffness', 'mean', 'median', 'std']
+        try:
+            with open(results_location + stats_file_name, 'a+') as f:
+                writer = csv.writer(f)
+                writer.writerow(row)
+        except IOError:
+            print('dupa dupa')
 
-        with open(stats_file_name, 'w+') as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
+        print(files_list)
 
         for file in files_list:
             one_stat = OneExperimentStats(file, stats_file_name)
             one_stat.save_chart()
             one_stat.save_statistics()
-
