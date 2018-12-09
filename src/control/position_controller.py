@@ -24,6 +24,9 @@ class PositionController:
         self.pid = None
         self.camera = None
 
+        # starting position detector thread
+        self.position_detector.start()
+
     def load_config(self, filename=DEFAULT_CONFIG):
         """
 
@@ -101,7 +104,6 @@ class PositionController:
         elif self.modules == {'approximation', 'movement_control', 'PID'}:
             raise NotImplementedError
         elif self.modules == {'PID'}:
-            self.position_detector.start()
             starting_servo_position = self.raw_controller.get_servo_position()
             starting_position = int(self.position_detector.get_angle())
             self.pid.control(angle, starting_servo_position, stiffness, starting_position)
