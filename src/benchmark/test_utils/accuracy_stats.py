@@ -5,8 +5,8 @@ import glob
 
 import os  # os module imported here
 
-location = '../../../data/approximation/validation/*'
-results_location = '../../../data/experiment_results/accuracy/'
+location = '../../../data/experiments_results/accuracy_experiment/data/*'
+results_location = '../../../data/experiments_results/accuracy_experiment/result/'
 
 
 class OneExperimentStats:

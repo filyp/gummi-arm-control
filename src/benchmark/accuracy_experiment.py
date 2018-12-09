@@ -10,7 +10,7 @@ from src.position_detection.position_detector import PositionDetector
 from src.control import raw_controller
 
 MAX_ANGLE = 180
-FILENAME_BASE = '../../../data/data_for_approximation/validation'
+FILENAME_BASE = '../../../data/experiments_result/accuracy_experiment/data/accuracy_experiment'
 DELAY = 4
 
 

@@ -9,7 +9,7 @@ yaml = YAML(typ='safe')
 my_dict = yaml.load(open(FILE_LOCATION))
 
 if my_dict['accuracy_experiment'] is not None:
-    print('Started examining data_for_approximation accuracy')
+    print('Started examining data_for_approximation accuracy_experiment')
     accuracy_experiments = []
     current_experiment = my_dict['accuracy_experiment']
     for key in current_experiment:
