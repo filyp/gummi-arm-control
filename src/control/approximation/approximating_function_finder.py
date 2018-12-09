@@ -9,22 +9,33 @@ import numpy as np
 import scipy.linalg
 from scipy.stats import binned_statistic
 
-DATA_LOCATION = os.path.join(os.path.dirname(__file__),
-                             '../../../data/data_for_approximation/*')
-APPROXIMATING_FUNCTION_FILE = os.path.join(os.path.dirname(__file__),
-                                           '../../../data/approximating_function.pickle')
+from src.benchmark import collect_data_for_approximation
+from src.constants import DATA_FOR_APPROXIMATION, \
+    DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS
 
 
 def get_default_file(location):
     # TODO search for newest file (assume names can be incorrect) also TEST IT
     # maybe refactor
     datafiles = glob.glob(location)
+    if not datafiles:
+        info = """
+            Looks like you haven't trained your arm yet.
 
+            Connect your arm and camera.
+            If you want to use remote camera type in it's address
+                example:    '192.168.0.52:4747'
+
+            If you want to use built-in or USB camera just hit enter.
+            """
+        camera_address = input(textwrap.dedent(info))
+        collect_data_for_approximation.start(camera_address=camera_address)
+        datafiles = glob.glob(location)
     return sorted(datafiles)[-1]
 
 
 class ApproximatingFunctionFinder:
-    def __init__(self, file_name=get_default_file(DATA_LOCATION), outlier_threshold=10):
+    def __init__(self, file_name=get_default_file(DATA_FOR_APPROXIMATION), outlier_threshold=10):
         self.angle = []
         self.stiffness = []
         self.camera = []
@@ -34,7 +45,11 @@ class ApproximatingFunctionFinder:
         self.filter_outliers(outlier_threshold)
 
         self.approximating_function = self.get_approximating_function()
-        with open(APPROXIMATING_FUNCTION_FILE, 'wb+') as file:
+        self.save_function_to_file(DEFAULT_FUNCTION)
+
+    def save_function_to_file(self, filename):
+        absolute_filename = os.path.join(APPROXIMATING_FUNCTIONS, filename)
+        with open(absolute_filename, 'wb') as file:
             dill.dump(self.approximating_function, file)
 
     def import_from_csv(self, file_name):
@@ -85,6 +100,7 @@ class ApproximatingFunctionFinder:
 
         self.angle, self.stiffness, self.camera = np.transpose(filtered_values)
 
+    # TODO move plotting functions somewhere else
     def plot_approximating_function(self):
         x_range = np.linspace(min(self.angle), max(self.angle), 10)
         y_range = np.linspace(min(self.stiffness), max(self.stiffness), 10)

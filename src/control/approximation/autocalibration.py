@@ -1,11 +1,9 @@
 import os
 
-from src.control.approximation.approximation import ApproximatingFunctionFinder
+from src.control.approximation.approximating_function_finder import ApproximatingFunctionFinder
 from src.position_detection.position_detector import PositionDetector
-import src.benchmark.collect_data_for_approximation as approximation_experiment
+import src.benchmark.collect_data_for_approximation as interpolation_experiment
 
-
-# TODO change to only testing script, without auto calibration
 
 print("welcome in  auto-calibration mode. Please, enjoy your arm!")
 print("""Put camera in front of arm's glyphs and make sure that all four glyphs in max/min arm position are visible""")
