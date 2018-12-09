@@ -28,7 +28,7 @@ def save_row(filename, row):
         print(row)
 
 
-def experiment_iteration(controller, interpolation_controller, position_detector, filename, examine_angle, stiffnes_list):
+def experiment_iteration(controller, interpolation_controller, position_detector, filename, examine_angle, stiffness):
     """Carry out one iteration of the experiment.
 
     Randomly choose angle and stiffness, and send them to arm.
@@ -43,47 +43,47 @@ def experiment_iteration(controller, interpolation_controller, position_detector
         interpolation_controller: ...
 
     """
-    for stiffness in stiffnes_list:
-        for x in range(0, 10):
-            angle = int(np.random.uniform(0, MAX_ANGLE))
-            try:
-                controller.send(angle, stiffness)
-                break
-            except ValueError:
-                # chosen values were out of servos' range, so choose once again
-                pass
+    while True:
+        angle = int(np.random.uniform(0, MAX_ANGLE))
+        try:
+            controller.send(angle, stiffness)
+            break
+        except ValueError:
+            # chosen values were out of servos' range, so choose once again
+            pass
 
-        time.sleep(DELAY)
+    time.sleep(DELAY)
 
-        angle_from_camera_prev = position_detector.get_angle()
+    angle_from_camera_prev = position_detector.get_angle()
 
-        servo_angle = interpolation_controller.send(examine_angle, stiffness)
+    servo_angle = interpolation_controller.send(examine_angle, stiffness)
 
-        time.sleep(DELAY)
+    time.sleep(DELAY)
 
-        angle_from_camera = position_detector.get_angle()
+    angle_from_camera = position_detector.get_angle()
 
-        row = [angle, angle_from_camera_prev, servo_angle, stiffness, angle_from_camera, examine_angle]
-        save_row(filename, row)
+    row = [angle, angle_from_camera_prev, servo_angle, stiffness, angle_from_camera, examine_angle]
+    save_row(filename, row)
 
 
 def start(angle, stiffness_list):
-    # print(angle)
-    # print(stiffness_list)
+    print(angle)
+    print(stiffness_list)
     controller = raw_controller.RawController()
     position_detector = PositionDetector(1)
     position_detector.start()
 
     interpolation_controller = PositionController()
 
-    timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    filename = '{} {}.csv'.format(FILENAME_BASE, timestamp)
-
-    labels = ["prev_angle_servo", "prev_angle", "angle_servo", "stiffness", "angle", 'examine_angle']
-    save_row(filename, labels)
-
     try:
-        experiment_iteration(controller, interpolation_controller, position_detector, filename, angle, stiffness_list)
+        for stiffness in stiffness_list:
+            timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            filename = '{} {}.csv'.format(FILENAME_BASE, timestamp)
+
+            labels = ["prev_angle_servo", "prev_angle", "angle_servo", "stiffness", "angle", 'examine_angle']
+            save_row(filename, labels)
+            for x in range(0, 10):
+                experiment_iteration(controller, interpolation_controller, position_detector, filename, angle, stiffness)
     except KeyboardInterrupt:
         pass
     finally:

@@ -21,3 +21,4 @@ class PositionController:
         """
         servo_angle = self.approximator.get_servo_angle(angle, stiffness)
         self.raw_controller.send(servo_angle, stiffness)
+        return servo_angle

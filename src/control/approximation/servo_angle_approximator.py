@@ -10,7 +10,7 @@ from src.control.approximation import approximation
 class ServoAngleApproximator:
     def __init__(self):
         if not os.path.isfile(approximation.APPROXIMATING_FUNCTION_FILE):
-            print('Training arm on collected values...')
+            print('Calculating function with collected values...')
             approximation.ApproximatingFunctionFinder()
 
         with open(approximation.APPROXIMATING_FUNCTION_FILE, 'rb') as file:

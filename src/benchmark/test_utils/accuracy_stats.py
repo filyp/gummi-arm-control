@@ -25,6 +25,7 @@ class OneExperimentStats:
         examine_angle = None
 
         for row in input_file:
+            print(row)
             angle.append(float(row['angle']))
             prev_angle.append(float(row['prev_angle']))
             stiffness = int(row['stiffness'])
@@ -77,7 +78,6 @@ class AccuracyStats:
             print('dupa dupa')
 
         for file in files_list:
-            print(file)
             one_stat = OneExperimentStats(file, stats_file_name)
             one_stat.save_chart()
             one_stat.save_statistics()
