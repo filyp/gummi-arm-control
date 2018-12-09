@@ -64,10 +64,10 @@ class PositionController:
             pid_params = self.config['PID']
             self.approximator = ServoAngleApproximator(**approx_params)
             self.movement = MovementController(**movement_params)
-            self.pid = PIDControllerOrWhatever(**pid_params)
+            # self.pid = PIDControllerOrWhatever(**pid_params)
         elif self.modules == {'PID'}:
             pid_params = self.config['PID']
-            self.pid = PIDControllerOrWhatever(**pid_params)
+            # self.pid = PIDControllerOrWhatever(**pid_params)
         else:
             logging.error(error_str.format(self.modules))
 

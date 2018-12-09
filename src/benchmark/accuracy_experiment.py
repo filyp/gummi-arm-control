@@ -56,13 +56,13 @@ def experiment_iteration(controller, interpolation_controller, position_detector
 
     angle_from_camera_prev = position_detector.get_angle()
 
-    servo_angle = interpolation_controller.send(examine_angle, stiffness)
+    interpolation_controller.send(examine_angle, stiffness)
 
     time.sleep(DELAY)
 
     angle_from_camera = position_detector.get_angle()
 
-    row = [angle, angle_from_camera_prev, servo_angle, stiffness, angle_from_camera, examine_angle]
+    row = [angle, angle_from_camera_prev, stiffness, angle_from_camera, examine_angle]
     save_row(filename, row)
 
 
@@ -73,17 +73,19 @@ def start(angle, stiffness_list):
     position_detector = PositionDetector(1)
     position_detector.start()
 
-    interpolation_controller = PositionController()
+    # TODO move creating PC to loader
+    position_controller = PositionController()
+    position_controller.load_config()
 
     try:
         for stiffness in stiffness_list:
             timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
             filename = '{} {}.csv'.format(FILENAME_BASE, timestamp)
 
-            labels = ["prev_angle_servo", "prev_angle", "angle_servo", "stiffness", "angle", 'examine_angle']
+            labels = ["prev_angle_servo", "prev_angle", "stiffness", "angle", 'examine_angle']
             save_row(filename, labels)
             for x in range(0, 10):
-                experiment_iteration(controller, interpolation_controller, position_detector, filename, angle, stiffness)
+                experiment_iteration(controller, position_controller, position_detector, filename, angle, stiffness)
     except KeyboardInterrupt:
         pass
     finally:
