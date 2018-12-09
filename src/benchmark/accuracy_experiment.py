@@ -10,7 +10,7 @@ from src.position_detection.position_detector import PositionDetector
 from src.control import raw_controller
 
 MAX_ANGLE = 180
-FILENAME_BASE = '../../../data/experiments_result/accuracy_experiment/data/accuracy_experiment'
+FILENAME_BASE = '../../../data/experiments_results/accuracy_experiment/data/accuracy_experiment'
 DELAY = 4
 
 
@@ -22,7 +22,7 @@ def save_row(filename, row):
         row: list of values
 
     """
-    with open(filename, 'a') as data:
+    with open(filename, 'a+') as data:
         writer = csv.writer(data)
         writer.writerow(row)
         print(row)
@@ -44,7 +44,7 @@ def experiment_iteration(controller, interpolation_controller, position_detector
 
     """
     for stiffness in stiffnes_list:
-        while True:
+        for x in range(0, 10):
             angle = int(np.random.uniform(0, MAX_ANGLE))
             try:
                 controller.send(angle, stiffness)

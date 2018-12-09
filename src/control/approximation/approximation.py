@@ -12,7 +12,7 @@ from scipy.stats import binned_statistic
 DATA_LOCATION = os.path.join(os.path.dirname(__file__),
                              '../../../data/data_for_approximation/*')
 APPROXIMATING_FUNCTION_FILE = os.path.join(os.path.dirname(__file__),
-                                           '../data/approximating_function.pickle')
+                                           '../../../data/approximating_function.pickle')
 
 
 def get_default_file(location):
@@ -34,7 +34,7 @@ class ApproximatingFunctionFinder:
         self.filter_outliers(outlier_threshold)
 
         self.approximating_function = self.get_approximating_function()
-        with open(APPROXIMATING_FUNCTION_FILE, 'wb') as file:
+        with open(APPROXIMATING_FUNCTION_FILE, 'wb+') as file:
             dill.dump(self.approximating_function, file)
 
     def import_from_csv(self, file_name):
