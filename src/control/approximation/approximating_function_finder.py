@@ -6,6 +6,7 @@ import dill
 import numpy as np
 import scipy.linalg
 
+from src.benchmark.test_utils.approximation_stats import ApproximationStats
 from src.constants import DATA_FOR_APPROXIMATION, \
     DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS_PATH
 
@@ -88,9 +89,14 @@ class ApproximatingFunctionFinder:
         with open(absolute_filename, 'wb') as file:
             dill.dump(self.approximating_function, file)
 
-    def save_function(self):
+    def save_function_and_stats(self):
         self.approximating_function = self.get_approximating_function()
         self.save_function_to_file(DEFAULT_FUNCTION)
+
+        # generate stats
+        approx_stats = ApproximationStats(self.importer, self.approximating_function)
+        approx_stats.plot_approximating_function()
+        approx_stats.plot_errors()
 
 
 if __name__ == '__main__':

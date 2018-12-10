@@ -4,6 +4,7 @@ import numpy as np
 import scipy.optimize
 import glob
 
+from src.benchmark.test_utils.approximation_stats import ApproximationStats
 from src.constants import DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS_PATH, DATA_FOR_APPROXIMATION, \
     APPROXIMATION_DATA_PATH
 from src.control.approximation.approximating_function_finder import ApproximatingFunctionFinder, \
@@ -31,9 +32,9 @@ class ServoAngleApproximator:
     @staticmethod
     def is_dir_empty(path):
         datafiles = glob.glob(path)
+        print(len(datafiles))
 
-        # 1 because glob.glob considers itself as a file
-        if len(datafiles) > 1:
+        if len(datafiles) > 0:
             return False
         else:
             return True
@@ -53,7 +54,7 @@ class ServoAngleApproximator:
                 print('not none and exists')
                 path = APPROXIMATION_DATA_PATH + data_for_approx_file
             else:
-                if self.is_dir_empty(APPROXIMATION_DATA_PATH):
+                if self.is_dir_empty(DATA_FOR_APPROXIMATION):
                     print('dir empty')
                     autocalibration = Autocalibration(self.raw_controller, self.position_detector)
                     autocalibration.run()
@@ -63,8 +64,9 @@ class ServoAngleApproximator:
             importer = ApproximationDataImporter(path)
             importer.import_from_csv()
             finder = ApproximatingFunctionFinder(importer)
-            finder.save_function()
-            # generowac ststy
+            finder.save_function_and_stats()
+
+            # loading function
             self.arm_angle_approx = self.load_approx_function(function_file)
 
     def get_servo_angle(self, result_angle, stiffness):

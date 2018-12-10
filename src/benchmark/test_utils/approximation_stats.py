@@ -7,12 +7,12 @@ from mpl_toolkits.mplot3d import Axes3D
 from src.constants import APPROXIMATION_RESULTS_PATH
 
 
-class ApproximationStat:
-    def __init__(self, finder):
-        self.approximating_function = finder.approximating_function
-        self.angle = finder.importer.angle
-        self.stiffness = finder.importer.stiffness
-        self.camera = finder.importer.camera
+class ApproximationStats:
+    def __init__(self, importer, approximating_function):
+        self.approximating_function = approximating_function
+        self.angle = importer.angle
+        self.stiffness = importer.stiffness
+        self.camera = importer.camera
 
     def plot_approximating_function(self):
         x_range = np.linspace(min(self.angle), max(self.angle), 10)
