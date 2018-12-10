@@ -67,18 +67,21 @@ class PositionController:
         elif self.modules == {'approximation', 'movement_control'}:
             approx_params = self.config['approximation']
             movement_params = self.config['movement_control']
-            self.approximator = ServoAngleApproximator(**approx_params)
+
+            self.approximator = ServoAngleApproximator(self.raw_controller, self.position_detector)
+            self.approximator.load_or_generate_approx_function(**approx_params)
             self.movement = MovementController(**movement_params)
         elif self.modules == {'approximation', 'movement_control', 'PID'}:
             approx_params = self.config['approximation']
             movement_params = self.config['movement_control']
             pid_params = self.config['PID']
-            self.approximator = ServoAngleApproximator(**approx_params)
+
+            self.approximator = ServoAngleApproximator(self.raw_controller, self.position_detector)
+            self.approximator.load_or_generate_approx_function(**approx_params)
             self.movement = MovementController(**movement_params)
-            # self.pid = PIDControllerOrWhatever(**pid_params)
+            self.pid = PIDController(self.position_detector, self.raw_controller, **pid_params)
         elif self.modules == {'PID'}:
             pid_params = self.config['PID']
-
             # in pid_params: stiffness_function, P, I, D coeffs
             self.pid = PIDController(self.position_detector, self.raw_controller, **pid_params)
         else:
