@@ -24,8 +24,8 @@ class PIDController:
             movement_completion = (1 - abs(current_angle - target_angle)) / abs(target_angle - starting_position)
             stiffness = self.stiffness_function(movement_completion) * target_stiffness
 
-            # if abs(current_angle - target_angle) <= THRESHOLD:
-            #     return
+            if abs(current_angle - target_angle) <= THRESHOLD:
+                return
             # stiffness_index = self.get_current_stiffness_index(current_angle, tick)
             # stiffness = stiffness_grid[stiffness_index]
 

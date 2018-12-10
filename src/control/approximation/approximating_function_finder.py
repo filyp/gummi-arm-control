@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg
 from scipy.stats import binned_statistic
+from mpl_toolkits.mplot3d import Axes3D
+
 
 from src.benchmark import collect_data_for_approximation
 from src.constants import DATA_FOR_APPROXIMATION, \
@@ -72,6 +74,8 @@ class ApproximatingFunctionFinder:
         A = np.c_[np.ones(data.shape[0]), data[:, :2], np.prod(data[:, :2], axis=1), data[:, :2] ** 2]
         # Solve for a least squares estimate
         self.coeffs, _, _, _ = scipy.linalg.lstsq(A, data[:, 2])
+
+        print(self.coeffs)
 
         return lambda x, y: self.coeffs[4] * x ** 2. + \
                             self.coeffs[5] * y ** 2. + \
@@ -152,6 +156,7 @@ class ApproximatingFunctionFinder:
 
 if __name__ == '__main__':
     ie = ApproximatingFunctionFinder(outlier_threshold=10)
+    print(ie.approximating_function)
     ie.plot_approximating_function()
     ie.plot_errors()
     ie.plot_deviations_for_given_stiffness(bins_number=10)
