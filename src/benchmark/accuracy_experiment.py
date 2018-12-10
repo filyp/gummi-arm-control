@@ -6,12 +6,10 @@ import time
 import numpy as np
 
 from src.control.position_controller import PositionController
-
-
+from src.constants import ACCURACY_DATA_PATH
 MAX_ANGLE = 180
 
-# TODO move to constants
-FILENAME_BASE = '../../../data/experiments_results/accuracy_experiment/data/accuracy_experiment'
+FILENAME_BASE = ACCURACY_DATA_PATH + 'accuracy_experiment'
 DELAY = 4
 
 
