@@ -5,8 +5,7 @@ import glob
 
 import os  # os module imported here
 
-location = '../../../data/experiments_results/accuracy_experiment/data/*'
-results_location = '../../../data/experiments_results/accuracy_experiment/results/'
+from src.constants import ACCURACY_RESULTS_PATH, ACCURACY_FILES_LIST_PATH
 
 
 class OneExperimentStats:
@@ -41,7 +40,7 @@ class OneExperimentStats:
         plt.title("Examine angle: {} Stiffness: {}".format(self.baseline_value, self.stiffness))
         plt.xlabel('starting position (deg)')
         plt.ylabel('ending position (deg)')
-        plt.savefig(results_location + 'accuracy_experiment-' + str(self.baseline_value) + '-' +
+        plt.savefig(ACCURACY_RESULTS_PATH + 'accuracy_experiment-' + str(self.baseline_value) + '-' +
                     str(self.stiffness) + '.png')
 
     def save_statistics(self):
@@ -51,7 +50,7 @@ class OneExperimentStats:
 
         row = [self.baseline_value, self.stiffness, mean, median, std]
 
-        with open(results_location + self.stats_file_name, 'a+') as f:
+        with open(ACCURACY_RESULTS_PATH + self.stats_file_name, 'a+') as f:
             writer = csv.writer(f)
             writer.writerow(row)
 
@@ -61,7 +60,7 @@ class OneExperimentStats:
 
 class AccuracyStats:
     def create_files_list(self):
-        datafiles = glob.glob(location)
+        datafiles = glob.glob(ACCURACY_FILES_LIST_PATH)
         return datafiles
 
     def generate_statistics(self):
@@ -71,7 +70,7 @@ class AccuracyStats:
 
         row = ['examine_angle', 'stiffness', 'mean', 'median', 'std']
         try:
-            with open(results_location + stats_file_name, 'a+') as f:
+            with open(ACCURACY_RESULTS_PATH + stats_file_name, 'a+') as f:
                 writer = csv.writer(f)
                 writer.writerow(row)
         except IOError:
