@@ -95,8 +95,9 @@ class ApproximatingFunctionFinder:
 
         # generate stats
         approx_stats = ApproximationStats(self.importer, self.approximating_function)
-        approx_stats.plot_approximating_function()
-        approx_stats.plot_errors()
+        # approx_stats.plot_approximating_function()
+        # approx_stats.plot_errors()
+        approx_stats.plot_deviations_for_given_stiffness(10)
 
 
 if __name__ == '__main__':
