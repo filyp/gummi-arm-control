@@ -33,7 +33,6 @@ class ApproximationStats:
         ax.set_zlabel('camera angle')
 
         plt.show()
-        # plt.savefig('../data/interpolation_experiment.png')
 
     def plot_errors(self):
         predictions = self.approximating_function(self.angle, self.stiffness)
