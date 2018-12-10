@@ -3,33 +3,75 @@ import os
 import dill
 import numpy as np
 import scipy.optimize
+import glob
 
-from src.constants import DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS
-from src.control.approximation.approximating_function_finder import ApproximatingFunctionFinder
+
+from src.constants import DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS_PATH, DATA_FOR_APPROXIMATION, \
+    APPROXIMATION_DATA_PATH
+from src.control.approximation.approximating_function_finder import ApproximatingFunctionFinder, \
+    ApproximationDataImporter
+from src.control.approximation.autocalibration import Autocalibration
+
+
+def get_default_file():
+    # TODO search for newest file (assume names can be incorrect) also TEST IT
+    datafiles = glob.glob(DATA_FOR_APPROXIMATION)
+    return sorted(datafiles)[-1]
 
 
 class ServoAngleApproximator:
-    def __init__(self, function_file=DEFAULT_FUNCTION):
-        """
+    def __init__(self, raw_controller, position_detector):
+        self.arm_angle_approx = None
+        self.raw_controller = raw_controller
+        self.position_detector = position_detector
 
-        Args:
-            function_file:
+    @staticmethod
+    def is_file_exist(path, file_name):
+        absolute_filename = os.path.join(path, file_name)
+        print('lalala')
+        return os.path.isfile(absolute_filename)
 
-        Notes:
-            Parameters passed to this method must be the same as
-            passed to Configurator.turn_on_pid.
-        """
-        try:
-            self.arm_angle_approx = self.load_approx_function(function_file)
-        except FileNotFoundError:
-            print('Training arm on collected values...')
-            ApproximatingFunctionFinder()
-            self.arm_angle_approx = self.load_approx_function(function_file)
+    @staticmethod
+    def is_dir_empty(path):
+        datafiles = glob.glob(path)
+        print(datafiles)
+        print('dupadupa')
+        print(len(datafiles))
 
-    def load_approx_function(self, filename):
-        absolute_filename = os.path.join(APPROXIMATING_FUNCTIONS, filename)
+        # 1 because glob.glob considers itself as a file
+        if len(datafiles) > 1:
+            return False
+        else:
+            return True
+
+    @staticmethod
+    def load_approx_function(filename):
+        absolute_filename = os.path.join(APPROXIMATING_FUNCTIONS_PATH, filename)
         with open(absolute_filename, 'rb') as file:
             return dill.load(file)
+
+    # todo get default file -> return only name without path
+    def load_or_generate_approx_function(self, function_file=DEFAULT_FUNCTION, data_for_approx_file=None):
+        print('in load and generate')
+        if self.is_file_exist(APPROXIMATING_FUNCTIONS_PATH, function_file):
+            self.arm_angle_approx = self.load_approx_function(function_file)
+        else:
+            if data_for_approx_file is not None and self.is_file_exist(APPROXIMATION_DATA_PATH, data_for_approx_file):
+                print('not none and exists')
+                path = data_for_approx_file
+            else:
+                if self.is_dir_empty(APPROXIMATION_DATA_PATH):
+                    print('dir empty')
+                    autocalibration = Autocalibration(self.raw_controller, self.position_detector)
+                    autocalibration.run()
+
+                print('default file')
+                path = get_default_file()
+            importer = ApproximationDataImporter(path)
+            importer.import_from_csv()
+            finder = ApproximatingFunctionFinder(importer)
+            finder.save_function()
+            self.arm_angle_approx = self.load_approx_function(function_file)
 
     def get_servo_angle(self, result_angle, stiffness):
         def f_to_solve(x):
