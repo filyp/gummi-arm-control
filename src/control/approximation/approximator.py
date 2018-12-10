@@ -28,15 +28,11 @@ class ServoAngleApproximator:
     @staticmethod
     def is_file_exist(path, file_name):
         absolute_filename = os.path.join(path, file_name)
-        print('lalala')
         return os.path.isfile(absolute_filename)
 
     @staticmethod
     def is_dir_empty(path):
         datafiles = glob.glob(path)
-        print(datafiles)
-        print('dupadupa')
-        print(len(datafiles))
 
         # 1 because glob.glob considers itself as a file
         if len(datafiles) > 1:
@@ -50,7 +46,6 @@ class ServoAngleApproximator:
         with open(absolute_filename, 'rb') as file:
             return dill.load(file)
 
-    # todo get default file -> return only name without path
     def load_or_generate_approx_function(self, function_file=DEFAULT_FUNCTION, data_for_approx_file=None):
         print('in load and generate')
         if self.is_file_exist(APPROXIMATING_FUNCTIONS_PATH, function_file):
@@ -58,7 +53,7 @@ class ServoAngleApproximator:
         else:
             if data_for_approx_file is not None and self.is_file_exist(APPROXIMATION_DATA_PATH, data_for_approx_file):
                 print('not none and exists')
-                path = data_for_approx_file
+                path = APPROXIMATION_DATA_PATH + data_for_approx_file
             else:
                 if self.is_dir_empty(APPROXIMATION_DATA_PATH):
                     print('dir empty')
