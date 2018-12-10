@@ -15,7 +15,7 @@ MIN_STIFFNESS = -20
 
 FILENAME_BASE = '../../../data/data_for_approximation/experiment'  # TODO change to absolute path
 DELAY_BETWEEN_ITERATIONS = 3
-DETECTION_TIMEOUT = 0.3
+DETECTION_TIMEOUT = 1
 
 
 def save_row(filename, row):
@@ -63,10 +63,7 @@ def experiment_iteration(controller, position_detector, filename):
     save_row(filename, row)
 
 
-def start(running_time=2, camera_address=None):
-    controller = raw_controller.RawController()
-    position_detector = pd.PositionDetector(DETECTION_TIMEOUT, camera_address)
-    position_detector.start()
+def start(controller, position_detector, running_time=2):
 
     timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     filename = f'{FILENAME_BASE}_{timestamp}.csv'
@@ -90,10 +87,10 @@ def start(running_time=2, camera_address=None):
             experiment_iteration(controller, position_detector, filename)
     except KeyboardInterrupt:
         pass
-    finally:
-        position_detector.kill()
-        position_detector.join()
 
 
 if __name__ == "__main__":
-    start()
+    c = raw_controller.RawController()
+    p_d = pd.PositionDetector(DETECTION_TIMEOUT)
+    p_d.start()
+    start(c, p_d)
