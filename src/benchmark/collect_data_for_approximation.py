@@ -6,6 +6,7 @@ import numpy as np
 
 from src.control import raw_controller
 from src.position_detection import position_detector as pd
+from src.constants import APPROXIMATION_DATA_PATH
 import textwrap
 
 # these values were set by playing with position_controller.manual_control
@@ -13,7 +14,7 @@ import textwrap
 MAX_STIFFNESS = 60
 MIN_STIFFNESS = -20
 
-FILENAME_BASE = '../../../data/data_for_approximation/experiment'  # TODO change to absolute path
+FILENAME_BASE = APPROXIMATION_DATA_PATH + 'experiment'
 DELAY_BETWEEN_ITERATIONS = 3
 DETECTION_TIMEOUT = 1
 
