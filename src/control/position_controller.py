@@ -14,7 +14,10 @@ class PositionController:
 
     def __init__(self):
         self.raw_controller = RawController()
+        # self.raw_controller = None
+        # todo added handling custom camera in position detector HERE!
         self.position_detector = PositionDetector(1)
+        # self.position_detector = None
         self.configurator = Configurator()
         self.config = {}
         self.modules = None
@@ -58,7 +61,8 @@ class PositionController:
 
         if self.modules == {'approximation'}:
             approx_params = self.config['approximation']
-            self.approximator = ServoAngleApproximator(**approx_params)
+            self.approximator = ServoAngleApproximator(self.raw_controller, self.position_detector)
+            self.approximator.load_or_generate_approx_function(**approx_params)
         elif self.modules == {'approximation', 'movement_control'}:
             approx_params = self.config['approximation']
             movement_params = self.config['movement_control']
