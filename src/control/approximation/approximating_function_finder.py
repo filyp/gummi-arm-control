@@ -15,10 +15,12 @@ from src.benchmark import collect_data_for_approximation
 from src.constants import DATA_FOR_APPROXIMATION, \
     DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS_PATH
 
+
 def get_default_file():
     # TODO search for newest file (assume names can be incorrect) also TEST IT
     datafiles = glob.glob(DATA_FOR_APPROXIMATION)
     return sorted(datafiles)[-1]
+
 
 class ApproximationDataImporter:
     def __init__(self, file_name, threshold=10):

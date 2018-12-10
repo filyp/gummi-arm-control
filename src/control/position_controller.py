@@ -62,6 +62,7 @@ class PositionController:
         if self.modules == {'approximation'}:
             approx_params = self.config['approximation']
             self.approximator = ServoAngleApproximator(self.raw_controller, self.position_detector)
+            # load_or_generate_approx_function(function_file=DEFAULT_FUNCTION, data_for_approx_file=None):
             self.approximator.load_or_generate_approx_function(**approx_params)
         elif self.modules == {'approximation', 'movement_control'}:
             approx_params = self.config['approximation']
