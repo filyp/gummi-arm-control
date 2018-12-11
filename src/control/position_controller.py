@@ -4,7 +4,6 @@ import textwrap
 from src.configurator import Configurator
 from src.control.PID_regulator.pid_controller import PIDController
 from src.control.approximation.approximator import ServoAngleApproximator
-from src.control.movement_controller import MovementController
 from src.control.raw_controller import RawController
 from src.constants import DEFAULT_CONFIG
 from src.position_detection.position_detector import PositionDetector
@@ -13,11 +12,11 @@ from src.position_detection.position_detector import PositionDetector
 class PositionController:
 
     def __init__(self):
-        # self.raw_controller = RawController()
-        self.raw_controller = None
+        self.raw_controller = RawController()
+        # self.raw_controller = None
         # todo added handling custom camera in position detector HERE!
-        # self.position_detector = PositionDetector(1)
-        self.position_detector = None
+        self.position_detector = PositionDetector(1)
+        # self.position_detector = None
         self.configurator = Configurator()
         self.config = {}
         self.modules = None
@@ -28,7 +27,7 @@ class PositionController:
         self.camera = None
 
         # starting position detector thread
-        # self.position_detector.start()
+        self.position_detector.start()
 
     def load_config(self, filename=DEFAULT_CONFIG):
         """
