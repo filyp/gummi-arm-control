@@ -18,7 +18,7 @@ def get_default_file():
 
 
 class ApproximationDataImporter:
-    def __init__(self, file_name, threshold=10):
+    def __init__(self, file_name, threshold=3):
         self.file_name = file_name
         self.threshold = threshold
         self.angle = []

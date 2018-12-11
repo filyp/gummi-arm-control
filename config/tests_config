@@ -2,8 +2,8 @@
 
 accuracy_experiment:
   first:
-    angle: 90
-    stiffness: [0, 10]
+    angle: 60
+    stiffness: [0]
 #  second:
 #    angle: 100
 #    stiffness: [0, 10, 40]
