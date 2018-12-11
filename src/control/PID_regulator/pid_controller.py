@@ -1,10 +1,13 @@
 from src.control.PID_regulator.pid import PID
 
-THRESHOLD = 1
+# todo change to 1 - 0.5 % of first error rate
+THRESHOLD = 0.2
+
+# better higher P and lower I, but matlab claims different things - only I-component
 
 
 class PIDController:
-    def __init__(self, position_detector, raw_controller, stiffness_function, P=2.0, I=0.0, D=1.0):
+    def __init__(self, position_detector, raw_controller, stiffness_function, P=0.7, I=0.2, D=0.2):
         self.pid = PID(P=P, I=I, D=D)
         self.position_detector = position_detector
         self.raw_controller = raw_controller

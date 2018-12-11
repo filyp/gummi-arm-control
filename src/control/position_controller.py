@@ -13,11 +13,11 @@ from src.position_detection.position_detector import PositionDetector
 class PositionController:
 
     def __init__(self):
-        self.raw_controller = RawController()
-        # self.raw_controller = None
+        # self.raw_controller = RawController()
+        self.raw_controller = None
         # todo added handling custom camera in position detector HERE!
-        self.position_detector = PositionDetector(1)
-        # self.position_detector = None
+        # self.position_detector = PositionDetector(1)
+        self.position_detector = None
         self.configurator = Configurator()
         self.config = {}
         self.modules = None
@@ -28,7 +28,7 @@ class PositionController:
         self.camera = None
 
         # starting position detector thread
-        self.position_detector.start()
+        # self.position_detector.start()
 
     def load_config(self, filename=DEFAULT_CONFIG):
         """
@@ -64,21 +64,13 @@ class PositionController:
             self.approximator = ServoAngleApproximator(self.raw_controller, self.position_detector)
             # load_or_generate_approx_function(function_file=DEFAULT_FUNCTION, data_for_approx_file=None):
             self.approximator.load_or_generate_approx_function(**approx_params)
-        elif self.modules == {'approximation', 'movement_control'}:
-            approx_params = self.config['approximation']
-            movement_params = self.config['movement_control']
 
-            self.approximator = ServoAngleApproximator(self.raw_controller, self.position_detector)
-            self.approximator.load_or_generate_approx_function(**approx_params)
-            self.movement = MovementController(**movement_params)
-        elif self.modules == {'approximation', 'movement_control', 'PID'}:
+        elif self.modules == {'approximation', 'PID'}:
             approx_params = self.config['approximation']
-            movement_params = self.config['movement_control']
             pid_params = self.config['PID']
 
             self.approximator = ServoAngleApproximator(self.raw_controller, self.position_detector)
             self.approximator.load_or_generate_approx_function(**approx_params)
-            self.movement = MovementController(**movement_params)
             self.pid = PIDController(self.position_detector, self.raw_controller, **pid_params)
         elif self.modules == {'PID'}:
             pid_params = self.config['PID']
@@ -103,13 +95,8 @@ class PositionController:
         if self.modules == {'approximation'}:
             servo_angle = self.approximator.get_servo_angle(angle, stiffness)
             self.raw_controller.send(servo_angle, stiffness)
-        elif self.modules == {'approximation', 'movement_control'}:
-            servo_angle = self.approximator.get_servo_angle(angle, stiffness)
-            self.movement.set_target(servo_angle, stiffness)
-            while self.movement.completion != 1:
-                intermediate_command = self.movement.get_command()
-                self.raw_controller.send(*intermediate_command)
-        elif self.modules == {'approximation', 'movement_control', 'PID'}:
+        elif self.modules == {'approximation', 'PID'}:
+            # todo implement
             raise NotImplementedError
         elif self.modules == {'PID'}:
             starting_servo_position = self.raw_controller.get_servo_position()
