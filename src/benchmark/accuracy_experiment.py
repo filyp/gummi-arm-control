@@ -2,6 +2,7 @@ import ast
 import csv
 import datetime
 import time
+import os
 
 import numpy as np
 
@@ -9,7 +10,7 @@ from src.control.position_controller import PositionController
 from src.constants import ACCURACY_DATA_PATH
 MAX_ANGLE = 180
 
-FILENAME_BASE = ACCURACY_DATA_PATH + 'accuracy_experiment'
+FILENAME_BASE = os.path.join(ACCURACY_DATA_PATH, 'accuracy_experiment')
 DELAY = 4
 
 

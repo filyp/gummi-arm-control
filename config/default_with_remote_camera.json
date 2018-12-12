@@ -1,0 +1,9 @@
+{
+    "camera": {
+        "port": "4747",
+        "ip": "192.168.0.52"
+    },
+    "approximation": {
+        "function_file": "default.pickle"
+    }
+}
