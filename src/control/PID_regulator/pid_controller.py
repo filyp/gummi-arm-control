@@ -4,6 +4,7 @@ import time
 # todo change to 1 - 0.5 % of first error rate
 THRESHOLD = 0.2
 
+
 # better higher P and lower I, but matlab claims different things - only I-component
 
 
@@ -20,6 +21,7 @@ class PIDController:
 
     def control(self, target_angle, starting_servo_angle, target_stiffness, starting_position):
         self.pid.set_point(target_angle)
+        starting_stiffness = 0
         current_servo_angle = starting_servo_angle
         print(current_servo_angle)
         while True:
@@ -27,8 +29,9 @@ class PIDController:
             print(current_angle)
 
             # calculate stiffness
-            movement_completion = (1 - abs(current_angle - target_angle)) / abs(target_angle - starting_position)
-            stiffness = self.stiffness_function(movement_completion) * target_stiffness
+            movement_completion = ((current_angle + starting_position) / abs(target_angle - starting_position))
+            stiffness = (self.stiffness_function(movement_completion) * (target_stiffness - starting_stiffness)) + \
+                        starting_stiffness
 
             if abs(current_angle - target_angle) <= THRESHOLD:
                 return
@@ -41,4 +44,3 @@ class PIDController:
 
             self.raw_controller.send(int(current_servo_angle), stiffness)
             time.sleep(0.5)
-
