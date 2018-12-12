@@ -13,10 +13,7 @@ from src.position_detection.position_detector import PositionDetector
 class PositionController:
 
     def __init__(self):
-        # self.raw_controller = RawController()
-        self.raw_controller = None
-        # todo added handling custom camera in position detector HERE!
-        # self.position_detector = PositionDetector(1)
+        self.raw_controller = RawController()
         self.position_detector = None
         self.configurator = Configurator()
         self.config = {}
@@ -25,16 +22,19 @@ class PositionController:
         self.approximator = None
         self.movement = None
         self.pid = None
-        self.camera = None
-
-        # starting position detector thread
-        # self.position_detector.start()
 
     def load_config(self, filename=DEFAULT_CONFIG):
-        """
+        """Load arm configuration from a file.
+
+        For details on what can be configured see src.configurator.
 
         Args:
-            filename:
+            filename: name of the config file inside directory specified in src.constants
+
+        Notes:
+            If camera is already connected, this method will use the existing one instead
+            of connecting to the one in config. To reconnect you have to manually call:
+            PositionController.connect_camera(reconnect_if_exists=True)
 
         """
 
@@ -46,38 +46,61 @@ class PositionController:
             
             Possible combinations:
                 approximation
-                approximation + movement_control
-                approximation + movement_control + PID
+                approximation + PID
                 PID
         """)
 
         self.configurator.load_config(filename)
         self.config = self.configurator.config
-        self.modules = set(self.config.keys())
+        possible_modules = {'approximation', 'PID'}
+        self.modules = self.config.keys() & possible_modules
 
+        # unset previous values
         self.approximator = None
         self.movement = None
         self.pid = None
 
         if self.modules == {'approximation'}:
-            approx_params = self.config['approximation']
-            self.approximator = ServoAngleApproximator(self.raw_controller, self.position_detector)
-            # load_or_generate_approx_function(function_file=DEFAULT_FUNCTION, data_for_approx_file=None):
-            self.approximator.load_or_generate_approx_function(**approx_params)
-
+            self._load_approximation_module()
         elif self.modules == {'approximation', 'PID'}:
-            approx_params = self.config['approximation']
-            pid_params = self.config['PID']
-
-            self.approximator = ServoAngleApproximator(self.raw_controller, self.position_detector)
-            self.approximator.load_or_generate_approx_function(**approx_params)
-            self.pid = PIDController(self.position_detector, self.raw_controller, **pid_params)
+            self._load_approximation_module()
+            self._load_pid_module()
         elif self.modules == {'PID'}:
-            pid_params = self.config['PID']
-            # in pid_params: stiffness_function, P, I, D coeffs
-            self.pid = PIDController(self.position_detector, self.raw_controller, **pid_params)
+            self._load_pid_module()
         else:
             logging.error(error_str.format(self.modules))
+
+    def _load_approximation_module(self):
+        approx_params = self.config['approximation']
+        self.approximator = ServoAngleApproximator()
+        try:
+            self.approximator.load_approx_function(**approx_params)
+        except FileNotFoundError:
+            self.connect_camera()
+            self.approximator.generate_approx_function(self.raw_controller, self.position_detector)
+            self.approximator.load_approx_function(**approx_params)
+
+    def _load_pid_module(self):
+        self.connect_camera()
+        pid_params = self.config['PID']
+        self.pid = PIDController(self.position_detector,
+                                 self.raw_controller,
+                                 **pid_params)
+
+    def connect_camera(self, reconnect_if_exists=False):
+        if self.position_detector:
+            if reconnect_if_exists:
+                self.position_detector.kill()
+                self.position_detector.join()
+            else:
+                return
+
+        try:
+            camera_address = self.config['camera']
+        except KeyError:
+            camera_address = {}
+        self.position_detector = PositionDetector()
+        self.position_detector.connect_camera(**camera_address)
 
     def send(self, angle, stiffness):
         """Send given command to the arm.
