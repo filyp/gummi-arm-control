@@ -21,9 +21,7 @@ def get_latest_approximation_file():
 
     Returns:
         name of the newest file
-
-    Raises:
-        FileNotFoundError:  if there were no files in checked directory
+        None, if there were no files
 
     """
     regex = os.path.join(APPROXIMATION_DATA_PATH, '*')
@@ -31,7 +29,7 @@ def get_latest_approximation_file():
     if datafiles:
         return sorted(datafiles)[-1]
     else:
-        raise FileNotFoundError
+        return None
 
 
 class ApproximationDataImporter:

@@ -10,6 +10,7 @@ from src.position_detection.position_detector import PositionDetector
 
 
 class PositionController:
+    possible_modules = {'approximation', 'PID'}
 
     def __init__(self):
         self.raw_controller = RawController()
@@ -51,13 +52,14 @@ class PositionController:
 
         self.configurator.load_config(filename)
         self.config = self.configurator.config
-        possible_modules = {'approximation', 'PID'}
-        self.modules = self.config.keys() & possible_modules
+        self.modules = self.config.keys() & self.possible_modules
 
         # unset previous values
         self.approximator = None
         self.movement = None
         self.pid = None
+
+        self.connect_camera()
 
         if self.modules == {'approximation'}:
             self._load_approximation_module()
@@ -72,21 +74,31 @@ class PositionController:
     def _load_approximation_module(self):
         approx_params = self.config['approximation']
         self.approximator = ServoAngleApproximator()
+        # TODO don't use exceptions for flow control
         try:
             self.approximator.load_approx_function(**approx_params)
         except FileNotFoundError:
-            self.connect_camera()
+            # self.connect_camera()
             self.approximator.generate_approx_function(self.raw_controller, self.position_detector)
             self.approximator.load_approx_function(**approx_params)
 
     def _load_pid_module(self):
-        self.connect_camera()
+        # self.connect_camera()
         pid_params = self.config['PID']
         self.pid = PIDController(self.position_detector,
                                  self.raw_controller,
                                  **pid_params)
 
     def connect_camera(self, reconnect_if_exists=False):
+        """Connect to a camera specified in config.
+
+        If no camera was specified in config, it will connect to
+        built-in or USB camera.
+        If this method was already called before, on default nothing happens.
+        You can change that behavior by setting reconnect_if_exists,
+        which will force reconnect.
+
+        """
         if self.position_detector:
             if reconnect_if_exists:
                 self.position_detector.kill()
@@ -94,12 +106,13 @@ class PositionController:
             else:
                 return
 
-        try:
+        if 'camera' in self.config:
             camera_address = self.config['camera']
-        except KeyError:
+        else:
             camera_address = {}
-        self.position_detector = PositionDetector()
-        self.position_detector.connect_camera(**camera_address)
+
+        self.position_detector = PositionDetector(**camera_address)
+        self.position_detector.start()
 
     def send(self, angle, stiffness):
         """Send given command to the arm.
