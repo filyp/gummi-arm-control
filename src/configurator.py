@@ -72,6 +72,7 @@ class Configurator:
         Notes:
             Parameters passed to this method must be the same as
             passed to ServoAngleApproximator.__init__.
+
         """
         self.config['approximation'] = self._get_parameters(locals())
 
@@ -90,6 +91,14 @@ class Configurator:
         if 'approximation' not in self.config:
             self.turn_on_approximating_function()
 
+    def set_camera_address(self, ip, port):
+        """Set address of remote camera used for position detection.
+
+        If none is set, built-in or USB camera will be used.
+
+        """
+        self.config['camera'] = self._get_parameters(locals())
+
     def turn_off_pid(self):
         self._turn_off('PID')
 
@@ -98,6 +107,14 @@ class Configurator:
 
     def turn_off_movement_control(self):
         self._turn_off('movement_control')
+
+    def unset_camera(self):
+        """If remote camera was set, unset it.
+
+        After that, position detector will use built-in or USB camera.
+
+        """
+        self._turn_off('camera')
 
     def _get_parameters(self, raw_parameters):
         """From given dict, cut out 'self' key."""

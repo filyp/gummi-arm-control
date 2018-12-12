@@ -3,7 +3,6 @@ import os
 
 project_path = os.path.join(os.path.dirname(__file__), '../')
 
-approximation_data_files_list = 'data/experiments_results/approximation_experiment/data/*'
 approximating_functions = 'data/functions/'
 
 approximation_data = 'data/experiments_results/approximation_experiment/data/'
@@ -20,7 +19,6 @@ def get_absolute_path(path):
     return os.path.join(project_path, path)
 
 
-DATA_FOR_APPROXIMATION = get_absolute_path(approximation_data_files_list)
 APPROXIMATING_FUNCTIONS_PATH = get_absolute_path(approximating_functions)
 
 APPROXIMATION_DATA_PATH = get_absolute_path(approximation_data)

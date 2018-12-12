@@ -43,7 +43,8 @@ class MovementController:
     def set_target(self, servo_angle, stiffness):
         self.completion = 0
         # TODO
+        raise NotImplementedError
 
     def get_command(self):
         # TODO
-        pass
+        raise NotImplementedError

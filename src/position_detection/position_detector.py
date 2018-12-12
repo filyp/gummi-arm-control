@@ -4,10 +4,10 @@ detects glyphs and their position
 based on
 rdmilligan.wordpress.com/2015/07/19/glyph-recognition-using-opencv-and-python/
 """
-
+import glob
+import logging
 import threading
 import time
-import glob
 
 from src.position_detection.position_detector_helpers import *
 
@@ -60,7 +60,7 @@ class PositionDetector(threading.Thread):
     Detect marker positions
     Find out their angle
     """
-    def __init__(self, timeout, camera_ip_and_port=None):
+    def __init__(self, timeout=1):
         threading.Thread.__init__(self)
         # current glyphs coordinates
         self.glyphs = {
@@ -70,20 +70,26 @@ class PositionDetector(threading.Thread):
             'DELTA': TimingOut(timeout)
         }
         self._die = False
-        self.camera_ip_and_port = camera_ip_and_port
 
-    def connect_camera(self):
+    def connect_camera(self, ip=None, port=None):
         """Connect OpenCV to camera.
-        If camera IP and port were specified during initialization, use them.
+
+        If camera IP and port were specified, use them.
         Otherwise, look for cameras in /dev/video*.
         If more than one camera can be found,
         choose the one with the biggest number (should be most recently added).
+
+        Args:
+            ip:     IP of the remote camera
+            port:   port of the remote camera
+
         Raises:
             IOError:    if no camera was found
+
         """
-        if self.camera_ip_and_port:
-            full_camera_address = f'http://{self.camera_ip_and_port}/mjpegfeed'
-            print(f'connecting to device {full_camera_address}...')
+        if ip and port:
+            full_camera_address = f'http://{ip}:{port}/mjpegfeed'
+            logging.info(f'connecting to device {full_camera_address}...')
             return cv2.VideoCapture(full_camera_address)
 
         cameras = glob.glob('/dev/video*')
@@ -92,7 +98,7 @@ class PositionDetector(threading.Thread):
 
         camera = sorted(cameras)[-1]
         device_number = int(camera[-1])
-        print(f'connecting to device /dev/video{device_number}...')
+        logging.info(f'connecting to device /dev/video{device_number}...')
         return cv2.VideoCapture(device_number)
 
     def find_contours(self, imgray, n):
@@ -112,6 +118,7 @@ class PositionDetector(threading.Thread):
 
     def get_angle(self):
         """Calculate angle between two pairs of glyphs.
+
         If any of the glyph positions was measured more that some given time ago,
         it means that the calculation can be out-of-date,
         so wait for new measurements.
