@@ -1,11 +1,11 @@
 import csv
+import glob
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 
-import os  # os module imported here
-
-from src.constants import ACCURACY_RESULTS_PATH, ACCURACY_FILES_LIST_PATH
+from src.constants import ACCURACY_RESULTS_PATH, ACCURACY_DATA_PATH
 
 
 class OneExperimentStats:
@@ -60,7 +60,8 @@ class OneExperimentStats:
 
 class AccuracyStats:
     def create_files_list(self):
-        datafiles = glob.glob(ACCURACY_FILES_LIST_PATH)
+        regex = os.path.join(ACCURACY_DATA_PATH, '*')
+        datafiles = glob.glob(regex)
         return datafiles
 
     def generate_statistics(self):

@@ -26,9 +26,8 @@ class ServoAngleApproximator:
         if approx_data_file_name:
             approx_data = os.path.join(APPROXIMATION_DATA_PATH, approx_data_file_name)
         else:
-            try:
-                approx_data = get_latest_approximation_file()
-            except FileNotFoundError:
+            approx_data = get_latest_approximation_file()
+            if not approx_data:
                 logging.info('No data for approximation found, gathering data first...')
                 autocalibration = Autocalibration(raw_controller, position_detector)
                 autocalibration.run()
@@ -40,9 +39,9 @@ class ServoAngleApproximator:
         finder = ApproximatingFunctionFinder(importer)
         finder.save_function_and_stats()
 
-    def get_servo_angle(self, result_angle, stiffness):
+    def get_servo_angle(self, arm_angle, stiffness):
         def f_to_solve(x):
-            return self.arm_angle_approx(x, stiffness) - result_angle
+            return self.arm_angle_approx(x, stiffness) - arm_angle
         solutions = scipy.optimize.fsolve(f_to_solve, np.array([0]))
         servo_angle = solutions[0]
         return servo_angle
