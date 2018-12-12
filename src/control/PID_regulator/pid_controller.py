@@ -15,10 +15,6 @@ class PIDController:
         self.raw_controller = raw_controller
         self.stiffness_function = stiffness_function
 
-    # def get_current_stiffness_index(self, current_angle, tick):
-    #     index = int(current_angle / tick)
-    #     return index
-
     def control(self, target_angle, starting_servo_angle, target_stiffness, starting_position):
         self.pid.set_point(target_angle)
         starting_stiffness = 0
@@ -35,8 +31,6 @@ class PIDController:
 
             if abs(current_angle - target_angle) <= THRESHOLD:
                 return
-            # stiffness_index = self.get_current_stiffness_index(current_angle, tick)
-            # stiffness = stiffness_grid[stiffness_index]
 
             delta_angle = self.pid.update(current_angle)
             print(delta_angle)
