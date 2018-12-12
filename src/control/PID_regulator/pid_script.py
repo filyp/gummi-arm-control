@@ -1,16 +1,23 @@
 from src.control.PID_regulator.pid_controller import PIDController
 from src.position_detection.position_detector import PositionDetector
 from src.control.raw_controller import RawController
+import time
+
 from src.control import maestro
 import numpy as np
 
 
 STIFFNESS = 10
-TARGET_ANGLE = 90
-STIFFNESS_FUNCTION = lambda x: x**2 # stub function of stiffness course
+TARGET_ANGLE = 100
+STIFFNESS_FUNCTION = lambda x: 0 # stub function of stiffness course
 
 position_detector = PositionDetector(1.0)
+position_detector.start()
+
 raw_controller = RawController()
+
+time.sleep(2)
+
 
 starting_servo_position = raw_controller.get_servo_position()
 starting_position = int(position_detector.get_angle())

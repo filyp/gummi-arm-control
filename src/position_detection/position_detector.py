@@ -117,6 +117,8 @@ class PositionDetector(threading.Thread):
                     self.glyphs[glyph_pattern].set(ordered)
                     break
                 bitmap = rotate_image(bitmap, 90)
+                a = self.get_angle()
+                print(a)
 
     def run(self):
         camera = cv2.VideoCapture(0)
