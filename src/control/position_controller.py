@@ -1,5 +1,6 @@
 import logging
 import textwrap
+from time import sleep
 
 from src.configurator import Configurator
 from src.control.PID_regulator.pid_controller import PIDController
@@ -15,6 +16,7 @@ class PositionController:
 
     def __init__(self):
         self.raw_controller = RawController()
+        sleep(2)
         self.position_detector = None
         self.configurator = Configurator()
         self.config = {}

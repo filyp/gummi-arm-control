@@ -4,3 +4,10 @@ env
 src/control/maestro.py
 
 data/approximation/functions/
+
+sin_generator\.py
+
+tatus
+
+data/learned_function\.pickle
+src/control/PID_regulator/pid_script.py
