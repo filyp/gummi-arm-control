@@ -28,7 +28,7 @@ def save_row(filename, row):
         print(row)
 
 
-def experiment_iteration(controller, interpolation_controller, position_detector, filename, examine_angle, stiffness):
+def experiment_iteration(controller, approximation_controller, position_detector, filename, examine_angle, stiffness):
     """Carry out one iteration of the experiment.
 
     Randomly choose angle and stiffness, and send them to arm.
@@ -40,13 +40,13 @@ def experiment_iteration(controller, interpolation_controller, position_detector
         controller: PositionController that communicates with servos
         position_detector: PositionDetector that reads arm angle from the camera
         filename: .csv file where data is saved
-        interpolation_controller: ...
+        approximation_controller: ...
 
     """
     while True:
         angle = int(np.random.uniform(0, MAX_ANGLE))
         try:
-            # controller.send(angle, stiffness)
+            controller.send(angle, stiffness)
             break
         except ValueError:
             # chosen values were out of servos' range, so choose once again
@@ -56,7 +56,7 @@ def experiment_iteration(controller, interpolation_controller, position_detector
 
     angle_from_camera_prev = position_detector.get_angle()
 
-    interpolation_controller.send(examine_angle, stiffness)
+    approximation_controller.send(examine_angle, stiffness)
 
     time.sleep(DELAY)
 
