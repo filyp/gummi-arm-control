@@ -94,8 +94,11 @@ class PositionController:
     def _load_pid_module(self):
         # self.connect_camera()
         pid_params = self.config['PID']
+        def stiffness_function(x):
+            return x**2
         self.pid = PIDController(self.position_detector,
                                  self.raw_controller,
+                                 stiffness_function,
                                  **pid_params)
 
     def connect_camera(self, reconnect_if_exists=False):
@@ -140,11 +143,19 @@ class PositionController:
             servo_angle = self.approximator.get_servo_angle(angle, stiffness)
             self.raw_controller.send(servo_angle, stiffness)
         elif self.modules == {'approximation', 'PID'}:
-            # todo implement
-            raise NotImplementedError
+            starting_servo_position = self.raw_controller.get_servo_position()
+            starting_arm_position = int(self.position_detector.get_angle())
+
+            servo_angle = self.approximator.get_servo_angle(angle, stiffness)
+            self.raw_controller.send(servo_angle, stiffness)
+            self.pid.wait_for_interception(starting_arm_position, angle)
+            self.pid.control(angle, starting_servo_position,
+                             stiffness, starting_arm_position)
+
         elif self.modules == {'PID'}:
             starting_servo_position = self.raw_controller.get_servo_position()
-            starting_position = int(self.position_detector.get_angle())
-            self.pid.control(angle, starting_servo_position, stiffness, starting_position)
+            starting_arm_position = int(self.position_detector.get_angle())
+            self.pid.control(angle, starting_servo_position,
+                             stiffness, starting_arm_position)
         elif not self.modules:
-            logging.error('to send, you must first load some configuration')
+            logging.error('To send, you must first load some configuration.')
