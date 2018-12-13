@@ -96,11 +96,8 @@ class PositionController:
     def _load_pid_module(self):
         # self.connect_camera()
         pid_params = self.config['PID']
-        def stiffness_function(x):
-            return x**2
         self.pid = PIDController(self.position_detector,
                                  self.raw_controller,
-                                 stiffness_function,
                                  **pid_params)
 
     def connect_camera(self, reconnect_if_exists=False):

@@ -11,13 +11,13 @@ THRESHOLD = 0.2
 
 
 class PIDController:
-    def __init__(self, position_detector, raw_controller, stiffness_function,
-                 P=0.7, I=0.2, D=0.2, interception_moment=None):
+    def __init__(self, position_detector, raw_controller,
+                 stiffness_function_string, P=0.7, I=0.2, D=0.2,
+                 interception_moment=None):
         self.pid = PID(P=P, I=I, D=D)
         self.position_detector = position_detector
         self.raw_controller = raw_controller
-        # todo evaluate function from string
-        self.stiffness_function = stiffness_function
+        self.stiffness_function = eval(stiffness_function_string)
         self.interception_moment = interception_moment
 
     # def get_current_stiffness_index(self, current_angle, tick):
