@@ -22,10 +22,3 @@ class ServoAngleApproximator:
         solutions = scipy.optimize.fsolve(f_to_solve, np.array([0]))
         servo_angle = solutions[0]
         return servo_angle
-
-
-a = ServoAngleApproximator(None, None)
-a.load_or_generate_approx_function()
-x = a.get_servo_angle(20, 0)
-
-print(x)
