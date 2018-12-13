@@ -13,6 +13,7 @@ class PIDController:
         self.pid = PID(P=P, I=I, D=D)
         self.position_detector = position_detector
         self.raw_controller = raw_controller
+        # todo evaluate function from string
         self.stiffness_function = stiffness_function
 
     def control(self, target_angle, starting_servo_angle, target_stiffness, starting_position):

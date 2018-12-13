@@ -52,8 +52,8 @@ class Configurator:
             interception_moment:
 
         Notes:
-            Parameters passed to this method must be the same as
-            passed to <PID controller>.__init__.
+            Parameters passed to this method must correspond to those
+            passed to PIDController.__init__.
 
         """
         self.config['PID'] = self._get_parameters(locals())
@@ -70,8 +70,9 @@ class Configurator:
             function_file: .pickle file containing the function
 
         Notes:
-            Parameters passed to this method must be the same as
+            Parameters passed to this method must correspond to those
             passed to ServoAngleApproximator.__init__.
+
         """
         self.config['approximation'] = self._get_parameters(locals())
 
@@ -81,7 +82,7 @@ class Configurator:
         For detailed description see MovementController.__init__
 
         Notes:
-            Parameters passed to this method must be the same as
+            Parameters passed to this method must correspond to those
             passed to MovementController.__init__.
 
         """
@@ -89,6 +90,35 @@ class Configurator:
         # for movement control, some angle approximation is needed
         if 'approximation' not in self.config:
             self.turn_on_approximating_function()
+
+    def turn_on_linear_interpolation(self, angle_relation):
+        """Find servo angles using linear interpolation.
+
+        It requires sending two angles to servos using RawController
+        and manually measuring what angle is reached by the arm for them.
+        Then, pass these values as a dictionary.
+
+        Args:
+            angle_relation: {servo_angle1: corresponding_arm_angle1,
+                             servo_angle2: corresponding_arm_angle2}
+
+        Notes:
+            Make sure servo angles that you choose, are inside the range
+            of arm's normal operation. Otherwise, interpolation will be skewed.
+
+            Parameters passed to this method must correspond to those
+            passed to LinearInterpolator.__init__.
+
+        """
+        self.config['linear_interpolator'] = self._get_parameters(locals())
+
+    def set_camera_address(self, ip, port):
+        """Set address of remote camera used for position detection.
+
+        If none is set, built-in or USB camera will be used.
+
+        """
+        self.config['camera'] = self._get_parameters(locals())
 
     def turn_off_pid(self):
         self._turn_off('PID')
@@ -98,6 +128,17 @@ class Configurator:
 
     def turn_off_movement_control(self):
         self._turn_off('movement_control')
+
+    def turn_off_linear_interpolation(self):
+        self._turn_off('linear_interpolator')
+
+    def unset_camera(self):
+        """If remote camera was set, unset it.
+
+        After that, position detector will use built-in or USB camera.
+
+        """
+        self._turn_off('camera')
 
     def _get_parameters(self, raw_parameters):
         """From given dict, cut out 'self' key."""

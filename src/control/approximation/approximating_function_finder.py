@@ -5,16 +5,31 @@ import os
 import dill
 import numpy as np
 import scipy.linalg
+import logging
 
-from src.benchmark.test_utils.approximation_stats import ApproximationStats
-from src.constants import DATA_FOR_APPROXIMATION, \
+from src.benchmark.approximation_experiment.approximation_stats import ApproximationStats
+from src.constants import APPROXIMATION_DATA_PATH, \
     DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS_PATH
 
 
-def get_default_file():
-    # TODO search for newest file (assume names can be incorrect) also TEST IT
-    datafiles = glob.glob(DATA_FOR_APPROXIMATION)
-    return sorted(datafiles)[-1]
+def get_latest_approximation_file():
+    """Get newest file with data for approximation.
+
+    Looks for data in directory specified in src.constants.
+    Assumes all file names in that directory have format:
+    experiment_%Y-%m-%d %H:%M:%S.csv
+
+    Returns:
+        name of the newest file
+        None, if there were no files
+
+    """
+    regex = os.path.join(APPROXIMATION_DATA_PATH, '*')
+    datafiles = glob.glob(regex)
+    if datafiles:
+        return sorted(datafiles)[-1]
+    else:
+        return None
 
 
 class ApproximationDataImporter:
@@ -27,7 +42,7 @@ class ApproximationDataImporter:
 
     def import_from_csv(self):
         with open(self.file_name) as datafile:
-            print(self.file_name)
+            logging.info(self.file_name)
             input_data = csv.DictReader(datafile)
 
             for row in input_data:
@@ -75,7 +90,7 @@ class ApproximatingFunctionFinder:
         # Solve for a least squares estimate
         self.coeffs, _, _, _ = scipy.linalg.lstsq(A, data[:, 2])
 
-        print(self.coeffs)
+        logging.info(self.coeffs)
 
         return lambda x, y: self.coeffs[4] * x ** 2. + \
                             self.coeffs[5] * y ** 2. + \
@@ -101,8 +116,8 @@ class ApproximatingFunctionFinder:
 
 
 if __name__ == '__main__':
-    path = get_default_file()
+    path = get_latest_approximation_file()
     i = ApproximationDataImporter(path)
     i.import_from_csv()
     finder = ApproximatingFunctionFinder(i)
-    print(finder.approximating_function)
+    logging.info(finder.approximating_function)

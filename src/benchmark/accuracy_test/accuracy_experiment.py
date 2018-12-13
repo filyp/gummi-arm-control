@@ -2,6 +2,7 @@ import ast
 import csv
 import datetime
 import time
+import os
 
 import numpy as np
 
@@ -9,7 +10,7 @@ from src.control.position_controller import PositionController
 from src.constants import ACCURACY_DATA_PATH
 MAX_ANGLE = 180
 
-FILENAME_BASE = ACCURACY_DATA_PATH + 'accuracy_experiment'
+FILENAME_BASE = os.path.join(ACCURACY_DATA_PATH, 'accuracy_experiment')
 DELAY = 4
 
 
@@ -27,7 +28,7 @@ def save_row(filename, row):
         print(row)
 
 
-def experiment_iteration(controller, interpolation_controller, position_detector, filename, examine_angle, stiffness):
+def experiment_iteration(controller, approximation_controller, position_detector, filename, examine_angle, stiffness):
     """Carry out one iteration of the experiment.
 
     Randomly choose angle and stiffness, and send them to arm.
@@ -39,7 +40,7 @@ def experiment_iteration(controller, interpolation_controller, position_detector
         controller: PositionController that communicates with servos
         position_detector: PositionDetector that reads arm angle from the camera
         filename: .csv file where data is saved
-        interpolation_controller: ...
+        approximation_controller: ...
 
     """
     while True:
@@ -55,7 +56,7 @@ def experiment_iteration(controller, interpolation_controller, position_detector
 
     angle_from_camera_prev = position_detector.get_angle()
 
-    interpolation_controller.send(examine_angle, stiffness)
+    approximation_controller.send(examine_angle, stiffness)
 
     time.sleep(DELAY)
 
@@ -82,7 +83,7 @@ def start(angle, stiffness_list):
 
             labels = ["prev_angle_servo", "prev_angle", "stiffness", "angle", 'examine_angle']
             save_row(filename, labels)
-            for x in range(0, 10):
+            for x in range(0, 30):
                 experiment_iteration(controller, position_controller, position_detector, filename, angle, stiffness)
     except KeyboardInterrupt:
         pass

@@ -1,11 +1,11 @@
 import csv
+import glob
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 
-import os  # os module imported here
-
-from src.constants import ACCURACY_RESULTS_PATH, ACCURACY_FILES_LIST_PATH
+from src.constants import ACCURACY_RESULTS_PATH, ACCURACY_DATA_PATH
 
 
 class OneExperimentStats:
@@ -36,10 +36,10 @@ class OneExperimentStats:
         plt.figure()
         baseline = np.arange(min(self.prev_angle) - self.MARGIN_X, max(self.prev_angle) + self.MARGIN_X)
         plt.plot(baseline, np.ones_like(baseline) * self.baseline_value, self.prev_angle, self.angle, 'ro')
-        plt.yticks(range(self.baseline_value - self.MARGIN_Y, self.baseline_value + self.MARGIN_Y))
-        plt.title("Examine angle: {} Stiffness: {}".format(self.baseline_value, self.stiffness))
-        plt.xlabel('starting position (deg)')
-        plt.ylabel('ending position (deg)')
+        # plt.yticks(range(self.baseline_value - self.MARGIN_Y, self.baseline_value + self.MARGIN_Y))
+        plt.title("Badana pozycja: {} stopni, Sztywność: {}".format(self.baseline_value, self.stiffness))
+        plt.xlabel('pozycja początkowa (st)')
+        plt.ylabel('pozycja końcowa (st)')
         plt.savefig(ACCURACY_RESULTS_PATH + 'accuracy_experiment-' + str(self.baseline_value) + '-' +
                     str(self.stiffness) + '.png')
 
@@ -60,7 +60,8 @@ class OneExperimentStats:
 
 class AccuracyStats:
     def create_files_list(self):
-        datafiles = glob.glob(ACCURACY_FILES_LIST_PATH)
+        regex = os.path.join(ACCURACY_DATA_PATH, '*')
+        datafiles = glob.glob(regex)
         return datafiles
 
     def generate_statistics(self):
@@ -74,7 +75,7 @@ class AccuracyStats:
                 writer = csv.writer(f)
                 writer.writerow(row)
         except IOError:
-            print('dupa dupa')
+            print('Error during saving data to file')
 
         for file in files_list:
             one_stat = OneExperimentStats(file, stats_file_name)

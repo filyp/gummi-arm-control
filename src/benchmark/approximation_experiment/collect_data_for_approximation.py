@@ -1,20 +1,21 @@
 import csv
 import datetime
+import os
+import textwrap
 import time
 
 import numpy as np
 
-from src.control import raw_controller
-from src.position_detection import position_detector as pd
 from src.constants import APPROXIMATION_DATA_PATH
-import textwrap
+from src.control.raw_controller import RawController
+from src.position_detection.position_detector import PositionDetector
 
 # these values were set by playing with position_controller.manual_control
 # and seeing how the arm behaves
 MAX_STIFFNESS = 20
 MIN_STIFFNESS = -10
 
-FILENAME_BASE = APPROXIMATION_DATA_PATH + 'experiment'
+FILENAME_BASE = os.path.join(APPROXIMATION_DATA_PATH, 'experiment')
 DELAY_BETWEEN_ITERATIONS = 3
 DETECTION_TIMEOUT = 1
 
@@ -48,10 +49,11 @@ def experiment_iteration(controller, position_detector, filename):
 
     """
     while True:
-        angle = int(np.random.uniform(0, controller.MAX_ANGLE))
+        angle = 0
+        # angle = int(np.random.uniform(0, controller.MAX_ANGLE))
         stiffness = int(np.random.uniform(MIN_STIFFNESS, MAX_STIFFNESS))
         try:
-            controller.send(angle, stiffness)
+            # controller.send(angle, stiffness)
             break
         except ValueError:
             # chosen values were out of servos' range, so choose once again
@@ -71,13 +73,13 @@ def start(controller, position_detector, running_time=2):
     iteration_number = running_time * 3600 // DELAY_BETWEEN_ITERATIONS
 
     info = f"""
-    Number of iterations:          {iteration_number}
-    Estimated running time:        {running_time} hours
-    File with experiment results:  {filename}
-    
-    You can stop it manually by CTRL+C
-    Results still will be saved
-    """
+        Number of iterations:          {iteration_number}
+        Estimated running time:        {running_time} hours
+        File with experiment results:  {filename}
+        
+        You can stop it manually by CTRL+C
+        Results still will be saved
+        """
     print(textwrap.dedent(info))
 
     row = ['angle', 'stiffness', 'camera']
@@ -91,7 +93,7 @@ def start(controller, position_detector, running_time=2):
 
 
 if __name__ == "__main__":
-    c = raw_controller.RawController()
-    p_d = pd.PositionDetector(DETECTION_TIMEOUT)
-    p_d.start()
-    start(c, p_d)
+    raw_controller = RawController()
+    p_c = PositionDetector(DETECTION_TIMEOUT)
+    p_c.start()
+    start(raw_controller, p_c)
