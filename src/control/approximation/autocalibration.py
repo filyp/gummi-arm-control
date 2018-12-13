@@ -13,7 +13,7 @@ class Autocalibration:
 
         # ask about custom duration of experiment
         try:
-            duration = int(input("""Put experiment duration in seconds. Default is 2"""))
+            duration = int(input("""Put experiment duration in hours. Default is 2"""))
             print('Started data_for_approximation experiment with duration: %'.format(duration))
             collect_data_for_approximation.start(self.raw_controller, self.position_detector, running_time=duration)
         except ValueError:

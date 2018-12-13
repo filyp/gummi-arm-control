@@ -54,9 +54,15 @@ class ApproximationStats:
         predictions = self.approximating_function(self.angle, self.stiffness)
         squared_errors = (self.camera - predictions) ** 2
 
+        # pack stiffnesses into bins ang get bins' variance
         variances = binned_statistic(self.stiffness, squared_errors, bins=bins_number)[0]
+
+        # calculate std
         deviations = np.sqrt(variances)
 
         bin_range = np.linspace(min(self.stiffness), max(self.stiffness), bins_number+1)[:-1]
         plt.plot(bin_range, deviations)
+        plt.xlabel('sztywność')
+        plt.ylabel('odchylenie standardowe błedów')
         plt.savefig('{}deviations_stiffness_{}.png'.format(APPROXIMATION_RESULTS_PATH, bins_number))
+

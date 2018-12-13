@@ -114,7 +114,7 @@ class ApproximatingFunctionFinder:
         approx_stats = ApproximationStats(self.importer, self.approximating_function)
         approx_stats.plot_approximating_function()
         # approx_stats.plot_errors()
-        approx_stats.plot_deviations_for_given_stiffness(10)
+        approx_stats.plot_deviations_for_given_stiffness(20)
 
 
 if __name__ == '__main__':
@@ -122,4 +122,4 @@ if __name__ == '__main__':
     i = ApproximationDataImporter(path)
     i.import_from_csv()
     finder = ApproximatingFunctionFinder(i)
-    logging.info(finder.approximating_function)
+    finder.save_function_and_stats()
