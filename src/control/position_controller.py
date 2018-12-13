@@ -5,6 +5,7 @@ from time import sleep
 from src.configurator import Configurator
 from src.control.PID_regulator.pid_controller import PIDController
 from src.control.approximation.approximator import ServoAngleApproximator
+from src.control.linear_interpolator import LinearInterpolator
 from src.control.raw_controller import RawController
 from src.constants import DEFAULT_CONFIG, DEFAULT_FUNCTION
 from src.position_detection.position_detector import PositionDetector
@@ -12,7 +13,7 @@ from src.control.approximation.function_factory import FunctionFactory
 
 
 class PositionController:
-    possible_modules = {'approximation', 'PID'}
+    possible_modules = {'approximation', 'PID', 'linear_interpolator'}
 
     def __init__(self):
         self.raw_controller = RawController()
@@ -25,6 +26,7 @@ class PositionController:
         self.approximator = None
         self.movement = None
         self.pid = None
+        self.linear_interpolator = None
 
     def load_config(self, filename=DEFAULT_CONFIG):
         """Load arm configuration from a file.
@@ -51,6 +53,7 @@ class PositionController:
                 approximation
                 approximation + PID
                 PID
+                linear_interpolator
         """)
 
         self.configurator.load_config(filename)
@@ -61,6 +64,7 @@ class PositionController:
         self.approximator = None
         self.movement = None
         self.pid = None
+        self.linear_interpolator = None
 
         # connect camera in case it will be needed for tests
         self.connect_camera()
@@ -72,6 +76,8 @@ class PositionController:
             self._load_pid_module()
         elif self.modules == {'PID'}:
             self._load_pid_module()
+        elif self.modules == {'linear_interpolator'}:
+            self._load_linear_interpolator()
         else:
             logging.error(error_str.format(self.modules))
 
@@ -99,6 +105,10 @@ class PositionController:
         self.pid = PIDController(self.position_detector,
                                  self.raw_controller,
                                  **pid_params)
+
+    def _load_linear_interpolator(self):
+        interp_params = self.config['linear_interpolator']
+        self.linear_interpolator = LinearInterpolator(interp_params)
 
     def connect_camera(self, reconnect_if_exists=False):
         """Connect to a camera specified in config.
@@ -156,5 +166,10 @@ class PositionController:
             starting_arm_position = int(self.position_detector.get_angle())
             self.pid.control(angle, starting_servo_position,
                              stiffness, starting_arm_position)
+
+        elif self.modules == {'linear_interpolator'}:
+            servo_angle = self.linear_interpolator.get_servo_angle(angle)
+            self.raw_controller.send(servo_angle, stiffness)
+
         elif not self.modules:
             logging.error('To send, you must first load some configuration.')
