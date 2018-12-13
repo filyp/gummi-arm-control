@@ -23,7 +23,7 @@ class PID:
         self.Integrator_max = Integrator_max
         self.Integrator_min = Integrator_min
 
-        self.set_point = 0.0
+        self.target_point = 0.0
         self.error = 0.0
 
     def update(self, current_value):
@@ -31,7 +31,7 @@ class PID:
 		Calculate PID output value for given reference input and feedback
 		"""
 
-        self.error = self.set_point - current_value
+        self.error = self.target_point - current_value
 
         P_value = self.Kp * self.error
         D_value = self.Kd * (self.error - self.Derivator)
@@ -50,12 +50,12 @@ class PID:
 
         return PID
 
-    def set_point(self, set_point):
+    def set_point(self, target_point):
         """
 		Initilize the setpoint of PID
 		"""
 
-        self.set_point = set_point
+        self.target_point = target_point
         self.Integrator = 0
         self.Derivator = 0
 
@@ -75,7 +75,7 @@ class PID:
         self.Kd = D
 
     def getPoint(self):
-        return self.set_point
+        return self.target_point
 
     def getError(self):
         return self.error

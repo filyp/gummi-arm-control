@@ -36,10 +36,10 @@ class OneExperimentStats:
         plt.figure()
         baseline = np.arange(min(self.prev_angle) - self.MARGIN_X, max(self.prev_angle) + self.MARGIN_X)
         plt.plot(baseline, np.ones_like(baseline) * self.baseline_value, self.prev_angle, self.angle, 'ro')
-        plt.yticks(range(self.baseline_value - self.MARGIN_Y, self.baseline_value + self.MARGIN_Y))
-        plt.title("Examine angle: {} Stiffness: {}".format(self.baseline_value, self.stiffness))
-        plt.xlabel('starting position (deg)')
-        plt.ylabel('ending position (deg)')
+        # plt.yticks(range(self.baseline_value - self.MARGIN_Y, self.baseline_value + self.MARGIN_Y))
+        plt.title("Badana pozycja: {} stopni, Sztywność: {}".format(self.baseline_value, self.stiffness))
+        plt.xlabel('pozycja początkowa (st)')
+        plt.ylabel('pozycja końcowa (st)')
         plt.savefig(ACCURACY_RESULTS_PATH + 'accuracy_experiment-' + str(self.baseline_value) + '-' +
                     str(self.stiffness) + '.png')
 
@@ -75,9 +75,13 @@ class AccuracyStats:
                 writer = csv.writer(f)
                 writer.writerow(row)
         except IOError:
-            print('dupa dupa')
+            print('Error during saving data to file')
 
         for file in files_list:
             one_stat = OneExperimentStats(file, stats_file_name)
             one_stat.save_chart()
             one_stat.save_statistics()
+
+
+a = AccuracyStats()
+a.generate_statistics()

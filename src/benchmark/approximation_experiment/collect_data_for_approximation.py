@@ -12,8 +12,8 @@ from src.position_detection.position_detector import PositionDetector
 
 # these values were set by playing with position_controller.manual_control
 # and seeing how the arm behaves
-MAX_STIFFNESS = 60
-MIN_STIFFNESS = -20
+MAX_STIFFNESS = 20
+MIN_STIFFNESS = -10
 
 FILENAME_BASE = os.path.join(APPROXIMATION_DATA_PATH, 'experiment')
 DELAY_BETWEEN_ITERATIONS = 3

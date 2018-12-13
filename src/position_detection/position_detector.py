@@ -55,18 +55,15 @@ class TimingOut:
 
 class PositionDetector(threading.Thread):
     """Detects arm angle.
-
     It connects to built-in or USB camera.
     It can also connect to a remote camera if you specify its IP and port.
     Then, it detects positions of four glyphs on the arm.
     From them, we can calculate the angle.
-
     Args:
         timeout:    time after which readings of glyph positions
                     become invalid
         ip:         IP of the remote camera
         port:       port of the remote camera
-
     """
     glyph_resolution = (5, 5)
 
@@ -85,15 +82,12 @@ class PositionDetector(threading.Thread):
 
     def _connect_camera(self):
         """Connect OpenCV to camera.
-
         If camera IP and port were specified, use them.
         Otherwise, look for cameras in /dev/video*.
         If more than one camera can be found,
         choose the one with the biggest number (should be most recently added).
-
         Raises:
             IOError:    if no camera was found
-
         """
         if self.ip and self.port:
             full_camera_address = f'http://{self.ip}:{self.port}/mjpegfeed'
@@ -126,7 +120,6 @@ class PositionDetector(threading.Thread):
 
     def get_angle(self):
         """Calculate angle between two pairs of glyphs.
-
         If any of the glyph positions was measured more that some given time ago,
         it means that the calculation can be out-of-date,
         so wait for new measurements.
