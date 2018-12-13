@@ -76,6 +76,7 @@ class ApproximationDataImporter:
 
 
 class ApproximatingFunctionFinder:
+    """Create approximating function from existing data."""
     def __init__(self, importer):
         self.coeffs = None
         self.importer = importer
@@ -107,6 +108,7 @@ class ApproximatingFunctionFinder:
     def save_function_and_stats(self):
         self.approximating_function = self.get_approximating_function()
         self.save_function_to_file(DEFAULT_FUNCTION)
+        logging.info(f'Function saved as {DEFAULT_FUNCTION}')
 
         # generate stats
         approx_stats = ApproximationStats(self.importer, self.approximating_function)

@@ -4,11 +4,7 @@ import numpy as np
 import scipy.optimize
 import logging
 
-from src.constants import DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS_PATH, APPROXIMATION_DATA_PATH
-from src.control.approximation.approximating_function_finder import ApproximatingFunctionFinder, \
-    ApproximationDataImporter
-from src.control.approximation.autocalibration import Autocalibration
-from src.control.approximation.approximating_function_finder import get_latest_approximation_file
+from src.constants import DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS_PATH
 
 
 class ServoAngleApproximator:
@@ -19,23 +15,6 @@ class ServoAngleApproximator:
         absolute_filename = os.path.join(APPROXIMATING_FUNCTIONS_PATH, function_file)
         with open(absolute_filename, 'rb') as file:
             self.arm_angle_approx = dill.load(file)
-
-    def generate_approx_function(self, raw_controller, position_detector, approx_data_file_name=None):
-        if approx_data_file_name:
-            approx_data = os.path.join(APPROXIMATION_DATA_PATH, approx_data_file_name)
-        else:
-            approx_data = get_latest_approximation_file()
-            if not approx_data:
-                logging.info('No data for approximation found, gathering data first...')
-                autocalibration = Autocalibration(raw_controller, position_detector)
-                autocalibration.run()
-                approx_data = get_latest_approximation_file()
-
-        logging.info('Calculating approximating function...')
-        importer = ApproximationDataImporter(approx_data)
-        importer.import_from_csv()
-        finder = ApproximatingFunctionFinder(importer)
-        finder.save_function_and_stats()
 
     def get_servo_angle(self, arm_angle, stiffness):
         def f_to_solve(x):
