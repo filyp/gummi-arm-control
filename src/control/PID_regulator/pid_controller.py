@@ -3,9 +3,6 @@ from time import sleep
 from src.control.PID_regulator.pid import PID
 import time
 
-# todo change to 1 - 0.5 % of first error rate
-THRESHOLD = 0.2
-
 
 # better higher P and lower I, but matlab claims different things - only I-component
 
@@ -19,6 +16,7 @@ class PIDController:
         self.raw_controller = raw_controller
         self.stiffness_function = eval(stiffness_function_string)
         self.interception_moment = interception_moment
+        self.threshold_ratio = 0.05
 
     # def get_current_stiffness_index(self, current_angle, tick):
     #     index = int(current_angle / tick)
@@ -50,21 +48,20 @@ class PIDController:
         starting_stiffness = 0
         current_servo_angle = starting_servo_angle
         print(current_servo_angle)
+        threshold = abs(target_angle - starting_position) * self.threshold_ratio
         while True:
             current_angle = self.position_detector.get_angle()
             print(current_angle)
 
-            # calculate stiffness
-            movement_completion = ((current_angle + starting_position) / abs(target_angle - starting_position))
-            stiffness = (self.stiffness_function(movement_completion) * (target_stiffness - starting_stiffness)) + \
-                        starting_stiffness
+            if abs(current_angle - target_angle) > threshold:
+                # calculate stiffness
+                movement_completion = ((current_angle + starting_position) / abs(target_angle - starting_position))
+                stiffness = (self.stiffness_function(movement_completion) * (target_stiffness - starting_stiffness)) + \
+                            starting_stiffness
 
-            if abs(current_angle - target_angle) <= THRESHOLD:
-                return
+                delta_angle = self.pid.update(current_angle)
+                print(delta_angle)
+                current_servo_angle -= delta_angle
 
-            delta_angle = self.pid.update(current_angle)
-            print(delta_angle)
-            current_servo_angle -= delta_angle
-
-            self.raw_controller.send(int(current_servo_angle), stiffness)
+                self.raw_controller.send(int(current_servo_angle), stiffness)
             time.sleep(0.5)
