@@ -4,8 +4,6 @@ accuracy_experiment:
   first:
     angle: 90
     stiffness: [0, 10]
-#  second:
-#    angle: 100
-#    stiffness: [0, 10, 40]
-
-dupa_experiment: null
+  second:
+    angle: 100
+    stiffness: [0, 10, 40]
