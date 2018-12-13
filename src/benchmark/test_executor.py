@@ -1,7 +1,6 @@
-import sys
 from ruamel.yaml import YAML
-from src.benchmark import accuracy_experiment
-from src.benchmark.test_utils.accuracy_stats import AccuracyStats
+from src.benchmark.accuracy_test import accuracy_experiment
+from src.benchmark.accuracy_test.accuracy_stats import AccuracyStats
 
 # todo add to constants
 FILE_LOCATION = "../../../config/tests_config"
@@ -26,9 +25,9 @@ class TestExecutor:
 
         if self.config['accuracy_experiment'] is not None:
             print('Started examining data_for_approximation accuracy_experiment')
-            current_experiment = self.config['accuracy_experiment']
-            for _, experiment in current_experiment.items():
-                accuracy_experiment.start(experiment['angle'], experiment['stiffness'])
+            experiment = self.config['accuracy_experiment']
+            for _, item in experiment.items():
+                accuracy_experiment.start(item['angle'], item['stiffness'])
             accuracy_stats = AccuracyStats()
             accuracy_stats.generate_statistics()
 

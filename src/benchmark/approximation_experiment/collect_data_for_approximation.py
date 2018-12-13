@@ -49,10 +49,11 @@ def experiment_iteration(controller, position_detector, filename):
 
     """
     while True:
-        angle = int(np.random.uniform(0, controller.MAX_ANGLE))
+        angle = 0
+        # angle = int(np.random.uniform(0, controller.MAX_ANGLE))
         stiffness = int(np.random.uniform(MIN_STIFFNESS, MAX_STIFFNESS))
         try:
-            controller.send(angle, stiffness)
+            # controller.send(angle, stiffness)
             break
         except ValueError:
             # chosen values were out of servos' range, so choose once again
@@ -93,6 +94,6 @@ def start(controller, position_detector, running_time=2):
 
 if __name__ == "__main__":
     raw_controller = RawController()
-    position_detector = PositionDetector(DETECTION_TIMEOUT)
-    position_detector.start()
-    start(raw_controller, position_detector)
+    p_c = PositionDetector(DETECTION_TIMEOUT)
+    p_c.start()
+    start(raw_controller, p_c)

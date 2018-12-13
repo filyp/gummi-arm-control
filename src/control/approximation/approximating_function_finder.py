@@ -7,7 +7,7 @@ import numpy as np
 import scipy.linalg
 import logging
 
-from src.benchmark.test_utils.approximation_stats import ApproximationStats
+from src.benchmark.approximation_experiment.approximation_stats import ApproximationStats
 from src.constants import APPROXIMATION_DATA_PATH, \
     DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS_PATH
 

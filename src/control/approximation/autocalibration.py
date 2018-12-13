@@ -1,4 +1,4 @@
-import src.benchmark.collect_data_for_approximation as collect_data_for_approximation
+import src.benchmark.approximation_experiment.collect_data_for_approximation as collect_data_for_approximation
 
 
 class Autocalibration:

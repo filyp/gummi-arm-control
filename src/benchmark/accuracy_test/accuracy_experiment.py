@@ -46,7 +46,7 @@ def experiment_iteration(controller, interpolation_controller, position_detector
     while True:
         angle = int(np.random.uniform(0, MAX_ANGLE))
         try:
-            controller.send(angle, stiffness)
+            # controller.send(angle, stiffness)
             break
         except ValueError:
             # chosen values were out of servos' range, so choose once again
@@ -83,7 +83,7 @@ def start(angle, stiffness_list):
 
             labels = ["prev_angle_servo", "prev_angle", "stiffness", "angle", 'examine_angle']
             save_row(filename, labels)
-            for x in range(0, 10):
+            for x in range(0, 30):
                 experiment_iteration(controller, position_controller, position_detector, filename, angle, stiffness)
     except KeyboardInterrupt:
         pass

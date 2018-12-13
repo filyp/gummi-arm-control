@@ -2,10 +2,8 @@ import os
 import dill
 import numpy as np
 import scipy.optimize
-import glob
 import logging
 
-from src.benchmark.test_utils.approximation_stats import ApproximationStats
 from src.constants import DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS_PATH, APPROXIMATION_DATA_PATH
 from src.control.approximation.approximating_function_finder import ApproximatingFunctionFinder, \
     ApproximationDataImporter
