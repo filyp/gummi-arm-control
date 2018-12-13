@@ -5,8 +5,9 @@ from src.configurator import Configurator
 from src.control.PID_regulator.pid_controller import PIDController
 from src.control.approximation.approximator import ServoAngleApproximator
 from src.control.raw_controller import RawController
-from src.constants import DEFAULT_CONFIG
+from src.constants import DEFAULT_CONFIG, DEFAULT_FUNCTION
 from src.position_detection.position_detector import PositionDetector
+from src.control.approximation.function_factory import FunctionFactory
 
 
 class PositionController:
@@ -59,6 +60,7 @@ class PositionController:
         self.movement = None
         self.pid = None
 
+        # connect camera in case it will be needed for tests
         self.connect_camera()
 
         if self.modules == {'approximation'}:
@@ -73,14 +75,21 @@ class PositionController:
 
     def _load_approximation_module(self):
         approx_params = self.config['approximation']
+        function_file = approx_params['function_file']
+
         self.approximator = ServoAngleApproximator()
-        # TODO don't use exceptions for flow control
-        try:
-            self.approximator.load_approx_function(**approx_params)
-        except FileNotFoundError:
-            # self.connect_camera()
-            self.approximator.generate_approx_function(self.raw_controller, self.position_detector)
-            self.approximator.load_approx_function(**approx_params)
+
+        if FunctionFactory.function_exists(function_file):
+            self.approximator.load_approx_function(function_file)
+            return
+        elif FunctionFactory.function_exists(DEFAULT_FUNCTION):
+            logging.warning(f'No {function_file} found, using {DEFAULT_FUNCTION} instead')
+            self.approximator.load_approx_function(DEFAULT_FUNCTION)
+            return
+        logging.warning(
+            f'No {function_file} or {DEFAULT_FUNCTION}found. Creating new function...')
+        FunctionFactory.generate_approx_function(self.raw_controller, self.position_detector)
+        self.approximator.load_approx_function(DEFAULT_FUNCTION)
 
     def _load_pid_module(self):
         # self.connect_camera()
