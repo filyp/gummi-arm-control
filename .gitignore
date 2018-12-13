@@ -2,5 +2,12 @@
 __pycache__
 env
 src/control/maestro.py
+src/control/PID_regulator/pid_script.py
 
 data/approximation/functions/
+
+sin_generator\.py
+
+tatus
+
+data/learned_function\.pickle

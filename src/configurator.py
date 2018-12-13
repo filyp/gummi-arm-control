@@ -42,14 +42,19 @@ class Configurator:
         with open(absolute_filename, 'w') as file:
             json.dump(self.config, file, indent=4)
 
-    def turn_on_pid(self, P, I, D, interception_moment=1):
-        """
+    def turn_on_pid(self, P, I, D, interception_moment=1,
+                    stiffness_function_string='lambda x: x'):
+        """Turn on PID control.
 
         Args:
-            P:
-            I:
-            D:
+            P, I, D:    PID parameters
             interception_moment:
+                ratio of completed movement, after which PID is turned on,
+                for details see PIDController.wait_for_interception
+            stiffness_function_string:
+                string containing lambda expression that will be used
+                to control stiffness during movement,
+                for details see PIDController.control
 
         Notes:
             Parameters passed to this method must correspond to those
