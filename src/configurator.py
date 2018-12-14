@@ -18,7 +18,7 @@ class Configurator:
         specified in src.constants.
 
         Args:
-            filename: name of the json file
+            filename (str): name of the json file
 
         Raises:
             FileNotFoundError:  if there's no such file in config directory
@@ -35,7 +35,7 @@ class Configurator:
         into a config directory specified in src.constants.
 
         Args:
-            filename: name of the json file
+            filename (str): name of the json file
 
         """
         absolute_filename = os.path.join(CONFIG_FILES, filename)
@@ -47,13 +47,12 @@ class Configurator:
         """Turn on PID control.
 
         Args:
-            P, I, D:    PID parameters
-            interception_moment:
-                ratio of completed movement, after which PID is turned on,
+            P, I, D (float): PID parameters
+            interception_moment (float): ratio of completed movement,
+                after which PID is turned on,
                 for details see PIDController.wait_for_interception
-            stiffness_function_string:
-                string containing lambda expression that will be used
-                to control stiffness during movement,
+            stiffness_function_string (str): contains lambda expression
+                that will be used to control stiffness during movement,
                 for details see PIDController.control
 
         Notes:
@@ -72,7 +71,7 @@ class Configurator:
         See ServoAngleApproximator.get_servo_angle
 
         Args:
-            function_file: .pickle file containing the function
+            function_file (str): .pickle file containing the function
 
         Notes:
             Parameters passed to this method must correspond to those
@@ -104,8 +103,9 @@ class Configurator:
         Then, pass these values as a dictionary.
 
         Args:
-            angle_relation: {servo_angle1: corresponding_arm_angle1,
-                             servo_angle2: corresponding_arm_angle2}
+            angle_relation (dict): tells how servo angles relate to arm angles
+                {servo_angle1: corresponding_arm_angle1,
+                 servo_angle2: corresponding_arm_angle2}
 
         Notes:
             Make sure servo angles that you choose, are inside the range

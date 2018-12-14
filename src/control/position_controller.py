@@ -141,11 +141,11 @@ class PositionController:
         Moves according to parameters passed in config.
 
         Args:
-            angle:      angle that you want the arm to move to
-            stiffness:  how tense tendons should be
+            angle (float): angle that you want the arm to move to
+            stiffness (float): how tense the tendons should be
 
         Raises:
-            OutOfRangeError:    if given command is out of servos' range
+            OutOfRangeError: if given command is out of servos' range
 
         """
         if self.modules == {'approximation'}:

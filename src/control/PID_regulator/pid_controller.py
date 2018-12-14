@@ -1,13 +1,20 @@
-from time import sleep
+from time import sleep, time
 
 from src.control.PID_regulator.pid import PID
-import time
+import logging
 
 
 # better higher P and lower I, but matlab claims different things - only I-component
 
 
 class PIDController:
+    timeout = 10
+    """See control method."""
+    # TODO time_grain can be specified in configuration
+    time_grain = 0.5
+    """See control method."""
+    # TODO change this class to a thread, so control method can be non-blocking
+
     def __init__(self, position_detector, raw_controller,
                  stiffness_function_string, P=0.7, I=0.2, D=0.2,
                  interception_moment=None):
@@ -31,8 +38,8 @@ class PIDController:
         That ratio must be specified in self.interception_moment.
 
         Args:
-            starting_angle:   angle in which arm started
-            target_angle:     angle that we want to move the arm to
+            starting_angle (float):   angle in which arm started
+            target_angle (float):     angle that we want to move the arm to
 
         """
         distance = abs(target_angle - starting_angle)
@@ -44,24 +51,52 @@ class PIDController:
             sleep(0.001)
 
     def control(self, target_angle, starting_servo_angle, target_stiffness, starting_position):
+        """Move arm to given angle using PID control.
+
+        Time between sending updates can be specified by time_grain
+        class attribute.
+
+        Args:
+            target_angle (float): angle that the arm should move to
+            starting_servo_angle (float): last angle that was sent
+                to RawController
+            target_stiffness (float): stiffness that we'd like to achieve
+                at the end of the movement
+            starting_position (float): arm position, measured by PositionDetector
+
+        Notes:
+            This method is blocking. It terminates if we reach position
+            that is less than some ratio of the initial error.
+            This ratio can be set by threshold_ratio class attribute.
+            It also terminates if we don't reach this position
+            in time specified by timeout attribute.
+
+        """
+        start_time = time()
         self.pid.set_point(target_angle)
         starting_stiffness = 0
         current_servo_angle = starting_servo_angle
-        print(current_servo_angle)
+        logging.debug(f'Current servo angle: {current_servo_angle}')
         threshold = abs(target_angle - starting_position) * self.threshold_ratio
-        while True:
+
+        current_angle = self.position_detector.get_angle()
+        while abs(current_angle - target_angle) > threshold:
+            if time() - start_time > self.timeout:
+                logging.warning(f"PID control couldn't reach destination "
+                                f"in {self.timeout} seconds, so it timed out.")
+                return
+
+            logging.debug(f'Current arm angle: {current_angle}')
+
+            # calculate stiffness
+            movement_completion = ((current_angle + starting_position) / abs(target_angle - starting_position))
+            stiffness = (self.stiffness_function(movement_completion) * (target_stiffness - starting_stiffness)) + \
+                        starting_stiffness
+
+            delta_angle = self.pid.update(current_angle)
+            logging.debug(f'Delta angle: {delta_angle}')
+            current_servo_angle -= delta_angle
+
+            self.raw_controller.send(int(current_servo_angle), stiffness)
+            sleep(self.time_grain)
             current_angle = self.position_detector.get_angle()
-            print(current_angle)
-
-            if abs(current_angle - target_angle) > threshold:
-                # calculate stiffness
-                movement_completion = ((current_angle + starting_position) / abs(target_angle - starting_position))
-                stiffness = (self.stiffness_function(movement_completion) * (target_stiffness - starting_stiffness)) + \
-                            starting_stiffness
-
-                delta_angle = self.pid.update(current_angle)
-                print(delta_angle)
-                current_servo_angle -= delta_angle
-
-                self.raw_controller.send(int(current_servo_angle), stiffness)
-            time.sleep(0.5)
