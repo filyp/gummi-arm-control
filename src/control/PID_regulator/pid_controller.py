@@ -89,7 +89,7 @@ class PIDController:
             logging.debug(f'Current arm angle: {current_angle}')
 
             # calculate stiffness
-            movement_completion = ((current_angle + starting_position) / abs(target_angle - starting_position))
+            movement_completion = abs(current_angle - starting_position) / abs(target_angle - starting_position)
             stiffness = (self.stiffness_function(movement_completion) * (target_stiffness - starting_stiffness)) + \
                         starting_stiffness
 
