@@ -11,3 +11,5 @@ sin_generator\.py
 tatus
 
 data/learned_function\.pickle
+
+config/
