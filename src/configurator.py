@@ -42,9 +42,9 @@ class Configurator:
         with open(absolute_filename, 'w') as file:
             json.dump(self.config, file, indent=4)
 
-    def turn_on_pid(self, P, I, D, interception_moment=1,
-                    stiffness_function_string='lambda x: x'):
-        """Turn on PID control.
+    def enable_pid(self, P, I, D, interception_moment=1,
+                   stiffness_function_string='lambda x: x'):
+        """Enable PID control.
 
         Args:
             P, I, D (float): PID parameters
@@ -62,7 +62,7 @@ class Configurator:
         """
         self.config['PID'] = self._get_parameters(locals())
 
-    def turn_on_approximating_function(self, function_file=DEFAULT_FUNCTION):
+    def enable_approximating_function(self, function_file=DEFAULT_FUNCTION):
         """Find servo angles using function from given file.
 
         File should contain pickled function:
@@ -80,7 +80,7 @@ class Configurator:
         """
         self.config['approximation'] = self._get_parameters(locals())
 
-    def turn_on_movement_control(self, max_servo_speed=250, stiffness_slope=1):
+    def enable_movement_control(self, max_servo_speed=250, stiffness_slope=1):
         """Specify how stiffness should change during movement.
 
         For detailed description see MovementController.__init__
@@ -93,9 +93,9 @@ class Configurator:
         self.config['movement_control'] = self._get_parameters(locals())
         # for movement control, some angle approximation is needed
         if 'approximation' not in self.config:
-            self.turn_on_approximating_function()
+            self.enable_approximating_function()
 
-    def turn_on_linear_interpolation(self, angle_relation):
+    def enable_linear_interpolation(self, angle_relation):
         """Find servo angles using linear interpolation.
 
         It requires sending two angles to servos using RawController
@@ -125,17 +125,17 @@ class Configurator:
         """
         self.config['camera'] = self._get_parameters(locals())
 
-    def turn_off_pid(self):
-        self._turn_off('PID')
+    def disable_pid(self):
+        self._disable('PID')
 
-    def turn_off_approximation(self):
-        self._turn_off('approximation')
+    def disable_approximation(self):
+        self._disable('approximation')
 
-    def turn_off_movement_control(self):
-        self._turn_off('movement_control')
+    def disable_movement_control(self):
+        self._disable('movement_control')
 
-    def turn_off_linear_interpolation(self):
-        self._turn_off('linear_interpolator')
+    def disable_linear_interpolation(self):
+        self._disable('linear_interpolator')
 
     def unset_camera(self):
         """If remote camera was set, unset it.
@@ -143,15 +143,15 @@ class Configurator:
         After that, position detector will use built-in or USB camera.
 
         """
-        self._turn_off('camera')
+        self._disable('camera')
 
     def _get_parameters(self, raw_parameters):
         """From given dict, cut out 'self' key."""
         return {key: val for key, val in raw_parameters.items()
                 if key != 'self'}
 
-    def _turn_off(self, attribute):
-        """Turn off given attribute from config."""
+    def _disable(self, attribute):
+        """Disable given attribute from config."""
         try:
             del self.config[attribute]
         except KeyError:
