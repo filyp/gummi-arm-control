@@ -7,14 +7,12 @@ class LinearInterpolator:
     It uses simple linear function to interpolate this value.
 
     Args:
-        angle_relation:  see Configurator.turn_on_linear_interpolation
+        See Configurator.turn_on_linear_interpolation
 
     """
-    def __init__(self, angle_relation):
-        servo_angles = list(angle_relation.keys())
-        arm_angles = list(angle_relation.values())
-        self.interpolation = interp1d(arm_angles,
-                                      servo_angles,
+    def __init__(self, servo1, arm1, servo2, arm2):
+        self.interpolation = interp1d([arm1, arm2],
+                                      [servo1, servo2],
                                       fill_value='extrapolate')
 
     def get_servo_angle(self, arm_angle):

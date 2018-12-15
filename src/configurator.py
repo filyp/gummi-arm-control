@@ -95,7 +95,7 @@ class Configurator:
         if 'approximation' not in self.config:
             self.turn_on_approximating_function()
 
-    def turn_on_linear_interpolation(self, angle_relation):
+    def turn_on_linear_interpolation(self, servo1, arm1, servo2, arm2):
         """Find servo angles using linear interpolation.
 
         It requires sending two angles to servos using RawController
@@ -103,9 +103,10 @@ class Configurator:
         Then, pass these values as a dictionary.
 
         Args:
-            angle_relation (dict): tells how servo angles relate to arm angles
-                {servo_angle1: corresponding_arm_angle1,
-                 servo_angle2: corresponding_arm_angle2}
+            servo1 (float): first angle sent to servos
+            arm1 (float): angle reached by the arm after sending 'servo1'
+            servo2 (float): analogous
+            arm2 (float): analogous
 
         Notes:
             Make sure servo angles that you choose, are inside the range
