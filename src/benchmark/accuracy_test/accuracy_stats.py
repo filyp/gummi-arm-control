@@ -59,14 +59,14 @@ class OneExperimentStats:
 
 
 class AccuracyStats:
-    def create_files_list(self):
+    def _create_files_list(self):
         regex = os.path.join(ACCURACY_DATA_PATH, '*')
         datafiles = glob.glob(regex)
         return datafiles
 
     def generate_statistics(self):
         print('in genarate')
-        files_list = self.create_files_list()
+        files_list = self._create_files_list()
         stats_file_name = "accuracy_experiment_statistics.csv"
 
         row = ['examine_angle', 'stiffness', 'mean', 'median', 'std']
@@ -83,5 +83,6 @@ class AccuracyStats:
             one_stat.save_statistics()
 
 
+# TODO call it somewhere else
 a = AccuracyStats()
 a.generate_statistics()

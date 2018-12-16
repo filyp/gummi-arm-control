@@ -1,13 +1,13 @@
-import ast
 import csv
 import datetime
-import time
 import os
+import time
 
 import numpy as np
 
-from src.control.position_controller import PositionController
 from src.constants import ACCURACY_DATA_PATH
+from src.control.position_controller import PositionController
+
 MAX_ANGLE = 180
 
 FILENAME_BASE = os.path.join(ACCURACY_DATA_PATH, 'accuracy_experiment')
@@ -75,6 +75,7 @@ def start(angle, stiffness_list):
 
     # TODO add send_raw to PositionController instead of taking away its raw_controller
     controller = position_controller.raw_controller
+    # TODO maybe also add get_angle to PositionDetector?
     position_detector = position_controller.position_detector
 
     try:

@@ -13,6 +13,8 @@ MAX_ANGLE = 180
 FILENAME_BASE = ACCURACY_DATA_PATH + 'movement_course'
 DELAY = 4
 
+# TODO merge this with accuracy_experiment.py because a lot is duplicated
+
 
 def save_row(filename, row):
     """Append row to given .csv file.
