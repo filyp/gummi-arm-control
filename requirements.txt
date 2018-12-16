@@ -13,6 +13,7 @@ pyserial==3.4
 python-dateutil==2.7.3
 pytz==2018.5
 PyYAML==3.13
+ruamel.yaml==0.15.81
 scipy==1.1.0
 #serial==0.0.67
 six==1.11.0

@@ -1,10 +1,11 @@
+import logging
+import os
+
+from src.constants import APPROXIMATING_FUNCTIONS_PATH
 from src.control.approximation.approximating_function_finder import ApproximatingFunctionFinder, \
     ApproximationDataImporter
-from src.control.approximation.autocalibration import Autocalibration
 from src.control.approximation.approximating_function_finder import get_latest_approximation_file
-from src.constants import DEFAULT_FUNCTION, APPROXIMATING_FUNCTIONS_PATH, APPROXIMATION_DATA_PATH
-import os
-import logging
+from src.control.approximation.autocalibration import Autocalibration
 
 
 class FunctionFactory:
