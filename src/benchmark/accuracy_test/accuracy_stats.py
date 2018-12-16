@@ -81,8 +81,3 @@ class AccuracyStats:
             one_stat = OneExperimentStats(file, stats_file_name)
             one_stat.save_chart()
             one_stat.save_statistics()
-
-
-# TODO call it somewhere else
-a = AccuracyStats()
-a.generate_statistics()

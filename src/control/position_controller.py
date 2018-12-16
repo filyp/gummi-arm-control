@@ -7,7 +7,7 @@ from src.control.PID_regulator.pid_controller import PIDController
 from src.control.approximation.approximator import ServoAngleApproximator
 from src.control.linear_interpolator import LinearInterpolator
 from src.control.raw_controller import RawController
-from src.constants import DEFAULT_CONFIG, DEFAULT_FUNCTION
+from src.constants import DEFAULT_ARM_CONFIG, DEFAULT_FUNCTION
 from src.position_detection.position_detector import PositionDetector
 from src.control.approximation.function_factory import FunctionFactory
 
@@ -28,7 +28,7 @@ class PositionController:
         self.pid = None
         self.linear_interpolator = None
 
-    def load_config(self, filename=DEFAULT_CONFIG):
+    def load_config(self, filename=DEFAULT_ARM_CONFIG):
         """Load arm configuration from a file.
 
         For details on what can be configured see src.configurator.
@@ -108,7 +108,7 @@ class PositionController:
 
     def _load_linear_interpolator(self):
         interp_params = self.config['linear_interpolator']
-        self.linear_interpolator = LinearInterpolator(interp_params)
+        self.linear_interpolator = LinearInterpolator(**interp_params)
 
     def connect_camera(self, reconnect_if_exists=False):
         """Connect to a camera specified in config.
@@ -173,3 +173,8 @@ class PositionController:
 
         elif not self.modules:
             logging.error('To send, you must first load some configuration.')
+
+    def kill(self):
+        if self.position_detector:
+            self.position_detector.kill()
+            self.position_detector.join()

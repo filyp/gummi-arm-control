@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-from src.constants import CONFIG_FILES, DEFAULT_CONFIG, DEFAULT_FUNCTION
+from src.constants import CONFIG_FILES, DEFAULT_ARM_CONFIG, DEFAULT_FUNCTION
 
 
 class Configurator:
@@ -11,7 +11,7 @@ class Configurator:
     def __init__(self):
         self.config = {}
 
-    def load_config(self, filename=DEFAULT_CONFIG):
+    def load_config(self, filename=DEFAULT_ARM_CONFIG):
         """Loads position control configuration.
 
         Looks for given file inside config directory,
@@ -28,7 +28,7 @@ class Configurator:
         with open(absolute_filename, 'r') as file:
             self.config = json.load(file)
 
-    def save_config(self, filename=DEFAULT_CONFIG):
+    def save_config(self, filename=DEFAULT_ARM_CONFIG):
         """Saves configuration stored in this class to a file.
 
         It's saved as a human readable json,
@@ -41,6 +41,11 @@ class Configurator:
         absolute_filename = os.path.join(CONFIG_FILES, filename)
         with open(absolute_filename, 'w') as file:
             json.dump(self.config, file, indent=4)
+
+    @classmethod
+    def config_exists(cls, config_file):
+        abs_name = os.path.join(CONFIG_FILES, config_file)
+        return os.path.isfile(abs_name)
 
     def enable_pid(self, P, I, D, interception_moment=1,
                    stiffness_function_string='lambda x: x'):

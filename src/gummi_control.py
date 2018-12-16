@@ -12,6 +12,8 @@ from scipy.interpolate import interp1d
 
 from src.control.position_controller import PositionController
 from src.control.raw_controller import OutOfRangeError
+from src.constants import DEFAULT_ARM_CONFIG
+from src.configurator import Configurator
 
 banner_string = 'GummiControl'
 print(figlet_format(banner_string, font='rectangles'))
@@ -63,6 +65,13 @@ help_string = f"""
         command:     "<angle> <stiffness>"
         for example: "120 10"
 
+    To send raw angles to servos:
+        command:     "r<angle> <stiffness>"
+        for example: "r35 10"
+
+    Print arm angle measured by camera:
+        'c'
+
     Mouse control:
         press 'm' to turn on
         CTRL+C to turn off
@@ -74,13 +83,25 @@ help_string = f"""
     """
 
 if __name__ == '__main__':
+    filename = input(
+        f'Type name of the config file you\'d like to use.\n'
+        f'For default config ({DEFAULT_ARM_CONFIG}) press ENTER.\n')
+    if filename == '':
+        filename = DEFAULT_ARM_CONFIG
+    while not Configurator.config_exists(filename):
+        filename = input('This file doesn\'t exist. Try again.\n')
+        if filename == '':
+            filename = DEFAULT_ARM_CONFIG
+
     controller = PositionController()
+    controller.load_config(filename)
     mouse_handler = MouseHandler()
 
     while True:
         line = input()
 
         if line == 'q':
+            controller.kill()
             exit()
         if line == 'm':
             try:
@@ -89,10 +110,18 @@ if __name__ == '__main__':
                 pass
             print('\nQuited mouse mode')
             continue
+        if line == 'c':
+            angle = controller.position_detector.get_angle()
+            print(angle)
+            continue
 
         # parse
+        raw = False
         try:
             angle_str, stiffness_str = line.split()
+            if angle_str[0] == 'r':
+                raw = True
+                angle_str = angle_str[1:]
             angle, stiffness = float(angle_str), float(stiffness_str)
         except ValueError:
             print(textwrap.dedent(help_string))
@@ -100,6 +129,9 @@ if __name__ == '__main__':
 
         # send
         try:
-            controller.send(angle, stiffness)
+            if raw:
+                controller.raw_controller.send(angle, stiffness)
+            else:
+                controller.send(angle, stiffness)
         except OutOfRangeError:
             print('servo out of range')

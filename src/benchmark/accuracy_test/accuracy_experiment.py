@@ -7,6 +7,7 @@ import numpy as np
 
 from src.constants import ACCURACY_DATA_PATH
 from src.control.position_controller import PositionController
+from src.constants import DEFAULT_ARM_CONFIG
 
 MAX_ANGLE = 180
 
@@ -37,6 +38,7 @@ def experiment_iteration(controller, approximation_controller, position_detector
     Record these three values to a file.
 
     Args:
+        # TODO update this
         controller: PositionController that communicates with servos
         position_detector: PositionDetector that reads arm angle from the camera
         filename: .csv file where data is saved
@@ -66,12 +68,12 @@ def experiment_iteration(controller, approximation_controller, position_detector
     save_row(filename, row)
 
 
-def start(angle, stiffness_list):
+def start(angle, stiffness_list, arm_config=DEFAULT_ARM_CONFIG):
     print(angle)
     print(stiffness_list)
 
     position_controller = PositionController()
-    position_controller.load_config()
+    position_controller.load_config(arm_config)
 
     # TODO add send_raw to PositionController instead of taking away its raw_controller
     controller = position_controller.raw_controller

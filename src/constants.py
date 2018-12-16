@@ -22,4 +22,5 @@ ACCURACY_RESULTS_PATH = get_absolute_path(
     'data/experiments_results/accuracy_experiment/results/')
 
 DEFAULT_FUNCTION = 'default.pickle'
-DEFAULT_CONFIG = 'default.json'
+DEFAULT_ARM_CONFIG = 'default.json'
+DEFAULT_TEST_CONFIG = 'tests_config'
