@@ -73,6 +73,7 @@ def start(angle, stiffness_list):
     position_controller = PositionController()
     position_controller.load_config()
 
+    # TODO add send_raw to PositionController instead of taking away its raw_controller
     controller = position_controller.raw_controller
     position_detector = position_controller.position_detector
 
@@ -90,7 +91,3 @@ def start(angle, stiffness_list):
     finally:
         position_detector.kill()
         position_detector.join()
-
-
-if __name__ == "__main__":
-    start()
